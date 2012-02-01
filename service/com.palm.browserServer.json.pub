@@ -1,0 +1,19 @@
+{
+    "role": {
+        "exeName":"/usr/bin/BrowserServer",
+        "type": "regular",
+        "allowedNames": ["com.palm.browserServer","com.palm.flashgraphics",""]
+    },
+    "permissions": [
+        {
+            "service":"com.palm.browserServer",
+            "inbound":["*"],
+            "outbound":["*"]
+        },
+        {
+            "service":"com.palm.flashgraphics",
+            "inbound":["*"],
+            "outbound":["*"]
+        }
+    ]
+}

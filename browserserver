@@ -1,0 +1,31 @@
+# BrowserServer
+# Copy me into /etc/event.d
+
+start on stopped fontconfig_cache
+
+# Stop when the Software Update tool is about to install an update. The tool
+# uses upstart to restart jobs when the installation is complete.
+stop on started start_update
+
+description "BrowserServer Daemon"
+
+#start on started PmNetConfigManager
+
+script
+
+    # Choose our malloc
+    export LD_PRELOAD="/usr/lib/libptmalloc3.so"
+
+    if grep -qs "qemux86" /etc/hostname ; then
+      # export added for qemux86
+      export HOME=/var/home/root
+    fi
+    if [ -d /dev/cgroup ] ; then
+        mkdir -p /dev/cgroup/web                          
+        echo $$ > /dev/cgroup/web/tasks
+    fi
+    exec /usr/bin/BrowserServer -d -1
+end script
+
+respawn
+respawn limit 0 0

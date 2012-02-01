@@ -1,0 +1,30 @@
+{
+	"type": "object",
+	"properties" : {
+		"isNull" : { "type" : "boolean", "default" : true },
+		"isLink" : { "type" : "boolean", "default" : false },
+		"isImage" : { "type" : "boolean", "default" : false },
+		"x" : { "type" : "number" },
+		"y" : { "type" : "number" },
+		"bounds" : {
+			"type" : "object",
+                        "optional": "true",
+			"properties" : {
+				"left" : { "type" : "number" },
+				"top" : { "type" : "number" },
+				"right" : { "type" : "number" },
+				"bottom" : { "type" : "number" }
+			}
+		},
+		"element" : { "type" : "string", "default" : null },
+		"title" : { "type" : "string", "default" : null },
+		"linkText" : { "type" : "string", "default" : null },
+		"linkUrl" : { "type" : "string", "default" : null },
+		"linkTitle" : { "type" : "string", "default" : null },
+		"altText" : { "type" : "string", "default" : null },
+		"imageUrl" : { "type" : "string", "default" : null },
+		"editable" : { "type" : "boolean", "default": false },
+		"selected" : { "type" : "boolean", "default" : false }
+	},
+	"additionalProperties": false
+}

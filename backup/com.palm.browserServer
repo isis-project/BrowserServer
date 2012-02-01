@@ -1,0 +1,7 @@
+{
+    "id": "com.palm.browserServer",
+    "preBackup":  "backup/preBackup",
+    "postBackup": "backup/postBackup",
+    "preRestore": "backup/preRestore",
+    "postRestore":"backup/postRestore"
+}

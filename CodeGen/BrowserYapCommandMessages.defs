@@ -1,0 +1,145 @@
+# Syntax for sync commands : sync;  cmdValue; [type param1[, type param2...]]; type return1[, type return2...]
+# Syntax for async commands: async; cmdValue; [type param1[, type param2...]]
+# Syntax for messages:       msg;   msgValue; [type param1[, type param2...]]
+#
+# Types are defined same as the Java types. The allowed types (and corresponding C type) are:
+#  bool (C bool), byte (C int8_t), short (C int16_t), int (C int32_t), 
+#  long (C int64_t), double (C double), string (C char*)
+# 
+# Empty lines and lines starting with # are ignored.
+
+# Sync  commands are in range: 0x0000 - 0x0FFF
+sync;  RenderToFile, 0x0014; string filename, int viewX, int viewY, int viewW, int viewH; int result
+
+# Async commands are in range: 0x1000 - 0x1FFF
+async; Connect, 0x1000; int pageWidth, int pageHeight, int sharedBufferKey1, int sharedBufferKey2, int sharedBufferSize, int identifier; int err
+async; SetWindowSize, 0x1001; int width, int height
+async; SetUserAgent, 0x1003; string userAgent
+async; OpenUrl, 0x1004; string url
+async; SetHtml, 0x1005; string url, string body
+async; ClickAt, 0x1007; int contentX, int contentY, int numClicks, int counter
+async; KeyDown, 0x1008; uint16_t key, uint16_t modifiers
+async; KeyUp, 0x1009; uint16_t key, uint16_t modifiers
+async; Forward, 0x100A; 
+async; Back, 0x100B;
+async; Reload, 0x100C;
+async; Stop, 0x100D;               
+async; PageFocused, 0x1010; bool focused
+async; Exit, 0x1011;
+async; CancelDownload, 0x1015; string url
+async; InterrogateClicks, 0x1016; bool enable
+async; ZoomSmartCalculateRequest, 0x1017; int pointX, int pointY
+async; DragStart, 0x101A; int contentX, int contentY
+async; DragProcess, 0x101B; int deltaX, int deltaY
+async; DragEnd, 0x101C; int contentX, int contentY
+async; SetMinFontSize, 0x1103; int minFontSizePt ; bool result
+async; FindString, 0x1104; string str, bool fwd
+async; ClearSelection, 0x1105; 
+async; ClearCache, 0x1106;
+async; ClearCookies, 0x1107;
+async; PopupMenuSelect, 0x1108; string identifier, int selectedIdx
+async; SetEnableJavaScript, 0x1109; bool enable
+async; SetBlockPopups, 0x110A; bool enable
+async; SetAcceptCookies, 0x110B; bool enable
+async; MouseEvent, 0x110C; int type, int contentX, int contentY, int detail
+async; GestureEvent, 0x110D; int type, int contentX, int contentY, double scale, double rotate, int centerX, int centerY
+async; Disconnect, 0x110E;
+async; InspectUrlAtPoint, 0x110F; int queryNum, int pointX, int pointY
+async; GetHistoryState, 0x1111; int queryNum
+async; ClearHistory, 0x1112;
+async; SetAppIdentifier, 0x1113; string identifier
+async; AddUrlRedirect, 0x1114; string urlRe, int type, bool redirect, string userData
+async; SetShowClickedLink, 0x1115; bool enable
+async; GetInteractiveNodeRects, 0x1116; int pointX, int pointY
+async; IsEditing, 0x1117; int queryNum
+async; InsertStringAtCursor, 0x1118; string text
+async; EnableSelection, 0x1119; int pointX, int pointY
+async; DisableSelection, 0x111A;
+async; SaveImageAtPoint, 0x111B; int queryNum, int pointX, int pointY, string dstDir
+async; GetImageInfoAtPoint, 0x111C; int queryNum, int pointX, int pointY
+async; IsInteractiveAtPoint, 0x111D; int queryNum, int pointX, int pointY
+async; GetElementInfoAtPoint, 0x111E; int queryNum, int pointX, int pointY
+async; SelectAll, 0x111F;
+async; Copy, 0x1120; int queryNum
+async; Paste, 0x1121;
+async; Cut, 0x1122;
+async; SetMouseMode, 0x1123; int mode
+async; DisableEnhancedViewport, 0x1124; bool disable
+async; IgnoreMetaTags,0x1125;bool ignore
+async; SetScrollPosition, 0x1500; int cx, int cy, int cw, int ch
+async; PluginSpotlightStart, 0x1501; int cx, int cy, int cw, int ch
+async; PluginSpotlightEnd, 0x1502;
+async; HideSpellingWidget, 0x1503;
+async; SetNetworkInterface,0x1504; string interfaceName
+async; HitTest, 0x1505; int queryNum, int cx, int cy
+async; SetVirtualWindowSize, 0x1506; int width, int height
+async; PrintFrame, 0x1507; string frameName, int lpsJobId, int width, int height, int dpi, bool landscape, bool reverseOrder
+async; TouchEvent, 0x1508; int type, int touchCount, int modifiers, string touchesJson
+async; HoldAt, 0x1509; int contentX, int contentY
+async; GetTextCaretBounds, 0x150a; int queryNum
+async; Freeze, 0x150b;
+async; Thaw, 0x150c; int sharedBufferKey1, int sharedBufferKey2, int sharedBufferSize
+async; ReturnBuffer, 0x150d; int sharedBufferKey
+async; SetZoomAndScroll, 0x150e; double zoom, int cx, int cy
+async; ScrollLayer, 0x150f; int id, int deltaX, int deltaY
+async; SetDNSServers, 0x1510; string servers
+
+# Async Messages are in range: 0x2000 - 0x2FFF
+msg; Painted, 0x2000; int sharedBufferKey
+msg; ReportError, 0x2001; string url, int code, string msg
+msg; ContentsSizeChanged, 0x2002; int width, int height
+msg; ScrolledTo, 0x2004; int contentsX, int contentsY
+msg; LoadStarted, 0x2005; 
+msg; LoadStopped, 0x2006; 
+msg; LoadProgress, 0x2007; int progress
+msg; LocationChanged, 0x2008; string uri, bool canGoBack, bool canGoForward
+msg; TitleChanged, 0x2009; string title
+msg; TitleAndUrlChanged, 0x200A; string title, string url, bool canGoBack, bool canGoForward
+msg; DialogAlert, 0x200B; string syncPipePath, string msg
+msg; DialogConfirm, 0x200C; string syncPipePath, string msg
+msg; DialogPrompt, 0x200D; string syncPipePath, string msg, string defaultValue
+msg; DialogUserPassword, 0x200E; string syncPipePath, string msg
+msg; ActionData, 0x200F; string dataType, string data
+msg; DownloadStart, 0x2010; string url
+msg; DownloadProgress, 0x2011; string url, int totalSizeSoFar, int totalSize
+msg; DownloadError, 0x2012; string url, string errorMsg
+msg; DownloadFinished, 0x2013; string url, string mimeType, string tmpFilePath
+msg; LinkClicked, 0x2014; string url
+msg; MimeHandoffUrl, 0x2015; string mimeType, string url
+msg; MimeNotSupported, 0x2016; string mimeType, string url
+msg; CreatePage, 0x2017; int identifier
+msg; ClickRejected, 0x2018; int counter
+msg; PopupMenuShow, 0x2019; string identifier, string menuDataFileName
+msg; PopupMenuHide, 0x201A; string identifier
+msg; SmartZoomCalculateResponseSimple, 0x201F; int pointX, int pointY, int left, int top, int right, int bottom, int fullscreenSpotlightHandle
+msg; FailedLoad, 0x201C; string domain, int errorCode, string failingURL, string localizedDescription
+msg; EditorFocused, 0x201D; bool focused, int fieldType, int fieldActions
+msg; DidFinishDocumentLoad, 0x201E;
+msg; UpdateGlobalHistory, 0x2020; string url, bool reload
+msg; SetMainDocumentError, 0x2021; string domain, int errorCode, string failingURL, string localizedDescription
+msg; PurgePage, 0x2022;
+msg; InspectUrlAtPointResponse, 0x2023; int queryNum, bool succeeded, string url, string desc, int rectWidth, int rectHeight, int rectX, int rectY
+msg; GetHistoryStateResponse, 0x2024; int queryNum, bool canGoBack, bool canGoForward
+msg; UrlRedirected, 0x2025; string url, string userData
+msg; DialogSSLConfirm, 0x2026; string syncPipePath, string host, int code, string certFile
+msg; MetaViewportSet, 0x2027; double initialScale, double minimumScale, double maximumScale, int width, int height, bool userScalable
+msg; HighlightRects, 0x2028; string rectsJson
+msg; IsEditing, 0x2029; int queryNum, bool isEditing
+msg; SaveImageAtPointResponse, 0x202A; int queryNum, bool succeeded, string filepath
+msg; GetImageInfoAtPointResponse, 0x202B; int queryNum, bool succeeded, string baseUri, string src, string title, string altText, int width, int height, string mimeType
+msg; MakePointVisible, 0x202C; int x, int y
+msg; IsInteractiveAtPointResponse, 0x202D; int queryNum, bool interractive
+msg; GetElementInfoAtPointResponse, 0x202E; int queryNum, bool succeeded, string element, string id, string name, string cname, string type, int left, int top, int right, int bottom, bool isEditable
+msg; CopiedToClipboard, 0x202F;
+msg; PastedFromClipboard, 0x2030;
+msg; RemoveSelectionReticle, 0x2031;
+msg; CopySuccessResponse, 0x2032; int queryNum, bool success
+msg; PluginFullscreenSpotlightCreate, 0x2033; int spotlightHandle, int rectX, int rectY, int rectWidth, int rectHeight
+msg; PluginFullscreenSpotlightRemove, 0x2034; 
+msg; SpellingWidgetVisibleRectUpdate, 0x2035; int rectX, int rectY, int rectWidth, int rectHeight
+msg; HitTestResponse, 0x2036; int queryNum, string hitTestResultJson
+msg; AddFlashRects, 0x2037; string rectsJson
+msg; RemoveFlashRects, 0x2038; string rectsJson
+msg; ShowPrintDialog, 0x2039;
+msg; GetTextCaretBoundsResponse, 0x203a; int queryNum, int left, int top, int right, int bottom;
+msg; UpdateScrollableLayers, 0x203b; string json

@@ -1,0 +1,5 @@
+[D-BUS Service]
+Name=com.palm.browserServer;com.palm.flashgraphics
+Exec=/usr/bin/BrowserServer
+Type=static
+
