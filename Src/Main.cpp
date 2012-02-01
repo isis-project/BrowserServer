@@ -255,11 +255,11 @@ static void InitPrivileges() {
 	chmod("/dev/pmem_adsp",S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP);
 	Chown((char*)"/dev/pmem_adsp",0,kGroupId,true);
 
-	// for topaz omx
+	// for omx
 	chmod("/dev/pmem_smipool",S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP);
 	Chown((char*)"/dev/pmem_smipool",0,kGroupId,true);
 
-	// for topaz 2D and 3D
+	// for 2D and 3D
 	// FIXME: why need this to launch GLES app?
 	chmod("/dev/console",S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP);
 	Chown((char*)"/dev/console",0,kGroupId,true);
