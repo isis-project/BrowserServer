@@ -11,7 +11,6 @@ LIB_SOURCES := \
 	YapClient.cpp \
 	IpcBuffer.cpp \
 	BufferLock.cpp \
-	BrowserOffscreen.cpp \
 	BrowserRect.cpp \
 	PluginDirWatcher.cpp
 
