@@ -354,7 +354,6 @@ BrowserPage::freeze()
 {
 	printf("BrowserPage::freeze: %p\n", this);
 	
-	WEBOS_REPORT_START(this,"BrowserPage.freeze","");
 
 	if (m_frozen)
 		return false;
@@ -374,7 +373,6 @@ BrowserPage::freeze()
 	//   1. Disable WebKitTimer to stop background gif animation, javascripts, etc.
 	//   2. Notify all plugins e.g. stop flash plugin playing audio
 
-	WEBOS_REPORT_STOP(this,"BrowserPage.freeze","");
 
 	return true;
 }
@@ -721,13 +719,10 @@ BrowserPage::openUrl(const char* pUrl)
         return;
     }
 
-    WEBOS_REPORT_CONDITIONAL_START();
 
     	snprintf (buffer, maxTransfer , "\n URL = %s \n" , pUrl);
 
-    	WEBOS_REPORT_START(this,"BrowserPage.openUrl",buffer);
 
-    WEBOS_REPORT_CONDITIONAL_END();
 
     m_lastUrlOption = UrlOpen;
 
@@ -746,14 +741,10 @@ BrowserPage::setHTML( const char* url, const char* body )
         return;
     }
 
-    WEBOS_REPORT_CONDITIONAL_START();
     	snprintf (buffer, maxTransfer , "\n URL = %s \n BODY = %s \n" , url , body);
-    	WEBOS_REPORT_START(this,"BrowserPage.setHTML",buffer);
-    WEBOS_REPORT_CONDITIONAL_END();
 
     m_webPage->mainFrame()->setHtml(body, QUrl(url));
 
-	WEBOS_REPORT_STOP(this,"BrowserPage.setHTML",buffer);
 }
 
 void
@@ -802,7 +793,6 @@ BrowserPage::pageReload( )
         return;
     }
 
-    WEBOS_REPORT_START(this,"BrowserPage.pageReload","");
 
     m_lastUrlOption = PageReload;
 
@@ -818,7 +808,6 @@ BrowserPage::pageStop( )
         return;
     }
 
-    WEBOS_REPORT_START(this,"BrowserPage.pageStop","");
     isPageStoppedCall = true;
 
     m_webPage->triggerAction(QWebPage::Stop);
@@ -1440,7 +1429,6 @@ BrowserPage::doLoadStarted()
 
 	BDBG("loadStarted");
 
-    WEBOS_REPORT_START(this,"BrowserPage.PageLoad","");
 
     m_server->msgLoadStarted(m_proxy);
 }
@@ -1466,20 +1454,14 @@ BrowserPage::doLoadFinished(bool ok)
             setMainDocumentError(domainString[errorInfo->domain].constData(), errorInfo->error, errorInfo->url.toString().toLatin1().constData(), errorInfo->errorString.toLatin1().constData());
     }
 
-    WEBOS_REPORT_CONDITIONAL_START();
 	if ( isPageStoppedCall )
-		WEBOS_REPORT_STOP(this,"BrowserPage.pageStop","");
 	isPageStoppedCall = false;
 
-	WEBOS_REPORT_STOP(this,"BrowserPage.PageLoad","");
 
 	switch(m_lastUrlOption) {
-	case UrlOpen: WEBOS_REPORT_STOP(this,"BrowserPage.openUrl",""); break;
-	case PageReload: WEBOS_REPORT_STOP(this,"BrowserPage.pageReload",""); break;
 	default: break;
 	}
 	m_lastUrlOption = None;
-	WEBOS_REPORT_CONDITIONAL_END();
 }
 
 void
@@ -2219,10 +2201,7 @@ void BrowserPage::touchEvent(int type, int32_t touchCount, int32_t modifiers, co
 void 
 BrowserPage::downloadStart( const char* url )
 {
-	WEBOS_REPORT_CONDITIONAL_START();
 		snprintf (buffer, maxTransfer , "\n URL = %s \n" , url);
-		WEBOS_REPORT_START(this,"BrowserPage.download",buffer);
-    WEBOS_REPORT_CONDITIONAL_END();
    
     m_server->msgDownloadStart(m_proxy, url);
 }
@@ -2238,10 +2217,7 @@ BrowserPage::downloadError( const char* url, const char* msg )
 {
     m_server->msgDownloadError(m_proxy, url, msg);
 
-    WEBOS_REPORT_CONDITIONAL_START();
     	snprintf (buffer, maxTransfer , "\n URL = %s \n" , url);
-    	WEBOS_REPORT_STOP(this,"BrowserPage.download",buffer);
-    WEBOS_REPORT_CONDITIONAL_END();
 }
 
 void 
@@ -2249,10 +2225,7 @@ BrowserPage::downloadFinished( const char* url, const char* mimeType, const char
 {
     m_server->msgDownloadFinished(m_proxy, url, mimeType, tmpPath);
 
-    WEBOS_REPORT_CONDITIONAL_START();
     	snprintf (buffer, maxTransfer , "\n URL = %s \n" , url);
-    	WEBOS_REPORT_STOP(this,"BrowserPage.download",buffer);
-    WEBOS_REPORT_CONDITIONAL_END();
 }
 
 void
@@ -2260,10 +2233,7 @@ BrowserPage::downloadCancel( const char* url )
 {
     m_webPage->triggerAction(QWebPage::Stop);
 
-	WEBOS_REPORT_CONDITIONAL_START();
 		snprintf (buffer, maxTransfer , "\n URL = %s \n" , url);
-		WEBOS_REPORT_STOP(this,"BrowserPage.download",buffer);
-	WEBOS_REPORT_CONDITIONAL_END();
 }
 
 

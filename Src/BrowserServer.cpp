@@ -555,9 +555,7 @@ BrowserServer::asyncCmdPageFocused(YapProxy* proxy, bool focused)
         return;
     }
 
-    WEBOS_REPORT_START(this,"BrowserPage.setFocus","");
 	pPage->setFocus(focused);
-	WEBOS_REPORT_STOP(this,"BrowserPage.setFocus","");
 	BrowserPageManager::instance()->setFocusedPage(pPage, focused);
 }
 
@@ -602,9 +600,7 @@ void BrowserServer::asyncCmdCancelDownload(YapProxy* proxy, const char* url)
         return;
     }
 
-    WEBOS_REPORT_START(this,"BrowserPage.downloadCancel","");
     pPage->downloadCancel(url);
-    WEBOS_REPORT_STOP(this,"BrowserPage.downloadCancel","");
     BrowserPageManager::instance()->raisePagePriority(pPage);
 }
 
