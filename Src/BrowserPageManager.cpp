@@ -142,12 +142,10 @@ void BrowserPageManager::setFocusedPage(BrowserPage* page, bool focused)
 void
 BrowserPageManager::raisePagePriority(BrowserPage* page)
 {
-	WEBOS_REPORT_START(this,"BrowserPageManager.raisePagePriority","");
     struct timespec currTime;
 	::clock_gettime(CLOCK_MONOTONIC, &currTime);
 	
 	page->setPriority((uint32_t)currTime.tv_sec);
-	WEBOS_REPORT_STOP(this,"BrowserPageManager.raisePagePriority","");
 }
 
 

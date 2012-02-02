@@ -48,13 +48,6 @@ LICENSE@@@ */
 
 #include <semaphore.h>
 
-#  define WEBOS_REPORT_START(_token,_name,_value) do { } while (0)
-#  define WEBOS_REPORT_STOP(_token,_name,_value)  do { } while (0)
-#  define WEBOS_REPORT_EVENT(_token,_name,_value) do { } while (0)
-#  define WEBOS_REPORT_END(_token,_name,_value)   do { } while (0)
-#  define WEBOS_REPORT_CONDITIONAL_START()        while (0) {
-#  define WEBOS_REPORT_CONDITIONAL_END()          }
-
 class BrowserSyncReplyPipe;
 class BrowserServer;
 class YapProxy;
