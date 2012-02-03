@@ -37,7 +37,6 @@ LICENSE@@@ */
 #include <palmwebview.h>
 #include <qpersistentcookiejar.h>
 #include <qwebevent.h>
-#include <palmwebglobal.h>
 #include <palmwebtypes.h>
 #include <palmerrorcodes.h>
 #include <cjson/json.h>
@@ -2749,9 +2748,6 @@ bool BrowserPage::smartKeySearchCallback(LSHandle *sh, LSMessage *message, void 
         if( ValidJsonObject(value) && json_object_get_boolean(value) ) {
             value = json_object_object_get(json, "match" );
             if( ValidJsonObject(value) ) {
-#ifdef FIXME_QT
-                Palm::WebGlobal::smartKeySearchResponse(requestId, json_object_get_string(value));
-#endif
                 succeeded = true;
             }
         }
@@ -2759,9 +2755,6 @@ bool BrowserPage::smartKeySearchCallback(LSHandle *sh, LSMessage *message, void 
     }
 
     if (!succeeded) {
-#ifdef FIXME_QT
-        Palm::WebGlobal::smartKeySearchResponse(requestId, "");
-#endif
     }
 
     return true;
@@ -2801,16 +2794,8 @@ bool BrowserPage::smartKeyLearn(const char* word)
  */
 bool BrowserPage::smartKeySearch(int requestId, const char* query)
 {
-#ifdef FIXME_QT
-    if (m_lsHandle == NULL || query == NULL || *query == '\0')
-        return Palm::WebGlobal::smartKeySearchResponse(requestId, "");
-#endif
-
     json_object* payload = json_object_new_object();
     if (!ValidJsonObject(payload)) {
-#ifdef FIXME_QT
-        return Palm::WebGlobal::smartKeySearchResponse(requestId, "");
-#endif
     }
 
     json_object_object_add(payload, "query", json_object_new_string(query));
@@ -2818,7 +2803,8 @@ bool BrowserPage::smartKeySearch(int requestId, const char* query)
     LSError error;
     LSErrorInit(&error);
 
-    bool succeeded = LSCall(m_lsHandle, "palm://com.palm.smartKey/search", json_object_get_string(payload), smartKeySearchCallback, (void*)requestId, NULL, &error);
+    bool succeeded = LSCall(m_lsHandle, "palm://com.palm.smartKey/search", json_object_get_string(payload),
+                 smartKeySearchCallback, (void*)requestId, NULL, &error);
     json_object_put(payload);
     if (succeeded) {
         return true;
@@ -2826,11 +2812,7 @@ bool BrowserPage::smartKeySearch(int requestId, const char* query)
     else {
         g_warning("Failed querying smartKey service: %s", error.message);
         LSErrorFree(&error);
-#ifdef FIXME_QT
-        return Palm::WebGlobal::smartKeySearchResponse(requestId, "");
-#else
         return false;
-#endif
     }
 }
 

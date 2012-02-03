@@ -23,7 +23,6 @@ LICENSE@@@ */
 #include <map>
 #include "BackupManager.h"
 #include <cjson/json.h>
-#include <palmwebglobal.h>
 
 /*
  * This file is almost identical to one in luna-sysmgr. If you change this please
@@ -173,7 +172,7 @@ std::string BackupManager::getHtml5BackupFile(const std::string& appId,const std
 std::string BackupManager::getHtml5Url(const std::string& appId)
 {
     if (appId == strPhonyCookieAppId) {
-        return Palm::k_PhonyCookieUrl;
+        return k_PhonyCookieUrl;
     }
     else {
         assert(false);
@@ -181,7 +180,7 @@ std::string BackupManager::getHtml5Url(const std::string& appId)
     }
 }
 
-void BackupManager::dbDumpStarted( const Palm::DbBackupStatus& status, void* userData )
+void BackupManager::dbDumpStarted( const DbBackupStatus& status, void* userData )
 {
     //this is called by webkit db dump method when it starts dumping the db
     BackupOperationData* opdata = static_cast<BackupOperationData*>(userData);
@@ -189,7 +188,7 @@ void BackupManager::dbDumpStarted( const Palm::DbBackupStatus& status, void* use
     g_message("Started dump of %s to %s, err: %d", status.url.c_str(), opdata->item.m_path.c_str(), status.err);
 }
 
-void BackupManager::dbDumpStopped( const Palm::DbBackupStatus& status, void* userData )
+void BackupManager::dbDumpStopped( const DbBackupStatus& status, void* userData )
 {
     //entered here after webkit finishes dumping the db for us to respond to pre backup
     BackupOperationData* opdata = static_cast<BackupOperationData*>(userData);
@@ -209,12 +208,12 @@ void BackupManager::dbDumpStopped( const Palm::DbBackupStatus& status, void* use
     delete opdata;
 }
 
-void BackupManager::dbRestoreStarted( const Palm::DbBackupStatus& status, void* userData )
+void BackupManager::dbRestoreStarted( const DbBackupStatus& status, void* userData )
 {
     g_message("Started restore of %s", status.url.c_str());
 }
 
-void BackupManager::dbRestoreStopped( const Palm::DbBackupStatus& status, void* userData )
+void BackupManager::dbRestoreStopped( const DbBackupStatus& status, void* userData )
 {
     BackupOperationData* opdata = static_cast<BackupOperationData*>(userData);
     assert(opdata != NULL);
@@ -256,8 +255,8 @@ bool BackupManager::preBackup( LSHandle* lshandle, LSMessage *message, void *use
 
     BackupItem item =s_instance->m_backupItem;
 
-    time_t modTime(0);
-    int numOpenMods(0);
+    time_t  modTime(0);
+    int     numOpenMods(0);
 
     //s_instance->m_currentBackupModTimes.erase(item.m_path);
     std::string url = getHtml5Url(strPhonyCookieAppId);
@@ -266,28 +265,29 @@ bool BackupManager::preBackup( LSHandle* lshandle, LSMessage *message, void *use
     item.m_path=getHtml5BackupFile(item.m_appid,backupPath);
     s_instance->m_backupItem.m_path =item.m_path;
 
-    g_message("Backing up HTML5 database for %s to %s.  modTime: %lu, mods:%d", item.m_appid.c_str(), item.m_path.c_str(), modTime, numOpenMods);
+    g_message("Backing up HTML5 database for %s to %s.  modTime: %lu, mods:%d",
+            item.m_appid.c_str(), item.m_path.c_str(), modTime, numOpenMods);
     BackupOperationData* opdata = new BackupOperationData();
     opdata->requestMessage = message;
     opdata->mgr = s_instance;
     opdata->item = item;
-#ifdef FIXME_QT
-    bool succeeded = Palm::WebGlobal::startDatabaseDump(url, item.m_dbname, item.m_path, opdata, strCookieDbAppId);
-#else
+
     bool succeeded = false;
-#endif
+
     if (succeeded) {
         g_debug("Database dump has started.");
         // Remember this db's modification time so that when backup is complete
         // I can save it so that subsequent backups can look for changes.
         //not sure if we still need this as we don't do incremental backup
         //s_instance->m_currentBackupModTimes[item.m_path] = modTime;
+
     }
     else {
         g_warning("Database dump not successful!");
         //just send an empty response
         s_instance->sendEmptyResponse(message);
     }
+
 
     return true;
 }
@@ -370,11 +370,9 @@ bool BackupManager::postRestore(  LSHandle* lshandle, LSMessage *message, void *
                     opdata->requestMessage = message;
                     opdata->mgr = s_instance;
                     opdata->item = item;
-#ifdef FIXME_QT
-                    bool succeeded = Palm::WebGlobal::startDatabaseRestore(getHtml5Url(item.m_appid), item.m_dbname, path, opdata, strCookieDbAppId);
-#else
+
                     bool succeeded = false;
-#endif
+
                     if (!succeeded) {
                         delete opdata;
                         g_warning("Database restore failed");

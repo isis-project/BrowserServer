@@ -28,7 +28,7 @@ LICENSE@@@ */
 #include <malloc.h>
 
 #include <webkitpalmsettings.h>
-#include <palmwebglobal.h>
+#include <palmmemstats.h>
 #include <palmwebview.h>
 #include <pbnjson.hpp>
 #include <qpersistentcookiejar.h>
@@ -213,10 +213,10 @@ void BrowserServer::initPlatformPlugin()
     settings->setComboBoxFactory(&m_comboBoxes);
 }
 
-bool 
+bool
 BrowserServer::webkitInit()
 {
-    if (gWebKitInit) 
+    if (gWebKitInit)
         return true;
 
     g_debug("Initializing WebKit.");
@@ -224,9 +224,6 @@ BrowserServer::webkitInit()
 
 
     if (!m_instance->m_carrierCode.empty()) {
-#ifdef FIXME_QT
-        Palm::WebGlobal::addAppendedHTTPHeader( "X-Palm-Carrier", m_instance->m_carrierCode.c_str() );
-#endif
     }
 
     initPlatformPlugin();
@@ -1208,9 +1205,6 @@ bool BrowserServer::getPreferencesCallback(LSHandle *sh, LSMessage *message, voi
     {
         char* carrierCode = json_object_get_string(value);
         if (gWebKitInit) {
-#ifdef FIXME_QT
-            Palm::WebGlobal::addAppendedHTTPHeader( "X-Palm-Carrier", carrierCode );
-#endif
         }
         if (m_instance != NULL) {
             m_instance->m_carrierCode = carrierCode;
@@ -1399,10 +1393,6 @@ void BrowserServer::doMemWatch()
     if (counter >= kCounterIntervalForCleanup) {
         counter = 0;
 
-        // Clear the font cache.
-        #ifdef FIXME_QT
-        Palm::WebGlobal::clearFontCache();
-        #endif
     }
 
     switch(threshold) {
@@ -1809,9 +1799,6 @@ Done:
 bool
 BrowserServer::privateDoGc(LSHandle* handle, LSMessage* message, void* ctxt)
 {
-#ifdef FIXME_QT
-    Palm::WebGlobal::garbageCollectNow();
-#endif
     return true;
 }
 
@@ -1940,9 +1927,6 @@ bool BrowserServer::connectionManagerGetStatusCallback(LSHandle* sh, LSMessage* 
 
         // Restart networking only if webkit has been initialized
         if (gWebKitInit) {
-            #ifdef FIXME_QT
-            Palm::WebGlobal::restartNetworking();
-            #endif
         }
     }
 
