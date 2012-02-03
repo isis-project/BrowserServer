@@ -28,7 +28,6 @@ LICENSE@@@ */
 #include <malloc.h>
 
 #include <webkitpalmsettings.h>
-#include <palmmemstats.h>
 #include <palmwebglobal.h>
 #include <palmwebview.h>
 #include <pbnjson.hpp>
@@ -1710,10 +1709,8 @@ gboolean BrowserServer::postStats(gpointer ctxt)
 	std::string jsonStr;
 	std::string counters;
 	std::multimap<std::string,std::string> docMap;
-#ifdef FIXME_QT
-	if (!Palm::MemStats::getJSON(docMap, counters))
-#endif
-		return TRUE;
+
+    return TRUE;
 
 	LSErrorInit(&lsError);
 	
@@ -1794,33 +1791,6 @@ BrowserServer::privateGetLunaStats(LSHandle* handle, LSMessage* message, void* c
 		}
 	}
 
-#ifdef FIXME_QT
-	if (Palm::MemStats::getJSON(docMap, counters)) {
-
-		ret = true;
-		// assemble the documents array:
-		jsonStr += " \"documents\": [";
-
-		int index = 0;
-		std::multimap<std::string,std::string>::const_iterator it;
-		for (it=docMap.begin(), index = 0; it != docMap.end(); ++it, ++index) {
-
-			if (index != 0)
-				jsonStr += ", ";
-
-			jsonStr += "{ ";
-			jsonStr +=  it->second;
-			jsonStr += " }";
-		}			
-
-		jsonStr += " ],\n";
-	
-		// assemble the counters frame:
-		jsonStr += " \"counters\": {";
-		jsonStr += counters;
-		jsonStr += " }, ";
-	}
-#endif
 	if (subscribed)
 		BrowserServer::instance()->initiateStatsReporting();
 
