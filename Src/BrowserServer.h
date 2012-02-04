@@ -46,20 +46,20 @@ public:
 
     static BrowserServer* instance();
     static bool isInternetConnectionAvailable;
-    
+
     bool init();
     bool init(int argc,char **argv);
-    
+
     bool webkitInit();
-	bool webKitInitialized() const;
-	
-	int m_pageCount;
+    bool webKitInitialized() const;
+
+    int m_pageCount;
 
     virtual void clientConnected(YapProxy* proxy);
     virtual void clientDisconnected(YapProxy* proxy);
 
     QNetworkAccessManager *networkAccessManager() { return m_networkAccessManager; }
-	
+
     // Luna Service Commands
     static bool serviceCmdDeleteImage(LSHandle *lsHandle, LSMessage *message, void *ctx);
     static bool serviceCmdClearCache(LSHandle *lsHandle, LSMessage *message, void *ctx);
@@ -72,16 +72,16 @@ public:
 
     bool        startService();
     void        stopService();
-    
+
     void InitMemWatcher();
     void doMemWatch();
 
-#if defined(__arm__)    
+#if defined(__arm__)
     static void handleMemchuteNotification(MemchuteThreshold threshold);
 #endif
-    
+
     unsigned char* getOffscreenBackupBuffer(int bufferSize);
-	LSHandle* getServiceHandle() const { return m_service; }
+    LSHandle* getServiceHandle() const { return m_service; }
     void shutdownBrowserServer();
 
 private:
@@ -91,7 +91,7 @@ private:
 
     BrowserServer(const BrowserServer&);
     BrowserServer& operator=(const BrowserServer&);
-    
+
     static BrowserServer* m_instance;
 
     QNetworkAccessManager* m_networkAccessManager;
@@ -100,38 +100,36 @@ private:
     LSHandle* m_service;
     LSMessageToken m_connectionManagerStatusToken;
     std::string m_ipAddress;
-	WebKitEventListener* m_wkEventListener;
-	std::string m_carrierCode;
+    WebKitEventListener* m_wkEventListener;
+    std::string m_carrierCode;
 
-	bool connectToMSMService();
-	static bool msmStatusCallback(LSHandle *sh, LSMessage *message, void *ctx);
+    bool connectToMSMService();
+    static bool msmStatusCallback(LSHandle *sh, LSMessage *message, void *ctx);
 
     bool connectToPrefsService();
     static bool getPreferencesCallback(LSHandle *sh, LSMessage *message, void *ctx);
 
     int getMemInfo(int& memTotal, int& memFree, int& swapTotal, int& swapFree,
                    int& cached, int& swapCached);
-	PluginDirWatcher* m_pluginDirWatcher;
+    PluginDirWatcher* m_pluginDirWatcher;
 
     QString m_defaultDownloadDir;
 
 #if defined(__arm__)
-	MemchuteThreshold m_memchute;
+    MemchuteThreshold m_memchute;
 #endif  // __arm__
     unsigned char* m_offscreenBackupBuffer;
     int m_offscreenBackupBufferLength;
 
     BrowserComboBoxList m_comboBoxes;
-    
+
     void registerForConnectionManager();
 
     static bool connectionManagerConnectCallback(LSHandle *sh, LSMessage *message, void *ctx); 
     static bool connectionManagerGetStatusCallback(LSHandle* sh, LSMessage* message, void* ctxt);
 
     // Async Commands
-    virtual void asyncCmdConnect(YapProxy* proxy, int32_t pageWidth, int32_t pageHeight, 
-                                 int32_t sharedBufferKey1, int32_t sharedBufferKey2,
-								 int32_t sharedBufferSize, int32_t identifier);
+    virtual void asyncCmdConnect(YapProxy* proxy, int32_t pageWidth, int32_t pageHeight, int32_t sharedBufferKey1, int32_t sharedBufferKey2, int32_t sharedBufferSize, int32_t identifier);
     virtual void asyncCmdSetWindowSize(YapProxy* proxy, int32_t width, int32_t height);
     virtual void asyncCmdSetVirtualWindowSize(YapProxy* proxy, int32_t width, int32_t height);
     virtual void asyncCmdSetUserAgent(YapProxy* proxy, const char* userAgent);
@@ -170,8 +168,7 @@ private:
     virtual void asyncCmdSetAcceptCookies(YapProxy* proxy, bool enable);
     virtual void asyncCmdSetShowClickedLink(YapProxy* proxy, bool enable);
     virtual void asyncCmdMouseEvent(YapProxy* proxy, int32_t type, int32_t contentX, int32_t contentY, int32_t detail);
-    virtual void asyncCmdGestureEvent(YapProxy* proxy, int32_t type, int32_t contentX, int32_t contentY,
-									  double scale, double rotate, int32_t centerX, int32_t centerY);
+    virtual void asyncCmdGestureEvent(YapProxy* proxy, int32_t type, int32_t contentX, int32_t contentY, double scale, double rotate, int32_t centerX, int32_t centerY);
     virtual void asyncCmdDisconnect(YapProxy *proxy);
     virtual void asyncCmdInspectUrlAtPoint(YapProxy* proxy, int32_t queryNum, int32_t pointX, int32_t pointY);
     virtual void asyncCmdGetHistoryState(YapProxy* proxy, int32_t queryNum);
@@ -179,11 +176,11 @@ private:
     virtual void asyncCmdClearHistory(YapProxy* proxy);
     virtual void asyncCmdSetAppIdentifier(YapProxy* proxy, const char* identifier);
     virtual void asyncCmdAddUrlRedirect(YapProxy* proxy, const char* urlRe, int type, bool redirect, const char* userData);
-    
+
     virtual void asyncCmdGetInteractiveNodeRects(YapProxy* proxy, int32_t mouseX, int32_t mouseY);
-    
+
     virtual void asyncCmdInsertStringAtCursor(YapProxy* proxy, const char* text);
-    
+
     virtual void asyncCmdSaveImageAtPoint(YapProxy* proxy, int32_t queryNum, int32_t pointX, int32_t pointY, const char* saveDir);
     virtual void asyncCmdGetImageInfoAtPoint(YapProxy* proxy, int32_t queryNum, int32_t pointX, int32_t pointY);
     virtual void asyncCmdIsInteractiveAtPoint(YapProxy* proxy, int32_t queryNum, int32_t pointX, int32_t pointY);
@@ -197,7 +194,7 @@ private:
     virtual void asyncCmdDisableEnhancedViewport(YapProxy* proxy,bool disable);
     virtual void asyncCmdIgnoreMetaTags(YapProxy* proxy,bool ignore);
     virtual void asyncCmdSetNetworkInterface(YapProxy* proxy,const char* name);
-	virtual void asyncCmdHitTest(YapProxy* proxy, int32_t queryNum, int32_t cx, int32_t cy);
+    virtual void asyncCmdHitTest(YapProxy* proxy, int32_t queryNum, int32_t cx, int32_t cy);
     virtual void asyncCmdPrintFrame(YapProxy* proxy, const char* frameName, int32_t lpsJobId, int32_t width, int32_t height, int32_t dpi, bool landscape, bool reverseOrder);
     virtual void asyncCmdTouchEvent(YapProxy* proxy, int32_t type, int32_t touchCount, int32_t modifiers, const char* touchesJson);
     virtual void asyncCmdGetTextCaretBounds(YapProxy* proxy, int32_t queryNum);
