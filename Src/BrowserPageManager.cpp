@@ -36,7 +36,7 @@ BrowserPageManager* BrowserPageManager::instance()
 BrowserPageManager::BrowserPageManager()
     : m_focusedPage(0)
 {
-    m_instance = this;    
+    m_instance = this;
 }
 
 BrowserPageManager::~BrowserPageManager()
@@ -58,22 +58,22 @@ BrowserPageManager::registerPage(BrowserPage* page)
 gboolean
 BrowserPageManager::expireWatchedPages(gpointer)
 {
-    
+
     BrowserPageManager* bpManager = BrowserPageManager::instance();
-    
+
     if (bpManager->m_watchingPageList.empty()) {
         return FALSE;  // detaches this function from event loop
     }
-    
-    // current time in seconds  
+
+    // current time in seconds
     struct timeval now;
-	gettimeofday(&now, 0);
-    
+    gettimeofday(&now, 0);
+
     std::list<WatchListEntry_t>::iterator iter_page = bpManager->m_watchingPageList.begin();
     while(iter_page != bpManager->m_watchingPageList.end())  
     {
         uint32_t pageWaitTime = now.tv_sec - (*iter_page).timeCreated;
-        
+
         if (pageWaitTime > kPageWaitMaxSeconds) {
             (*iter_page).page->pageStop();
             BrowserPage *page = (*iter_page).page;
@@ -94,7 +94,7 @@ BrowserPageManager::expireWatchedPages(gpointer)
 void
 BrowserPageManager::unregisterPage(BrowserPage* page)
 {
-    m_pageList.remove(page);    
+    m_pageList.remove(page);
 
     std::list<WatchListEntry_t>::iterator it = m_watchingPageList.begin();
     for (; it != m_watchingPageList.end(); ++it) {
@@ -112,15 +112,15 @@ BrowserPageManager::watchForPage(BrowserPage* watchingPage, const int32_t identi
     if (m_watchingPageList.size() == 0) {  // attach page expire function to main loop
         g_idle_add(expireWatchedPages, NULL);
     }
-    
+
     struct timeval now;
-	gettimeofday(&now, 0);
+    gettimeofday(&now, 0);
 
     WatchListEntry_t pageEntry;
     pageEntry.page = watchingPage;
     pageEntry.identifier = identifier;
     pageEntry.timeCreated = now.tv_sec;
-    
+
     m_watchingPageList.push_back(pageEntry);
 }
 
@@ -143,9 +143,9 @@ void
 BrowserPageManager::raisePagePriority(BrowserPage* page)
 {
     struct timespec currTime;
-	::clock_gettime(CLOCK_MONOTONIC, &currTime);
-	
-	page->setPriority((uint32_t)currTime.tv_sec);
+    ::clock_gettime(CLOCK_MONOTONIC, &currTime);
+
+    page->setPriority((uint32_t)currTime.tv_sec);
 }
 
 
@@ -163,7 +163,7 @@ BrowserPageManager::findInWatchedList(const int32_t identifier)
             return (*it).page;
         }
     }
-    
+
     return NULL;
 }
 
@@ -178,7 +178,7 @@ BrowserPageManager::removeFromWatchedList(const int32_t identifier)
             break;
         }
     }
-    
+
     return m_watchingPageList.size();
 }
 
@@ -208,7 +208,7 @@ BrowserPageManager::purgeLowPriorityPages()
     //static purgePageCount = 1;
     //int maxToPurge = purgePageCount;
     //purgePageCount *= 2;
-    
+
     // sort list of pages in ascending priority order
     m_pageList.sort(BrowserPageManager::compareByPriority);
 
@@ -216,18 +216,18 @@ BrowserPageManager::purgeLowPriorityPages()
     for (page_iter = m_pageList.begin(); page_iter != m_pageList.end() && numPurged < maxToPurge; ++page_iter) 
     {
         BrowserPage* page = *page_iter;
-        
-		syslog(LOG_WARNING, "%s: purging page of priority: %d", __FUNCTION__, page->getPriority());
-      
+
+        syslog(LOG_WARNING, "%s: purging page of priority: %d", __FUNCTION__, page->getPriority());
+
         // notify host that it needs to disconnect page
         BrowserServer::instance()->msgPurgePage(page->getProxy());
 
         // BrowserPage's destructor removes it from m_pageList
-        
+
         numPurged++;
     }
-    
-	g_warning("Purged %d low priority pages out of %u.", numPurged, m_pageList.size());
+
+    g_warning("Purged %d low priority pages out of %u.", numPurged, m_pageList.size());
 
     return numPurged;
 }
@@ -237,7 +237,7 @@ BrowserPageManager::purgeLowPriorityPages()
  *        priority, so it should know how to compare a BrowserPage by priority.
  *
  */
-bool 
+bool
 BrowserPageManager::compareByPriority(BrowserPage* b1, BrowserPage* b2)
 {
     return (b1->getPriority() < b2->getPriority());
