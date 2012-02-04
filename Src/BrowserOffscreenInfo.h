@@ -21,22 +21,22 @@ LICENSE@@@ */
 
 struct BrowserOffscreenInfo
 {
-	// The buffer dimensions. the full height may not have been rendered.
-	// Use contentHeight to figure out the height rendered	
-	int bufferWidth;
-	int bufferHeight;
+    // The buffer dimensions. the full height may not have been rendered.
+    // Use contentHeight to figure out the height rendered
+    int bufferWidth;
+    int bufferHeight;
 
-	// At what zoom factor was the page rendered into the buffer
-	double contentZoom;
+    // At what zoom factor was the page rendered into the buffer
+    double contentZoom;
 
-	// The portion of the webpage that has been rendered into the buffer. The zoom factor
-	// is baked into these dimensions. For eg: renderedX = renderedZoom * pageX
-	// renderedWidth == bufferWidth;
-	// renderedHeight == renderedHeight (<= bufferHeight)
-	int renderedX;
-	int renderedY;
-	int renderedWidth;
-	int renderedHeight;
+    // The portion of the webpage that has been rendered into the buffer. The zoom factor
+    // is baked into these dimensions. For eg: renderedX = renderedZoom * pageX
+    // renderedWidth == bufferWidth;
+    // renderedHeight == renderedHeight (<= bufferHeight)
+    int renderedX;
+    int renderedY;
+    int renderedWidth;
+    int renderedHeight;
 };
 
 #endif
