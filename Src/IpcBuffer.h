@@ -23,21 +23,21 @@ class IpcBuffer
 {
 public:
 
-	static IpcBuffer* create(int size);
-	static IpcBuffer* attach(int key, int size);
-	~IpcBuffer();
-	
-	void* buffer() const;
+    static IpcBuffer* create(int size);
+    static IpcBuffer* attach(int key, int size);
+    ~IpcBuffer();
+
+    void* buffer() const;
     int size() const { return m_size; }
-	int key() const { return m_key; }
+    int key() const { return m_key; }
 
 protected:
 
-	IpcBuffer(int key, int size);
+    IpcBuffer(int key, int size);
 
-	int m_key;
-	void* m_buffer;
-	int m_size;
+    int m_key;
+    void* m_buffer;
+    int m_size;
 };
 
 
