@@ -78,42 +78,42 @@ PrvInitialTimerCallback(gpointer pArg)
 static void
 PrvSigTermHandler(int)
 {
-	// Don't call syslog here because is uses malloc/free which isn't reentrant.
+    // Don't call syslog here because is uses malloc/free which isn't reentrant.
     fprintf(stderr, "SIGTERM received. Shutting down...\n");
     exit(0);
 }
 
 static void logFilter(const gchar *log_domain, GLogLevelFlags log_level, const gchar *message, gpointer unused_data)
 {
-	if (g_useSysLog) {
-		int priority;
+    if (g_useSysLog) {
+        int priority;
 
-		switch (log_level & G_LOG_LEVEL_MASK) {
-			case G_LOG_LEVEL_CRITICAL:
-				priority = LOG_CRIT;
-				break;
-			case G_LOG_LEVEL_ERROR:
-				priority = LOG_ERR;
-				break;
-			case G_LOG_LEVEL_WARNING:
-				priority = LOG_WARNING;
-				break;
-			case G_LOG_LEVEL_MESSAGE:
-				priority = LOG_NOTICE;
-				break;
-			case G_LOG_LEVEL_DEBUG:
-				priority = LOG_DEBUG;
-				break;
-			case G_LOG_LEVEL_INFO:
-			default:
-				priority = LOG_INFO;
-				break;
-		}
-		syslog(priority, "%s", message);
-	}
-	else {
-		g_log_default_handler(log_domain, log_level, message, unused_data);
-	}
+        switch (log_level & G_LOG_LEVEL_MASK) {
+            case G_LOG_LEVEL_CRITICAL:
+                priority = LOG_CRIT;
+                break;
+            case G_LOG_LEVEL_ERROR:
+                priority = LOG_ERR;
+                break;
+            case G_LOG_LEVEL_WARNING:
+                priority = LOG_WARNING;
+                break;
+            case G_LOG_LEVEL_MESSAGE:
+                priority = LOG_NOTICE;
+                break;
+            case G_LOG_LEVEL_DEBUG:
+                priority = LOG_DEBUG;
+                break;
+            case G_LOG_LEVEL_INFO:
+            default:
+                priority = LOG_INFO;
+                break;
+        }
+        syslog(priority, "%s", message);
+    }
+    else {
+        g_log_default_handler(log_domain, log_level, message, unused_data);
+    }
 }
 
 #ifdef DEBUG_SEGFAULT
@@ -122,16 +122,16 @@ static void crashHandler(int sig)
 {
     fprintf(stdout, "BrowserServer: Caught signal %d\n", sig);
 
-	FILE *file;
-	file = fopen("/tmp/BrowserServer-signal-occurred", "w");
-	if (file) {
-		fprintf(file, "BrowserServer: Caught signal %d\n", sig);
-		fclose(file);
-	}
+    FILE *file;
+    file = fopen("/tmp/BrowserServer-signal-occurred", "w");
+    if (file) {
+        fprintf(file, "BrowserServer: Caught signal %d\n", sig);
+        fclose(file);
+    }
 
-	// Infinite loop until we turn off stayInLoop using gdb:
-	while (stayInLoop) {
-	}
+    // Infinite loop until we turn off stayInLoop using gdb:
+    while (stayInLoop) {
+    }
 }
 #endif // DEBUG_SEGFAULT
 
@@ -141,10 +141,10 @@ static void crashHandler(int sig)
 static bool
 isDaemonized()
 {
-	// This is only true because our devices don't have HOME set and the 
-	// desktop does. It would be nice to have a more accurate way of knowing
-	// that this process is daemonized.
-	return getenv("HOME") == NULL;
+    // This is only true because our devices don't have HOME set and the 
+    // desktop does. It would be nice to have a more accurate way of knowing
+    // that this process is daemonized.
+    return getenv("HOME") == NULL;
 }
 
 /*
@@ -159,39 +159,36 @@ Chown(char *path, int owner, int group, bool recurse)
 
     rc = stat(path,&statbuf);
     if (rc == 0) {
-	if (S_ISDIR(statbuf.st_mode) && recurse) {
-	    int pathlen;
-	    char newpath[PATH_MAX];
-	    DIR * dir;
-	    struct dirent* dent;
-	    // chown this dir first
-	    if (chown(path, owner, group) != 0)
-		return -1;
-	
-	    dir = opendir(path);
-	    // recurse into subdirs
-	    if (dir) {
-		pathlen = strlen(path);
-		while((dent = readdir(dir)) != NULL) {
-		    int dlen = strlen(dent->d_name);
-		    // skip . and ..
-		    if (!((dlen == 1 && dent->d_name[0] == '.') ||
-			(dlen == 2 && dent->d_name[0] == '.' && 
-			 dent->d_name[1] == '.'))) {
-			memcpy(newpath,path,pathlen);
-			newpath[pathlen] = '/';
-			strncpy(&newpath[pathlen+1],
-				dent->d_name,PATH_MAX - pathlen - 1);
-			rc = Chown(newpath,owner,group,recurse);
-		    }
-		}
-		closedir(dir);
-	    }
-	}
-	else {
-	    // actually chown
-	    rc = chown(path, owner, group);
-	}
+        if (S_ISDIR(statbuf.st_mode) && recurse) {
+            int pathlen;
+            char newpath[PATH_MAX];
+            DIR * dir;
+            struct dirent* dent;
+            // chown this dir first
+            if (chown(path, owner, group) != 0)
+                return -1;
+
+            dir = opendir(path);
+            // recurse into subdirs
+            if (dir) {
+                pathlen = strlen(path);
+                while((dent = readdir(dir)) != NULL) {
+                    int dlen = strlen(dent->d_name);
+                    // skip . and ..
+                    if (!((dlen == 1 && dent->d_name[0] == '.') || (dlen == 2 && dent->d_name[0] == '.' && dent->d_name[1] == '.'))) {
+                        memcpy(newpath,path,pathlen);
+                        newpath[pathlen] = '/';
+                        strncpy(&newpath[pathlen+1], dent->d_name,PATH_MAX - pathlen - 1);
+                        rc = Chown(newpath,owner,group,recurse);
+                    }
+            }
+            closedir(dir);
+            }
+        }
+        else {
+            // actually chown
+            rc = chown(path, owner, group);
+        }
     }
     return rc;
 }
@@ -201,123 +198,123 @@ static void InitPrivileges() {
 #define NOTROOT
 #ifdef NOTROOT
 #if defined(__arm__)
-	const int kProcessId = 1000; // user "luna"
-	const int kGroupId = 1000;  // group "luna"
-	const int kGroup2Id = 44;  // group "video"
+    const int kProcessId = 1000; // user "luna"
+    const int kGroupId = 1000;  // group "luna"
+    const int kGroup2Id = 44;  // group "video"
 
-	// Set rlimit of mlock memory for the GPU mapping, needed by html5 GLES based implementation
-	struct rlimit rl = {RLIM_INFINITY, RLIM_INFINITY};
-	setrlimit(RLIMIT_MEMLOCK, &rl);
-	// Drop process groups so we are no longer running as root. This is for security reasons
-	// as we will be running Flash in this process.
+    // Set rlimit of mlock memory for the GPU mapping, needed by html5 GLES based implementation
+    struct rlimit rl = {RLIM_INFINITY, RLIM_INFINITY};
+    setrlimit(RLIMIT_MEMLOCK, &rl);
+    // Drop process groups so we are no longer running as root. This is for security reasons
+    // as we will be running Flash in this process.
 
-	// Fix up the file system. We have to handle the case where is exists (and is wrong) and the case
-	// where it has not been created yet.
-	::mkdir( "/var/palm", 0777 );
-	::mkdir( "/var/palm/data", 0777 );
-	char path[1024];
+    // Fix up the file system. We have to handle the case where is exists (and is wrong) and the case
+    // where it has not been created yet.
+    ::mkdir( "/var/palm", 0777 );
+    ::mkdir( "/var/palm/data", 0777 );
+    char path[1024];
 
 #ifdef FIXME_QT
     Chown(PalmBrowserSettings()->sharedClipboardFile,kProcessId,
           kGroupId,true);
 #endif
 
-	// needed for cookies and googlemaps data:
-	Chown((char*)"/var/palm/data",kProcessId,kGroupId,false);
+    // needed for cookies and googlemaps data:
+    Chown((char*)"/var/palm/data",kProcessId,kGroupId,false);
 
 
-	// do both mkdir and chmod to deal with the dir not being
-	// there, or being there and having wrong perms:
-	::mkdir("/var/luna/data/browser",S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IWGRP|S_IXGRP|S_IROTH|S_IXOTH);
-	chmod("/var/luna/data/browser",S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IWGRP|S_IXGRP|S_IROTH|S_IXOTH);
-	::mkdir("/var/luna/data/browser/icons",755);
-	Chown((char*)"/var/luna/data/browser/icons",kProcessId,kGroupId,true);
-	Chown((char*)"/var/palm/data/browser-cookies.db",kProcessId,kGroupId,true);
-	// don't let other read cookies:
-	chmod("/var/palm/data/browser-cookies.db",S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IWGRP|S_IXGRP);
+    // do both mkdir and chmod to deal with the dir not being
+    // there, or being there and having wrong perms:
+    ::mkdir("/var/luna/data/browser",S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IWGRP|S_IXGRP|S_IROTH|S_IXOTH);
+    chmod("/var/luna/data/browser",S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IWGRP|S_IXGRP|S_IROTH|S_IXOTH);
+    ::mkdir("/var/luna/data/browser/icons",755);
+    Chown((char*)"/var/luna/data/browser/icons",kProcessId,kGroupId,true);
+    Chown((char*)"/var/palm/data/browser-cookies.db",kProcessId,kGroupId,true);
+    // don't let other read cookies:
+    chmod("/var/palm/data/browser-cookies.db",S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IWGRP|S_IXGRP);
 
-	// local storage
-	Chown((char*)"/var/palm/data/localstorage",kProcessId,kGroupId,true);
+    // local storage
+    Chown((char*)"/var/palm/data/localstorage",kProcessId,kGroupId,true);
 
-	// DSP for flash
-	// make sure it allows group rw:
-	chmod("/dev/DspBridge",S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP);
-	// and set the group to luna:
-	Chown((char*)"/dev/DspBridge",0,kGroupId,true);
+    // DSP for flash
+    // make sure it allows group rw:
+    chmod("/dev/DspBridge",S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP);
+    // and set the group to luna:
+    Chown((char*)"/dev/DspBridge",0,kGroupId,true);
 
-	// same for broadway:
-	// make sure it allows group rw:
-	chmod("/dev/msm_vidc_dec",S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP);
-	// and set the group to luna:
-	Chown((char*)"/dev/msm_vidc_dec",0,kGroupId,true);
+    // same for broadway:
+    // make sure it allows group rw:
+    chmod("/dev/msm_vidc_dec",S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP);
+    // and set the group to luna:
+    Chown((char*)"/dev/msm_vidc_dec",0,kGroupId,true);
 
-	// for manta
-	chmod("/dev/pmem_adsp",S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP);
-	Chown((char*)"/dev/pmem_adsp",0,kGroupId,true);
+    // for manta
+    chmod("/dev/pmem_adsp",S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP);
+    Chown((char*)"/dev/pmem_adsp",0,kGroupId,true);
 
-	// for omx
-	chmod("/dev/pmem_smipool",S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP);
-	Chown((char*)"/dev/pmem_smipool",0,kGroupId,true);
+    // for omx
+    chmod("/dev/pmem_smipool",S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP);
+    Chown((char*)"/dev/pmem_smipool",0,kGroupId,true);
 
-	// for 2D and 3D
-	// FIXME: why need this to launch GLES app?
-	chmod("/dev/console",S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP);
-	Chown((char*)"/dev/console",0,kGroupId,true);
+    // for 2D and 3D
+    // FIXME: why need this to launch GLES app?
+    chmod("/dev/console",S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP);
+    Chown((char*)"/dev/console",0,kGroupId,true);
 
-	chmod("/dev/kgsl-2d0",S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP);
-	Chown((char*)"/dev/kgsl-2d0",0,kGroupId,true);
+    chmod("/dev/kgsl-2d0",S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP);
+    Chown((char*)"/dev/kgsl-2d0",0,kGroupId,true);
 
-	chmod("/dev/kgsl-2d1",S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP);
-	Chown((char*)"/dev/kgsl-2d1",0,kGroupId,true);
+    chmod("/dev/kgsl-2d1",S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP);
+    Chown((char*)"/dev/kgsl-2d1",0,kGroupId,true);
 
-	chmod("/dev/kgsl-3d0",S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP);
-	Chown((char*)"/dev/kgsl-3d0",0,kGroupId,true);
+    chmod("/dev/kgsl-3d0",S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP);
+    Chown((char*)"/dev/kgsl-3d0",0,kGroupId,true);
 
-	// flash needs this:
-	chmod("/tmp/pipcserver.sysmgr",S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP);
-	Chown((char*)"/tmp/pipcserver.sysmgr",0,kGroupId,false);
+    // flash needs this:
+    chmod("/tmp/pipcserver.sysmgr",S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP);
+    Chown((char*)"/tmp/pipcserver.sysmgr",0,kGroupId,false);
 
-	// cert store
-	// Chown((char*)"/var/ssl",kProcessId,kGroupId,true);
-	// I use system instead (below) to chmod g+w /var/ssl
+    // cert store
+    // Chown((char*)"/var/ssl",kProcessId,kGroupId,true);
+    // I use system instead (below) to chmod g+w /var/ssl
 
-	// browser page dbs:
-	// I use system here to handle the wildcards
-	// putting all the commands in one system() makes it faster.
-	// we chmod /var/ssl to root.luna so we can write to it.
-	::snprintf( path, 1023, "/bin/chmod -R g+w /var/ssl; /bin/chown -R root.luna /var/ssl; /bin/chown luna:luna -R /var/palm/data/http_* /var/palm/data/https_*; /bin/chmod -R o-rwx  /var/palm/data/http_* /var/palm/data/https_*");
-	::system( path );
+    // browser page dbs:
+    // I use system here to handle the wildcards
+    // putting all the commands in one system() makes it faster.
+    // we chmod /var/ssl to root.luna so we can write to it.
+    ::snprintf( path, 1023, "/bin/chmod -R g+w /var/ssl; /bin/chown -R root.luna /var/ssl; /bin/chown luna:luna -R /var/palm/data/http_* /var/palm/data/https_*; /bin/chmod -R o-rwx  /var/palm/data/http_* /var/palm/data/https_*");
+    ::system( path );
 
-	gid_t groups[22];
-	// check groups and add ours to them:
-	{
-	    int i, n;
-	    fprintf(stderr,"groups: ");
-	    n = getgroups(20,groups);
-	    if (n == -1) {
-		perror("getgroups");
-	    } else {
-		groups[n++] = kGroupId;
-		groups[n++] = kGroup2Id;
-		setgroups(n,groups);
-	    }
-	    n = getgroups(22,groups);
-	    if (n == -1) {
-		perror("getgroups");
-	    } else {
-		for(i = 0; i < n; i++) {
-		    fprintf(stderr,"%d ",groups[i]);
-		}
-	    }
-	    fprintf(stderr,"\n");
+    gid_t groups[22];
+    // check groups and add ours to them:
+    {
+        int i, n;
+        fprintf(stderr,"groups: ");
+        n = getgroups(20,groups);
+        if (n == -1) {
+            perror("getgroups");
+        } else {
+            groups[n++] = kGroupId;
+            groups[n++] = kGroup2Id;
+            setgroups(n,groups);
+        }
+        n = getgroups(22,groups);
+        if (n == -1) {
+            perror("getgroups");
+        } else {
+            for(i = 0; i < n; i++) {
+                fprintf(stderr,"%d ",groups[i]);
+            }
+        }
+        fprintf(stderr,"\n");
 
-	}
+    }
 
-	chdir( "/home/luna" );
+    chdir( "/home/luna" );
 #ifdef SETGID_BUG_FIXME
-	// now we drop privs
-	setgid( kGroupId );
-	setuid( kProcessId );
+    // now we drop privs
+    setgid( kGroupId );
+    setuid( kProcessId );
 #endif
 #endif // defined(__arm__)
 #endif // NOTROOT
@@ -379,7 +376,7 @@ main(int argc, char *argv[])
     int deadlockTimeoutMs = settings.value("DeadlockTimeoutMs", 15000).toInt();
 
     syslog(LOG_INFO, "Starting BrowserServer");
-    
+
     qDebug("BrowserServer compiled against Qt %s, running on %s", QT_VERSION_STR, qVersion());
 
     if (!g_thread_supported()) {
@@ -431,19 +428,19 @@ main(int argc, char *argv[])
 
     BrowserServer* server = BrowserServer::instance();
     if (!server) {
-	BERR("Failed to get instance of server");
-	return -1;
+        BERR("Failed to get instance of server");
+        return -1;
     }
 
     if (!(server->init())) {
-	BERR("BrowserServer initialization failed");
-	return -1;
+        BERR("BrowserServer initialization failed");
+        return -1;
     }
 
     bool serviceStarted = server->startService();
     if (!serviceStarted) {
-	BERR("Failed to start luna service");
-	return -1;
+        BERR("Failed to start luna service");
+        return -1;
     }
 
     SSLSupport::init();
@@ -458,7 +455,7 @@ main(int argc, char *argv[])
     } else {
         g_warning("%s: Unable to create MemchuteWatcher", __FUNCTION__);
     }
-#endif    
+#endif
 
     // NOTE: We need to initialize the privileges before we start the GMainLoop
     // below.  This is to workarounf a bug where setgid() and setuid()
@@ -479,7 +476,7 @@ main(int argc, char *argv[])
 
 #if defined(__arm__)
     if (memWatch != NULL) {
-	MemchuteWatcherDestroy(memWatch);
+        MemchuteWatcherDestroy(memWatch);
     }
 #endif
 
