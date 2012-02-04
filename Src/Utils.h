@@ -35,9 +35,9 @@ bool  deleteFile(const char* filePath);
 
 template <class T>
 std::string toSTLString(const T &arg) {
-	std::ostringstream	out;
-	out << arg;
-	return(out.str());
+    std::ostringstream out;
+    out << arg;
+    return(out.str());
 }
 
 /*
@@ -50,8 +50,8 @@ std::string toSTLString(const T &arg) {
  * 
  * IMPORTANT: X509_free() must be called by the caller on the X509 objects returned
  */
-X509 * 	findSSLCertInLocalStore(X509 * cert,int& ret_certSerialNb);
-X509 *	findSSLCertInLocalStore(const char * certFileAndPath,int& ret_certSerialNb);
+X509 * findSSLCertInLocalStore(X509 * cert,int& ret_certSerialNb);
+X509 * findSSLCertInLocalStore(const char * certFileAndPath,int& ret_certSerialNb);
 
 /**
  * Return a file name such that it will be uniquely named
