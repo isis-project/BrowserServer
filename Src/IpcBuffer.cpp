@@ -37,75 +37,75 @@ LICENSE@@@ */
 #include "IpcBuffer.h"
 
 #ifndef SHM_CACHE_WRITETHROUGH
-#define SHM_CACHE_WRITETHROUGH   0200000	/* custom! */
+#define SHM_CACHE_WRITETHROUGH   0200000 /* custom! */
 #endif
 
 IpcBuffer* IpcBuffer::create(int size)
 {
-	int key = -1;
-	while (key < 0) {
+    int key = -1;
+    while (key < 0) {
 
-		struct timeval tv;
-		gettimeofday(&tv, NULL);
-		// ftok has unspecified behavior if the lower 8-bits are 0
-		if ((tv.tv_usec & 0xFF) == 0)
-			tv.tv_usec++;
-		key_t k = ftok(".", tv.tv_usec);
-		key = ::shmget(k, size, 0666 | IPC_CREAT | IPC_EXCL);
-		if (key == -1 && errno != EEXIST) {
-			g_critical("Failed to create shared buffer: %s", strerror(errno));
-			return 0;
-		}
-	}
-	
-	void* buffer = ::shmat(key, NULL, SHM_CACHE_WRITETHROUGH);
-	if (-1 == (int) buffer) {
-		g_critical("Failed to attach to shared memory key (1) %d: %s", key, strerror(errno));
-		::shmctl(key, IPC_RMID, NULL);
-		return 0;
-	}
-	
-	// Auto delete when all processes detach
-	::shmctl(key, IPC_RMID, NULL);
+        struct timeval tv;
+        gettimeofday(&tv, NULL);
+        // ftok has unspecified behavior if the lower 8-bits are 0
+        if ((tv.tv_usec & 0xFF) == 0)
+            tv.tv_usec++;
+        key_t k = ftok(".", tv.tv_usec);
+        key = ::shmget(k, size, 0666 | IPC_CREAT | IPC_EXCL);
+        if (key == -1 && errno != EEXIST) {
+            g_critical("Failed to create shared buffer: %s", strerror(errno));
+            return 0;
+        }
+    }
 
-	IpcBuffer* b = new IpcBuffer(key, size);
-	b->m_buffer = buffer;
+    void* buffer = ::shmat(key, NULL, SHM_CACHE_WRITETHROUGH);
+    if (-1 == (int) buffer) {
+        g_critical("Failed to attach to shared memory key (1) %d: %s", key, strerror(errno));
+        ::shmctl(key, IPC_RMID, NULL);
+        return 0;
+    }
 
-	return b;
+    // Auto delete when all processes detach
+    ::shmctl(key, IPC_RMID, NULL);
+
+    IpcBuffer* b = new IpcBuffer(key, size);
+    b->m_buffer = buffer;
+
+    return b;
 }
 
 // browserserver side
 IpcBuffer* IpcBuffer::attach(int key, int size)
 {
-	void* buffer = ::shmat(key, NULL, 0);
-	if (-1 == (int) buffer) {
-		g_critical("Failed to attach to shared memory key (2) %d: %s", key, strerror(errno));
-		return false;
-	}
+    void* buffer = ::shmat(key, NULL, 0);
+    if (-1 == (int) buffer) {
+        g_critical("Failed to attach to shared memory key (2) %d: %s", key, strerror(errno));
+        return false;
+    }
 
-	IpcBuffer* b = new IpcBuffer(key, size);
-	b->m_buffer = buffer;
+    IpcBuffer* b = new IpcBuffer(key, size);
+    b->m_buffer = buffer;
 
-	return b;
+    return b;
 }
 
 
 IpcBuffer::IpcBuffer(int key, int size)
-	: m_key(key)
-	, m_buffer(0)
-	, m_size(size)
+    : m_key(key)
+    , m_buffer(0)
+    , m_size(size)
 {
 }
 
 IpcBuffer::~IpcBuffer()
 {
-	if (m_buffer) {
-		shmdt(m_buffer);
-		m_buffer = 0;
-	}
+    if (m_buffer) {
+        shmdt(m_buffer);
+        m_buffer = 0;
+    }
 }
 
 void* IpcBuffer::buffer() const
 {
-	return m_buffer;
+    return m_buffer;
 }
