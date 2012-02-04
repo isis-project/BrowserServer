@@ -45,129 +45,128 @@ extern "C" {
 
 char* readFile(const char* filePath)
 {
-	if (!filePath)
-		return 0;
-	
-	FILE* f = fopen(filePath,"r");
-	
-	if (!f)
-		return 0;
+    if (!filePath)
+        return 0;
 
-	fseek(f, 0L, SEEK_END);
-	long sz = ftell(f);
-	fseek( f, 0L, SEEK_SET );
-	if (!sz) {
-		fclose(f);
-		return 0;
-	}
+    FILE* f = fopen(filePath,"r");
 
-	char* ptr = new char[sz+1];
-	if( !ptr )
-	{
-		fclose(f);
-		return 0;
-	}
-	ptr[sz] = 0;
-	
-	if (fread(ptr, sz, 1, f) != size_t(sz)) {
-		delete [] ptr;
-		ptr = NULL;
-	}
-	fclose(f);
+    if (!f)
+        return 0;
 
-	return ptr;
+    fseek(f, 0L, SEEK_END);
+    long sz = ftell(f);
+    fseek( f, 0L, SEEK_SET );
+    if (!sz) {
+        fclose(f);
+        return 0;
+    }
+
+    char* ptr = new char[sz+1];
+    if( !ptr )
+    {
+        fclose(f);
+        return 0;
+    }
+    ptr[sz] = 0;
+
+    if (fread(ptr, sz, 1, f) != size_t(sz)) {
+        delete [] ptr;
+        ptr = NULL;
+    }
+    fclose(f);
+
+    return ptr;
 }
 
 
 bool writeFile(const char* filePath, const char* buffer)
 {
-	if (!filePath || !buffer)
-		return 0;
+    if (!filePath || !buffer)
+        return 0;
 
-	FILE* f = fopen(filePath, "w");
-	if (!f)
-		return false;
+    FILE* f = fopen(filePath, "w");
+    if (!f)
+        return false;
 
-	int len = strlen(buffer) + 1;
-	int written = fwrite(buffer, 1, len, f);
-	if (written != len) {
-		fclose(f);
-		unlink(filePath);
-		return false;
-	}
+    int len = strlen(buffer) + 1;
+    int written = fwrite(buffer, 1, len, f);
+    if (written != len) {
+        fclose(f);
+        unlink(filePath);
+        return false;
+    }
 
-	fclose(f);
-	return true;
+    fclose(f);
+    return true;
 }
 
 bool deleteFile(const char* filePath)
 {
-	if (!filePath)
-		return false;
+    if (!filePath)
+        return false;
 
-	return (unlink(filePath) == 0);
-}	
+    return (unlink(filePath) == 0);
+
 
 X509 * findSSLCertInLocalStore(X509 * cert,int& ret_certSerialNb)
 {
-	if (cert == NULL)
-		return NULL;
-	
-	int items=0;
-	SSL_library_init();
-	SSL_load_error_strings();
-	CertReturnCode_t result = CertGetDatabaseInfo(CERT_DATABASE_SIZE, &items);
-	//printf("database size %d %d ", result, items);
-	if (result == CERT_OK) {
-		for (int i = 0; i < items; i++) {
-			char serialStr[128];
-			result = CertGetDatabaseStrValue(i, CERT_DATABASE_ITEM_SERIAL,
-					serialStr, 128);
-			//printf("list id %d %d %s ", i, result, serialStr);
-			if (CERT_OK == result) {
-				char dir[MAX_CERT_PATH];
-				char * endPtr = NULL;
-				int serial = strtol(serialStr, &endPtr, 16);
-				result = makePathToCert(serial, dir, MAX_CERT_PATH);
-				//printf("list dir %d %s ", result, dir);
-				if (CERT_OK == result) {
-					X509 *candidate_cert = NULL;
-					char buf[128] = { '\0' };
-					memset(buf, 0, sizeof(buf));
-					result = CertPemToX509(dir, &candidate_cert);
-					if (candidate_cert == NULL)
-						continue;
-					//printf("list cert %d ", result);
-					if (result == CERT_OK) {
-						//DO COMPARISON
-						if (X509_cmp(candidate_cert,cert) == 0) {
-							ret_certSerialNb = serial;
-							return candidate_cert;
-						}
-					}
-				}
-			}
-		}
-	}
-	return NULL;
+    if (cert == NULL)
+        return NULL;
+
+    int items=0;
+    SSL_library_init();
+    SSL_load_error_strings();
+    CertReturnCode_t result = CertGetDatabaseInfo(CERT_DATABASE_SIZE, &items);
+    //printf("database size %d %d ", result, items);
+    if (result == CERT_OK) {
+        for (int i = 0; i < items; i++) {
+            char serialStr[128];
+            result = CertGetDatabaseStrValue(i, CERT_DATABASE_ITEM_SERIAL, serialStr, 128);
+            //printf("list id %d %d %s ", i, result, serialStr);
+            if (CERT_OK == result) {
+                char dir[MAX_CERT_PATH];
+                char * endPtr = NULL;
+                int serial = strtol(serialStr, &endPtr, 16);
+                result = makePathToCert(serial, dir, MAX_CERT_PATH);
+                //printf("list dir %d %s ", result, dir);
+                if (CERT_OK == result) {
+                    X509 *candidate_cert = NULL;
+                    char buf[128] = { '\0' };
+                    memset(buf, 0, sizeof(buf));
+                    result = CertPemToX509(dir, &candidate_cert);
+                    if (candidate_cert == NULL)
+                        continue;
+                    //printf("list cert %d ", result);
+                    if (result == CERT_OK) {
+                        //DO COMPARISON
+                        if (X509_cmp(candidate_cert,cert) == 0) {
+                            ret_certSerialNb = serial;
+                            return candidate_cert;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return NULL;
 }
 
 X509 * findSSLCertInLocalStore(const char * certFileAndPath,int& ret_certSerialNb)
 {
-				
-	FILE * fp = fopen(certFileAndPath,"rb");
-	if (fp == NULL) {
-		return NULL;
-	}
-	X509 *cert = PEM_read_X509(fp, NULL, 0, NULL);
-	if (cert == NULL)
-	{
-		return NULL;
-	}
 
-	X509 * inStoreCert = findSSLCertInLocalStore(cert,ret_certSerialNb);
-	X509_free(cert);
-	return inStoreCert;
+    FILE * fp = fopen(certFileAndPath,"rb");
+    if (fp == NULL) {
+        return NULL;
+    }
+    X509 *cert = PEM_read_X509(fp, NULL, 0, NULL);
+    if (cert == NULL)
+    {
+        return NULL;
+    }
+
+    X509 * inStoreCert = findSSLCertInLocalStore(cert,ret_certSerialNb);
+    X509_free(cert);
+    return inStoreCert;
 }
 
 QString makeUniqueFileName(const QString &inFileName)
