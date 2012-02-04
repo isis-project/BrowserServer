@@ -54,12 +54,12 @@ public:
     T h() const { return m_h; }
     T r() const { return m_x+m_w; }
     T b() const { return m_y+m_h; }
-	
+
     void setX(T x){m_x=x;}
     void setY(T y){m_y=y;}
     void setWidth(T w){m_w=w;}
     void setHeight(T h){m_h=h;}
-	void set( T x, T y, T r, T b ) { m_x=x; m_y=y; m_w=r-x; m_h=b-y; }
+    void set( T x, T y, T r, T b ) { m_x=x; m_y=y; m_w=r-x; m_h=b-y; }
     void moveTo(T x, T y) { m_x = x; m_y = y; }
     void moveBy(T dx, T dy) { m_x += dx; m_y += dy; }
 
@@ -107,7 +107,7 @@ public:
             *this = rect;
             return;
         }
-        
+
         T l = std::min(m_x, rect.m_x);
         T t = std::min(m_y, rect.m_y);
         T r = std::max(m_x + m_w, rect.m_x + rect.m_w);
@@ -122,110 +122,110 @@ public:
     bool overlaps(const _TemplateRect<T>& r) const
     {
 
-    	if (empty() || r.empty())
-    		return false;
-    	
-    	return ((m_x <= r.m_x) &&
-    			(m_x+m_w >= r.m_x+r.m_w) &&
-    			(m_y <= r.m_y) &&
-    			(m_y+m_h >= r.m_y+r.m_h));
+        if (empty() || r.empty())
+            return false;
+
+        return ((m_x <= r.m_x) &&
+            (m_x+m_w >= r.m_x+r.m_w) &&
+            (m_y <= r.m_y) &&
+            (m_y+m_h >= r.m_y+r.m_h));
 
     };
 
     int subtract(const _TemplateRect<T>& r, _TemplateRect<T>* result) const
     {
 
-    	int index = 0;
-    	// Case 0: this rect is empty
-    	if (empty())
-    		return index;
+        int index = 0;
+        // Case 0: this rect is empty
+        if (empty())
+            return index;
 
-    	// Case 1: other rect is empty
-    	if (r.empty()) {
-    		memcpy(result+(index++), this, sizeof(_TemplateRect<T>));
-    		return index;
-    	}
+        // Case 1: other rect is empty
+        if (r.empty()) {
+            memcpy(result+(index++), this, sizeof(_TemplateRect<T>));
+            return index;
+        }
 
-    	// Case 2: rects don't intersect
-    	if (!intersects(r)) {			
-    		memcpy(result+(index++), this, sizeof(_TemplateRect<T>));
-    		return index;
-    	}
+        // Case 2: rects don't intersect
+        if (!intersects(r)) {
+            memcpy(result+(index++), this, sizeof(_TemplateRect<T>));
+            return index;
+        }
 
-    	// Case 3: other rect overlaps this. result is an empty rectangle
-    	if (r.overlaps(*this)) {
-    		return index;
-    	}
+        // Case 3: other rect overlaps this. result is an empty rectangle
+        if (r.overlaps(*this)) {
+            return index;
+        }
 
-    	// Case 4: general intersection: 4 possible strips (top, bottom, left, right)
-    	// optimize for wider strips: i.e. make top and bottom as wide as possible
+        // Case 4: general intersection: 4 possible strips (top, bottom, left, right)
+        // optimize for wider strips: i.e. make top and bottom as wide as possible
 
-    	// Top Strip?
-    	if (y() < r.y()) {
+        // Top Strip?
+        if (y() < r.y()) {
 
-    		_TemplateRect<T>& a = *(result+index);
-    		a.m_y = m_y;
-    		a.m_h = r.m_y - m_y;
-    		a.m_x = m_x;
-    		a.m_w = m_w;
+            _TemplateRect<T>& a = *(result+index);
+            a.m_y = m_y;
+            a.m_h = r.m_y - m_y;
+            a.m_x = m_x;
+            a.m_w = m_w;
 
-    		if (!a.empty())
-    			index++;
-    	}
+            if (!a.empty())
+                index++;
+        }
 
-    	// Bottom Strip?
-    	if (b() > r.b()) {
+        // Bottom Strip?
+        if (b() > r.b()) {
 
-    		_TemplateRect<T>& a = *(result+index);
-    		a.m_y = r.m_y + r.m_h;
-    		a.m_h = m_y + m_h - a.m_y;
-    		a.m_x = m_x;
-    		a.m_w = m_w;
+            _TemplateRect<T>& a = *(result+index);
+            a.m_y = r.m_y + r.m_h;
+            a.m_h = m_y + m_h - a.m_y;
+            a.m_x = m_x;
+            a.m_w = m_w;
 
-    		if (!a.empty())
-    			index++;
-    	}
+            if (!a.empty())
+                index++;
+        }
 
-    	// Left Strip?
-    	if (x() < r.x()) {
+        // Left Strip?
+        if (x() < r.x()) {
 
-    		_TemplateRect<T>& a = *(result+index);
-    		a.m_x = m_x;
-    		a.m_w = r.m_x - m_x;
-    		a.m_y = std::max(m_y, r.m_y);
-    		a.m_h = std::min(b(), r.b()) - a.m_y;
+            _TemplateRect<T>& a = *(result+index);
+            a.m_x = m_x;
+            a.m_w = r.m_x - m_x;
+            a.m_y = std::max(m_y, r.m_y);
+            a.m_h = std::min(b(), r.b()) - a.m_y;
 
-    		if (!a.empty())
-    			index++;
-    	}
+            if (!a.empty())
+                index++;
+        }
 
-    	// Right Strip?
-    	if (this->r() > r.r()) {
+        // Right Strip?
+        if (this->r() > r.r()) {
 
-    		_TemplateRect<T>& a = *(result+index);
-    		a.m_x = r.r();
-    		a.m_w = this->r() - a.m_x;
-    		a.m_y = std::max(y(), r.y());
-    		a.m_h = std::min(b(), r.b()) - a.m_y;
+            _TemplateRect<T>& a = *(result+index);
+            a.m_x = r.r();
+            a.m_w = this->r() - a.m_x;
+            a.m_y = std::max(y(), r.y());
+            a.m_h = std::min(b(), r.b()) - a.m_y;
 
-    		if (!a.empty())
-    			index++;
-    	}
+            if (!a.empty())
+                index++;
+        }
 
-    	return index;
+        return index;
     }
 
-	
-	void scale( double factor )
-	{
-		if( 1.0f == factor ) 
-			return;
-		m_x = (T)( m_x * factor );
-		m_y = (T)( m_y * factor );
-		m_w = (T)( m_w * factor );
-		m_h = (T)( m_h * factor );
-	}
-    
+
+    void scale( double factor )
+    {
+        if( 1.0f == factor ) 
+            return;
+        m_x = (T)( m_x * factor );
+        m_y = (T)( m_y * factor );
+        m_w = (T)( m_w * factor );
+        m_h = (T)( m_h * factor );
+    }
+
 private:
 
     T m_x;
