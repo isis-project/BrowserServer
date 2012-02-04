@@ -29,12 +29,12 @@ LICENSE@@@ */
 void setCpuAffinity(int pid, int processor)
 {
 #if defined(TARGET_DEVICE)
-	int ret = libaffinity_set_affinity(pid, processor);
-	if (ret)
-		g_warning("Failed to set cpu affinity for process %d to processor %d: retVal: %d, errno: %s",
-				  pid, processor, ret, strerror(errno));
-	else
-		g_message("Successfully set cpu affinity for process %d to processor %d",
-				  pid, processor);
+    int ret = libaffinity_set_affinity(pid, processor);
+    if (ret)
+        g_warning("Failed to set cpu affinity for process %d to processor %d: retVal: %d, errno: %s",
+                  pid, processor, ret, strerror(errno));
+    else
+        g_message("Successfully set cpu affinity for process %d to processor %d",
+                  pid, processor);
 #endif
 }
