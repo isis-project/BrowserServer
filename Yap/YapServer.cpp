@@ -263,10 +263,10 @@ YapServer::YapServer(const char* name)
     d->mainCtxt      = 0;
     d->ioSource      = 0;
 
-	::snprintf(d->socketPath, G_N_ELEMENTS(d->socketPath), "%s%s", kSocketPathPrefix, name);
+    ::snprintf(d->socketPath, G_N_ELEMENTS(d->socketPath), "%s%s", kSocketPathPrefix, name);
     ::unlink(d->socketPath);
 
-    init();  
+    init();
 }
 
 YapServer::~YapServer()
@@ -274,13 +274,13 @@ YapServer::~YapServer()
     if (d->deadlockDetector) {
         delete d->deadlockDetector;
     }
-    delete d;    
+    delete d;
 }
 
 void YapServer::init()
 {
-	struct sockaddr_un  socketAddr;
-    
+    struct sockaddr_un  socketAddr;
+
     d->socketFd = ::socket(PF_LOCAL, SOCK_STREAM, 0);
     if (d->socketFd < 0) {
         fprintf(stderr, "YAP: Failed to create socket: %s\n", strerror(errno));
@@ -289,7 +289,7 @@ void YapServer::init()
 
     socketAddr.sun_family = AF_LOCAL;
     ::strncpy(socketAddr.sun_path, d->socketPath, G_N_ELEMENTS(socketAddr.sun_path));
-	socketAddr.sun_path[G_N_ELEMENTS(socketAddr.sun_path)-1] = '\0';
+    socketAddr.sun_path[G_N_ELEMENTS(socketAddr.sun_path)-1] = '\0';
     if (::bind(d->socketFd, (struct sockaddr*) &socketAddr, SUN_LEN(&socketAddr)) != 0) {
         fprintf(stderr, "YAP: Failed to bind socket: %s\n", strerror(errno));
         d->socketFd = -1;
@@ -301,7 +301,7 @@ void YapServer::init()
         d->socketFd = -1;
         return;
     }
-    
+
     d->mainCtxt = g_main_context_default();
     d->mainLoop = g_main_loop_new(d->mainCtxt, TRUE);
 
@@ -321,7 +321,7 @@ void YapServer::run(int deadlockTimeoutMs)
 {
     if (!d->mainLoop)
         return;
-    
+
     if (deadlockTimeoutMs > 0) {
         d->deadlockDetector = new YapServerDeadlockPriv(deadlockTimeoutMs);
         if (d->mainCtxt) {
@@ -329,7 +329,7 @@ void YapServer::run(int deadlockTimeoutMs)
         }
     }
 
-    //g_main_loop_run(d->mainLoop);    
+    //g_main_loop_run(d->mainLoop);
     QApplication::exec();
 }
 
@@ -363,7 +363,7 @@ void YapServer::setDeadlockDetectionInterval(const int IntervalInSeconds) {
 
 void YapServer::ioCallback(GIOChannel* channel, GIOCondition condition)
 {
-	struct sockaddr_un  socketAddr;
+    struct sockaddr_un  socketAddr;
     socklen_t           socketAddrLen;
     int                 socketFd = -1;
     int16_t             msgSocketPathLen = 0;
@@ -375,10 +375,10 @@ void YapServer::ioCallback(GIOChannel* channel, GIOCondition condition)
     memset(&socketAddrLen, 0, sizeof(socketAddrLen));
 
     socketFd = ::accept(d->socketFd, (struct sockaddr*) &socketAddr, &socketAddrLen);
-	if (-1 == socketFd) {
+    if (-1 == socketFd) {
         fprintf(stderr, "YAP: Failed to accept inbound connection.\n");
         goto Detached;
-	}
+    }
     if (!readSocket(socketFd, (char*) &msgSocketPathLen, 2)) {
         fprintf(stderr, "YAP: Failed to read message socket name length\n");
         goto Detached;
@@ -414,15 +414,15 @@ void YapServer::ioCallback(GIOChannel* channel, GIOCondition condition)
     free(msgSocketPath);
     free(msgSocketPostfix);
     return;
-    
+
  Detached:
 
     if (msgSocketPath)
         free(msgSocketPath);
     if (msgSocketPostfix)
         free(msgSocketPostfix);
-	if (-1 != socketFd) {
-    	close(socketFd);
+    if (-1 != socketFd) {
+        close(socketFd);
     }
 }
 
@@ -434,15 +434,15 @@ void YapServer::ioCallback(GIOChannel* channel, GIOCondition condition)
  */
 YapProxy* YapServer::createRecordProxy()
 {
-	return new YapProxy(this, -1, NULL, NULL);
+    return new YapProxy(this, -1, NULL, NULL);
 }
 
 void YapServer::deleteRecordProxy(YapProxy* proxy)
 {
-	if (proxy != NULL) {
-		assert(proxy->isRecordProxy());
-		delete proxy;
-	}
+    if (proxy != NULL) {
+        assert(proxy->isRecordProxy());
+        delete proxy;
+    }
 }
 
 bool YapServer::readSocket(int fd, char* buf, int len)
@@ -469,5 +469,5 @@ bool YapServer::readSocket(int fd, char* buf, int len)
 
 int YapServer::serverSocketFd() const
 {
-	return d->socketFd;    
+    return d->socketFd;
 }
