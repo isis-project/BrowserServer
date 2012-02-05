@@ -33,7 +33,7 @@ enum YapType {
     YapLong,
     YapDouble,
     YapString
-};    
+};
 
 typedef QPair<YapType, QString> TypeArgPair;
 typedef QList<TypeArgPair>      TypeArgPairList;
@@ -55,7 +55,7 @@ struct YapMsg {
     QString msg;
     QString msgValue;
     TypeArgPairList inArgs;
-};   
+};
 
 static QList<YapSyncCmd>  gSyncCmdList;
 static QList<YapAsyncCmd> gAsyncCmdList;
@@ -66,7 +66,7 @@ ignoreLine(const char* line)
 {
     if (!line)
         return true;
-    
+
     if (line[0] == '#')
         return true;
 
@@ -102,7 +102,7 @@ parseTypeArgPairList(QString str, TypeArgPairList& retList)
     str = str.trimmed();
     if (str.isEmpty())
         return true;
-    
+
     QStringList argsList = str.split(",", QString::SkipEmptyParts);
     for (int i = 0; i < argsList.size(); i++) {
         QString s = argsList.at(i).trimmed();
@@ -223,7 +223,7 @@ printInputTypeArgPairConverted(FILE* f, TypeArgPair pair, const char* source)
                 pair.second.toLocal8Bit().constData(), source); break;
         break;
     }
-}    
+}
 
 static
 void writeServerHeaderFile(QString className)
@@ -242,7 +242,7 @@ void writeServerHeaderFile(QString className)
     fprintf(f, "#include <YapProxy.h>\n");
     fprintf(f, "#include <YapPacket.h>\n");
     fprintf(f, "\n");
-    
+
     fprintf(f, "class %s : public YapServer\n", className.toLocal8Bit().constData());
     fprintf(f, "{\n");
 
@@ -280,7 +280,7 @@ void writeServerHeaderFile(QString className)
             printOutputTypeArgPair(f, y.outArgs.at(j));
         }
         fprintf(f, ") = 0;\n");
-    }        
+    }
 
     fprintf(f, "\n");
     fprintf(f, "    // Async Commands\n");
@@ -341,7 +341,7 @@ void writeServerCppFile(QString className)
             if (y.inArgs.at(j).first == YapString)
                 stringsToFree.append(y.inArgs.at(j).second);
         }
-        
+
 
         fprintf(f, "\t\t\n");
         for (int j = 0; j < y.outArgs.size(); j++) {
@@ -351,7 +351,7 @@ void writeServerCppFile(QString className)
             if (y.outArgs.at(j).first == YapString)
                 stringsToFree.append(y.outArgs.at(j).second);
         }
-        
+
         fprintf(f, "\t\t\n");
         for (int j = 0; j < y.inArgs.size(); j++) {
             fprintf(f, "\t\t(*cmd) >> %s;\n",
@@ -380,15 +380,15 @@ void writeServerCppFile(QString className)
                    stringsToFree.at(j).toLocal8Bit().constData(),
                    stringsToFree.at(j).toLocal8Bit().constData());
         }
-        
+
         fprintf(f, "\t\t\n");
         fprintf(f, "\t\tbreak;\n");
         fprintf(f, "\t}\n");
     }
     fprintf(f, "\tdefault:\n");
     fprintf(f, "\t\tfprintf(stderr, \"Unknown sync cmd: %%d\\n\", cmdValue);\n");
-    fprintf(f, "\t}\n");    
-    fprintf(f, "}\n\n");                                      
+    fprintf(f, "\t}\n");
+    fprintf(f, "}\n\n");
 
     // Async Commands
     fprintf(f, "void %s::handleAsyncCommand(YapProxy* proxy, YapPacket* cmd)\n",
@@ -415,7 +415,7 @@ void writeServerCppFile(QString className)
             if (y.inArgs.at(j).first == YapString)
                 stringsToFree.append(y.inArgs.at(j).second);
         }
-        
+
         fprintf(f, "\t\t\n");
         for (int j = 0; j < y.inArgs.size(); j++) {
             fprintf(f, "\t\t(*cmd) >> %s;\n",
@@ -435,15 +435,15 @@ void writeServerCppFile(QString className)
                    stringsToFree.at(j).toLocal8Bit().constData(),
                    stringsToFree.at(j).toLocal8Bit().constData());
         }
-        
+
         fprintf(f, "\t\t\n");
         fprintf(f, "\t\tbreak;\n");
         fprintf(f, "\t}\n");
     }
     fprintf(f, "\tdefault:\n");
     fprintf(f, "\t\tfprintf(stderr, \"Unknown async cmd: %%d\\n\", cmdValue);\n");
-    fprintf(f, "\t}\n");    
-    fprintf(f, "}\n\n");                                      
+    fprintf(f, "\t}\n");
+    fprintf(f, "}\n\n");
 
     // Async messages
     for (int i = 0; i < gMsgList.size(); i++) {
@@ -490,14 +490,14 @@ void writeClientHeaderFile(QString className)
     fprintf(f, "#include <YapClient.h>\n");
     fprintf(f, "#include <YapPacket.h>\n");
     fprintf(f, "\n");
-    
+
     fprintf(f, "class %s : public YapClient\n", className.toLocal8Bit().constData());
     fprintf(f, "{\n");
 
     fprintf(f, "public:\n\n");
-	fprintf(f, "\t%s(const char* name) : YapClient(name) {}\n", className.toLocal8Bit().constData());
-	fprintf(f, "\t%s(const char* name, GMainContext *ctxt) : YapClient(name, ctxt) {}\n", className.toLocal8Bit().constData());
-	fprintf(f, "\tvirtual ~%s() {}\n\n", className.toLocal8Bit().constData());
+    fprintf(f, "\t%s(const char* name) : YapClient(name) {}\n", className.toLocal8Bit().constData());
+    fprintf(f, "\t%s(const char* name, GMainContext *ctxt) : YapClient(name, ctxt) {}\n", className.toLocal8Bit().constData());
+    fprintf(f, "\tvirtual ~%s() {}\n\n", className.toLocal8Bit().constData());
 
     fprintf(f, "\n");
     fprintf(f, "\t// Async commands\n");
@@ -510,7 +510,7 @@ void writeClientHeaderFile(QString className)
             printInputTypeArgPair(f, y.inArgs.at(j));
         }
         fprintf(f, ");\n");
-    }   
+    }
 
     fprintf(f, "\n");
     fprintf(f, "\t// Sync commands\n");
@@ -536,7 +536,7 @@ void writeClientHeaderFile(QString className)
     fprintf(f, "\n");
     fprintf(f, "\t// Raw command\n");
     fprintf(f, "\tbool sendRawCmd(const char* rawCmd);");
-    
+
     fprintf(f, "\n");
     fprintf(f, "protected:\n\n");
     fprintf(f, "\t// Async Messages\n");
@@ -553,7 +553,7 @@ void writeClientHeaderFile(QString className)
 
     fprintf(f, "\n");
     fprintf(f, "\t// Overriden functions\n");
-    fprintf(f, "\tvirtual void handleAsyncMessage(YapPacket* msg);\n");    
+    fprintf(f, "\tvirtual void handleAsyncMessage(YapPacket* msg);\n");
 
     fprintf(f, "};\n\n");
     fprintf(f, "#endif // %s_H \n", className.toUpper().toLocal8Bit().constData());
@@ -666,12 +666,12 @@ void writeClientCppFile(QString className)
         fprintf(f, "\t\tif ((argCount - 1) < %d) return false;\n",
                 y.inArgs.size());
         fprintf(f, "\t\tmatched = true;\n\n");
-        
+
         for (int j = 0; j < y.inArgs.size(); j++) {
             QString source = "strSplit[";
             source += QString::number(j + 1);
             source += "]";
-            
+
             fprintf(f, "\t\t");
             printInputTypeArgPairConverted(f, y.inArgs.at(j),
                                            source.toLocal8Bit().constData());
@@ -685,7 +685,7 @@ void writeClientCppFile(QString className)
                 fprintf(f, ", ");
             fprintf(f, "%s", y.inArgs.at(j).second.toLocal8Bit().constData());
         }
-        fprintf(f, ");\n");                
+        fprintf(f, ");\n");
 
         fprintf(f, "\t}\n\n");
     }
@@ -705,7 +705,7 @@ void writeClientCppFile(QString className)
             QString source = "strSplit[";
             source += QString::number(j + 1);
             source += "]";
-            
+
             fprintf(f, "\t\t");
             printInputTypeArgPairConverted(f, y.inArgs.at(j),
                                            source.toLocal8Bit().constData());
@@ -736,11 +736,11 @@ void writeClientCppFile(QString className)
                 fprintf(f, ", ");
             fprintf(f, "%s", y.outArgs.at(j).second.toLocal8Bit().constData());
         }
-        fprintf(f, ");\n");                
+        fprintf(f, ");\n");
 
         fprintf(f, "\t}\n\n");
     }
-    
+
     fprintf(f, "\tg_strfreev(strSplit);\n");
     fprintf(f, "\treturn matched;\n");
     fprintf(f, "}\n\n");
@@ -783,12 +783,12 @@ void writeClientCppFile(QString className)
         fprintf(f, ");\n");
 
         // Free the strings
-		for (int j = 0; j < y.inArgs.size(); j++) {
-			if(y.inArgs.at(j).first == YapString) {
-				fprintf(f, "\t\tfree(%s);\n", y.inArgs.at(j).second.toLocal8Bit().constData());
-			}
-		}
-		
+        for (int j = 0; j < y.inArgs.size(); j++) {
+            if(y.inArgs.at(j).first == YapString) {
+                fprintf(f, "\t\tfree(%s);\n", y.inArgs.at(j).second.toLocal8Bit().constData());
+            }
+        }
+
         fprintf(f, "\t\tbreak;\n");
         fprintf(f, "\t}\n");
     }
@@ -796,7 +796,7 @@ void writeClientCppFile(QString className)
     fprintf(f, "\t\tfprintf(stderr, \"Unknown msg: 0x%%04x\\n\", msgValue);\n");
     fprintf(f, "\t\tbreak;\n");
     fprintf(f, "\t}\n");
-    
+
     fprintf(f, "}\n");
 
     fclose(f);
@@ -853,7 +853,7 @@ int main(int argc, char** argv)
         }
         lineNum++;
 
-        if (ignoreLine(line)) 
+        if (ignoreLine(line))
             continue;
 
         QString     lineQStr(line);
@@ -864,7 +864,7 @@ int main(int argc, char** argv)
             return -1;
         }
 
-        
+
         QString type = argsQStrList.at(0);
         if (type == "sync") {
             // need at least 4 args for sync cmd
@@ -933,22 +933,22 @@ int main(int argc, char** argv)
     }
 
     fclose(inputFile);
-    
+
     printf("Parsed %d sync commands, %d async command and %d messages\n",
            gSyncCmdList.size(), gAsyncCmdList.size(), gMsgList.size());
 
     if (clientCodeGen) {
         writeClientHeaderFile(className);
         printf("Wrote client header file: %s\n", (className + ".h").toLocal8Bit().constData());
-        
-        writeClientCppFile(className);    
+
+        writeClientCppFile(className);
         printf("Wrote client cpp file: %s\n", (className + ".cpp").toLocal8Bit().constData());
     }
     else {
         writeServerHeaderFile(className);
         printf("Wrote server header file: %s\n", (className + ".h").toLocal8Bit().constData());
-        
-        writeServerCppFile(className);    
+
+        writeServerCppFile(className);
         printf("Wrote server cpp file: %s\n", (className + ".cpp").toLocal8Bit().constData());
     }
 
