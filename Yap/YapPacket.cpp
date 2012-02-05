@@ -110,17 +110,17 @@ void YapPacket::operator<<(int16_t val)
 
 void YapPacket::operator<<(uint16_t val)
 {
-	g_return_if_fail(m_forWriting);
-	g_return_if_fail((m_currWritePos + 3) <= kMaxMsgLen);
+    g_return_if_fail(m_forWriting);
+    g_return_if_fail((m_currWritePos + 3) <= kMaxMsgLen);
 
-	m_buffer[m_currWritePos++] = kYapTypeUInt16;
+    m_buffer[m_currWritePos++] = kYapTypeUInt16;
 
-	uint8_t* pSrc = (uint8_t*)(&val);
-	uint8_t* pDst = m_buffer + m_currWritePos;
+    uint8_t* pSrc = (uint8_t*)(&val);
+    uint8_t* pDst = m_buffer + m_currWritePos;
 
-	pDst[0] = pSrc[1];
-	pDst[1] = pSrc[0];
-	m_currWritePos += sizeof(val);
+    pDst[0] = pSrc[1];
+    pDst[1] = pSrc[0];
+    m_currWritePos += sizeof(val);
 }
 
 void YapPacket::operator<<(int32_t val)
@@ -129,10 +129,10 @@ void YapPacket::operator<<(int32_t val)
     g_return_if_fail((m_currWritePos + 5) <= kMaxMsgLen);
 
     m_buffer[m_currWritePos++] = kYapTypeInt32;
-    
+
     uint8_t* pSrc = (uint8_t*)(&val);
     uint8_t* pDst = m_buffer + m_currWritePos;
-    
+
     pDst[0] = pSrc[3];
     pDst[1] = pSrc[2];
     pDst[2] = pSrc[1];
@@ -149,7 +149,7 @@ void YapPacket::operator<<(int64_t val)
 
     uint8_t* pSrc = (uint8_t*)(&val);
     uint8_t* pDst = m_buffer + m_currWritePos;
-    
+
     pDst[0] = pSrc[7];
     pDst[1] = pSrc[6];
     pDst[2] = pSrc[5];
@@ -170,7 +170,7 @@ void YapPacket::operator<<(double val)
 
     uint8_t* pSrc = (uint8_t*)(&val);
     uint8_t* pDst = m_buffer + m_currWritePos;
-    
+
     pDst[0] = pSrc[7];
     pDst[1] = pSrc[6];
     pDst[2] = pSrc[5];
@@ -253,21 +253,21 @@ void YapPacket::operator>>(int16_t& val)
 
 void YapPacket::operator>>(uint16_t& val)
 {
-	g_return_if_fail(!m_forWriting);
-	g_return_if_fail((m_currReadPos + 3) <= m_readTotalLen);
+    g_return_if_fail(!m_forWriting);
+    g_return_if_fail((m_currReadPos + 3) <= m_readTotalLen);
 
-	YapType_t type = (YapType_t) m_buffer[m_currReadPos++];
-	if (type != kYapTypeUInt16) {
-		fprintf(stderr, "Arg type is not unsigned short: %d\n", type);
-		g_return_if_fail(false);
-	}
+    YapType_t type = (YapType_t) m_buffer[m_currReadPos++];
+    if (type != kYapTypeUInt16) {
+        fprintf(stderr, "Arg type is not unsigned short: %d\n", type);
+        g_return_if_fail(false);
+    }
 
-	const uint8_t* pSrc = m_buffer + m_currReadPos;
-	uint8_t* pDst = (uint8_t*)(&val);
+    const uint8_t* pSrc = m_buffer + m_currReadPos;
+    uint8_t* pDst = (uint8_t*)(&val);
 
-	pDst[0] = pSrc[1];
-	pDst[1] = pSrc[0];
-	m_currReadPos += sizeof(val);
+    pDst[0] = pSrc[1];
+    pDst[1] = pSrc[0];
+    m_currReadPos += sizeof(val);
 }
 
 void YapPacket::operator>>(int32_t& val)
@@ -283,7 +283,7 @@ void YapPacket::operator>>(int32_t& val)
 
     uint8_t* pSrc = m_buffer + m_currReadPos;
     uint8_t* pDst = (uint8_t*)(&val);
-    
+
     pDst[0] = pSrc[3];
     pDst[1] = pSrc[2];
     pDst[2] = pSrc[1];
@@ -356,7 +356,7 @@ void YapPacket::operator>>(char*& val)
 
     uint8_t* pSrc = m_buffer + m_currReadPos;
     uint8_t* pDst = (uint8_t*)(&strLen);
-    
+
     pDst[0] = pSrc[1];
     pDst[1] = pSrc[0];
     m_currReadPos += 2;
@@ -367,6 +367,6 @@ void YapPacket::operator>>(char*& val)
     memcpy(val, m_buffer + m_currReadPos, strLen);
     val[strLen] = 0;
 
-    m_currReadPos += strLen;    
+    m_currReadPos += strLen;
 }
 
