@@ -26,70 +26,60 @@ class OffscreenBuffer
 {
 public:
 
-	OffscreenBuffer(int width, int height);
-	OffscreenBuffer(int key);
-	~OffscreenBuffer();
+    OffscreenBuffer(int width, int height);
+    OffscreenBuffer(int key);
+    ~OffscreenBuffer();
 
-	void getDimensions(int& width, int& height);
-	void getContentRect(int& cx, int& cy, int& cw, int& ch);
+    void getDimensions(int& width, int& height);
+    void getContentRect(int& cx, int& cy, int& cw, int& ch);
 
-	int key() const;
-	
-	// These are meant to be changed only from the server
-	void viewportSizeChanged(int w, int h);
-	void contentsSizeChanged(int w, int h);
-	bool scrollChanged(int& x, int& y);
-	bool scrollAndContentsChanged(int x, int y, int w, int h);
-	void copyFromBuffer(uint32_t* srcBuffer, int srcStride,
-						int srcPositionX, int srcPositionY,
-						int srcSizeWidth, int srcSizeHeight);
-	void copyFromBuffer(uint32_t* srcBuffer, int srcStride,
-						int srcPositionX, int srcPositionY,
-						int srcSizeWidth, int srcSizeHeight,
-						int newScrollX, int newScrollY);
+    int key() const;
 
-	// To be used from the client side
-	void copyToBuffer(uint32_t* dstBuffer, int dstStride,
-					  int dstPositionX, int dstPositionY,
-					  int dstSizeWidth, int dstSizeHeight);
-	void scaleToBuffer(uint32_t* dstBuffer, int dstStride,
-					   int dstLeft, int dstTop, int dstRight, int dstBottom,
-					   int srcLeft, int srcTop, int srcRight, int srcBottom,
-					   double scaleFactor);
+    // These are meant to be changed only from the server
+    void viewportSizeChanged(int w, int h);
+    void contentsSizeChanged(int w, int h);
+    bool scrollChanged(int& x, int& y);
+    bool scrollAndContentsChanged(int x, int y, int w, int h);
+    void copyFromBuffer(uint32_t* srcBuffer, int srcStride, int srcPositionX, int srcPositionY, int srcSizeWidth, int srcSizeHeight);
+    void copyFromBuffer(uint32_t* srcBuffer, int srcStride, int srcPositionX, int srcPositionY, int srcSizeWidth, int srcSizeHeight, int newScrollX, int newScrollY);
 
-	int writeToFile(FILE* pFile, int left, int top, int right, int bottom) const;
+    // To be used from the client side
+    void copyToBuffer(uint32_t* dstBuffer, int dstStride, int dstPositionX, int dstPositionY, int dstSizeWidth, int dstSizeHeight);
+    void scaleToBuffer(uint32_t* dstBuffer, int dstStride, int dstLeft, int dstTop, int dstRight, int dstBottom, int srcLeft, int srcTop, int srcRight, int srcBottom, double scaleFactor);
 
-	void dump(const char* fileName);
-	void erase(void);
-	
+    int writeToFile(FILE* pFile, int left, int top, int right, int bottom) const;
+
+    void dump(const char* fileName);
+    void erase(void);
+
 private:
 
-	// assumes mutex is locked
-	void invalidate();
+    // assumes mutex is locked
+    void invalidate();
 
-	struct BufferInfo {
-		int bufferId;
-		int bufferWidth;
-		int bufferHeight;
+    struct BufferInfo {
+        int bufferId;
+        int bufferWidth;
+        int bufferHeight;
 
-		int viewportWidth;
-		int viewportHeight;
-		int contentsWidth;
-		int contentsHeight;
-		
-		int scrollX;
-		int scrollY;
-		
-		int width;
-		int height;		
-		int stride;
-		int xPadding;
-		int yPadding;
-	};
+        int viewportWidth;
+        int viewportHeight;
+        int contentsWidth;
+        int contentsHeight;
 
-	ProcessMutex* m_mutex;
-	uint32_t* m_buffer;
-	uint32_t m_bufferSize;
+        int scrollX;
+        int scrollY;
+
+        int width;
+        int height;
+        int stride;
+        int xPadding;
+        int yPadding;
+    };
+
+    ProcessMutex* m_mutex;
+    uint32_t* m_buffer;
+    uint32_t m_bufferSize;
 };
 
 #endif /* OFFSCREENBUFFER_H */
