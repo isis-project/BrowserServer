@@ -42,17 +42,17 @@ gboolean YapProxyIoFunction(GIOChannel* channel, GIOCondition condition, void* d
 
 YapProxy::Message::Message( const char* hdr, const uint8_t* data, int dataLen ) : data(NULL)
 {
-	::memcpy(this->hdr, hdr, sizeof(this->hdr));
-	this->data = new uint8_t[dataLen];
-	if (this->data != NULL) {
-		::memcpy(this->data, data, dataLen);
-	}
-	len = dataLen;
+    ::memcpy(this->hdr, hdr, sizeof(this->hdr));
+    this->data = new uint8_t[dataLen];
+    if (this->data != NULL) {
+        ::memcpy(this->data, data, dataLen);
+    }
+    len = dataLen;
 }
 
 YapProxy::Message::~Message()
 {
-	delete [] data;
+    delete [] data;
 }
 
 /**
@@ -72,10 +72,10 @@ YapProxy::YapProxy(YapServer* server, int cmdSocketFd, char* msgSocketPath, char
     , m_cmdBuffer(0)
     , m_replyBuffer(0)
     , m_msgBuffer(0)
-	, m_ioChannel(0)
-	, m_ioSource(0)
+    , m_ioChannel(0)
+    , m_ioSource(0)
     , m_inSyncMode(false)
-	, m_terminate(false)
+    , m_terminate(false)
     , m_packetCommand(0)
     , m_packetReply(0)
     , m_packetMessage(0)
@@ -99,62 +99,62 @@ YapProxy::YapProxy(YapServer* server, int cmdSocketFd, char* msgSocketPath, char
     m_packetCommand = new YapPacket(m_cmdBuffer, 0);
     m_packetReply   = new YapPacket(m_replyBuffer);
     m_packetMessage = new YapPacket(m_msgBuffer);
-    
+
     GMainContext* mainCtxt = g_main_loop_get_context(m_server->mainLoop());
 
-	if (m_cmdSocketFd != -1) {
-		m_ioChannel = g_io_channel_unix_new(m_cmdSocketFd);
-		m_ioSource  = g_io_create_watch(m_ioChannel, (GIOCondition) (G_IO_IN | G_IO_HUP));
+    if (m_cmdSocketFd != -1) {
+        m_ioChannel = g_io_channel_unix_new(m_cmdSocketFd);
+        m_ioSource  = g_io_create_watch(m_ioChannel, (GIOCondition) (G_IO_IN | G_IO_HUP));
 
-		g_source_set_callback(m_ioSource, (GSourceFunc) YapProxyIoFunction, this, NULL);
-		g_source_attach(m_ioSource, mainCtxt);
-		g_source_set_priority(m_ioSource, G_PRIORITY_HIGH);
-	}
+        g_source_set_callback(m_ioSource, (GSourceFunc) YapProxyIoFunction, this, NULL);
+        g_source_attach(m_ioSource, mainCtxt);
+        g_source_set_priority(m_ioSource, G_PRIORITY_HIGH);
+    }
 
-	if (msgSocketPath) {
-		struct sockaddr_un socketAddr = {0};
-		socketAddr.sun_family = AF_LOCAL;
-		if (strlen(msgSocketPath) < sizeof(socketAddr.sun_path)) {
-			::strncpy(socketAddr.sun_path, msgSocketPath, sizeof(socketAddr.sun_path));
-			socketAddr.sun_path[sizeof(socketAddr.sun_path)-1] = '\0';
-		}
-		else {
-			fprintf(stderr, "Socket path length too long\n");
-			return;
-		}
-		m_msgSocketFd = ::socket(PF_LOCAL, SOCK_STREAM, 0);
+    if (msgSocketPath) {
+        struct sockaddr_un socketAddr = {0};
+        socketAddr.sun_family = AF_LOCAL;
+        if (strlen(msgSocketPath) < sizeof(socketAddr.sun_path)) {
+            ::strncpy(socketAddr.sun_path, msgSocketPath, sizeof(socketAddr.sun_path));
+            socketAddr.sun_path[sizeof(socketAddr.sun_path)-1] = '\0';
+        }
+        else {
+            fprintf(stderr, "Socket path length too long\n");
+            return;
+        }
+        m_msgSocketFd = ::socket(PF_LOCAL, SOCK_STREAM, 0);
 
-		fprintf(stderr, "Connecting to browser-adapter (client) socket: %s ...\n", msgSocketPath);
+        fprintf(stderr, "Connecting to browser-adapter (client) socket: %s ...\n", msgSocketPath);
 
-		int connectTryCount = 0;
-		bool connected = false;
-		while (connectTryCount < kMaxConnectTries) {
+        int connectTryCount = 0;
+        bool connected = false;
+        while (connectTryCount < kMaxConnectTries) {
 
-			if (::connect(m_msgSocketFd, (struct sockaddr*) &socketAddr, SUN_LEN(&socketAddr)) == 0) {
-				connected = true;
-				break;
-			}
-			else if (errno == EAGAIN || errno == EINTR || errno == ETIMEDOUT) {
+            if (::connect(m_msgSocketFd, (struct sockaddr*) &socketAddr, SUN_LEN(&socketAddr)) == 0) {
+                connected = true;
+                break;
+            }
+            else if (errno == EAGAIN || errno == EINTR || errno == ETIMEDOUT) {
 
-				fprintf(stderr, "Retrying connect. Error was: %s\n", strerror(errno));
-				connectTryCount++;
-				continue;
-			}
-			else {
-				
-				break;
-			}			
-		}
+                fprintf(stderr, "Retrying connect. Error was: %s\n", strerror(errno));
+                connectTryCount++;
+                continue;
+            }
+            else {
 
-		if (!connected) {
-			fprintf(stderr, "Failed to connect to client's msg socket. Messages will not work\n");
-			::close(m_msgSocketFd);
-			m_msgSocketFd = -1;
-		}
-		else {
-			fprintf(stderr, "Connected to client socket\n");
-		}
-	}
+                break;
+            }
+        }
+
+        if (!connected) {
+            fprintf(stderr, "Failed to connect to client's msg socket. Messages will not work\n");
+            ::close(m_msgSocketFd);
+            m_msgSocketFd = -1;
+        }
+        else {
+            fprintf(stderr, "Connected to client socket\n");
+        }
+    }
 }
 
 YapProxy::~YapProxy()
@@ -162,18 +162,18 @@ YapProxy::~YapProxy()
     delete m_msgSocketPostfix;
     m_msgSocketPostfix = 0;
 
-	if (m_ioSource) {
-    	g_source_destroy(m_ioSource);
-	}
-	if (m_ioChannel) {
-    	g_io_channel_shutdown(m_ioChannel, TRUE, NULL);
-    	g_io_channel_unref(m_ioChannel);
-	}
-    
+    if (m_ioSource) {
+        g_source_destroy(m_ioSource);
+    }
+    if (m_ioChannel) {
+        g_io_channel_shutdown(m_ioChannel, TRUE, NULL);
+        g_io_channel_unref(m_ioChannel);
+    }
+
     delete [] m_cmdBuffer;
     delete [] m_replyBuffer;
     delete [] m_msgBuffer;
-    
+
     delete m_packetCommand;
     delete m_packetReply;
     delete m_packetMessage;
@@ -184,15 +184,15 @@ YapProxy::~YapProxy()
     if (m_cmdSocketFd != -1)
         ::close(m_cmdSocketFd);
 
-	while (!m_queuedMessages.empty()) {
-		delete m_queuedMessages.front();
-		m_queuedMessages.pop();
-	}
+    while (!m_queuedMessages.empty()) {
+        delete m_queuedMessages.front();
+        m_queuedMessages.pop();
+    }
 }
 
 bool YapProxy::isRecordProxy() const
 {
-	return m_msgSocketFd == -1;
+    return m_msgSocketFd == -1;
 }
 
 /**
@@ -201,22 +201,22 @@ bool YapProxy::isRecordProxy() const
  */
 void YapProxy::transferQueuedMessage(YapProxy* srcProxy)
 {
-	while (!srcProxy->m_queuedMessages.empty()) {
-		Message* message = srcProxy->m_queuedMessages.front();
-		srcProxy->m_queuedMessages.pop();
+    while (!srcProxy->m_queuedMessages.empty()) {
+        Message* message = srcProxy->m_queuedMessages.front();
+        srcProxy->m_queuedMessages.pop();
 
-		if (message) {
-			bool sent = writeSocket(m_msgSocketFd, message->hdr, sizeof(message->hdr));
-			if (sent)
-				sent = writeSocket(m_msgSocketFd, (char*)message->data, message->len);
+        if (message) {
+            bool sent = writeSocket(m_msgSocketFd, message->hdr, sizeof(message->hdr));
+            if (sent)
+                sent = writeSocket(m_msgSocketFd, (char*)message->data, message->len);
 
-			delete message;
+            delete message;
 
-			if (!sent) {
-				fprintf(stderr, "Error sending queued message");
-			}
-		}
-	}
+            if (!sent) {
+                fprintf(stderr, "Error sending queued message");
+            }
+        }
+    }
 }
 
 void YapProxy::setPrivateData(void* priv)
@@ -237,14 +237,14 @@ YapPacket* YapProxy::packetMessage()
 
 void YapProxy::setTerminate()
 {
-	m_terminate = true;
+    m_terminate = true;
 }
 
 void YapProxy::sendMessage()
 {
     char     pktHeader[4];
     uint16_t pktLen = 0;
-    
+
     if (m_packetMessage->length() == 0) {
         fprintf(stderr, "Message is empty\n");
         return;
@@ -256,19 +256,19 @@ void YapProxy::sendMessage()
     pktLen = bswap_16(pktLen);
     ::memcpy(pktHeader, &pktLen, 2);
 
-	if (m_msgSocketFd != -1) {
-		bool sent = writeSocket(m_msgSocketFd, pktHeader, 4);
-		if (sent) {
-			sent = writeSocket(m_msgSocketFd, (char*) m_msgBuffer, m_packetMessage->length());
-		}
-		if (!sent) {
-			fprintf(stderr, "ERROR sending message, errno=%d.", errno);
-		}
-	}
-	else {
-		// Save this message for later and send if socket is opened.
-		m_queuedMessages.push(new Message(pktHeader, m_msgBuffer, m_packetMessage->length()));
-	}
+    if (m_msgSocketFd != -1) {
+        bool sent = writeSocket(m_msgSocketFd, pktHeader, 4);
+        if (sent) {
+            sent = writeSocket(m_msgSocketFd, (char*) m_msgBuffer, m_packetMessage->length());
+        }
+        if (!sent) {
+            fprintf(stderr, "ERROR sending message, errno=%d.", errno);
+        }
+    }
+    else {
+        // Save this message for later and send if socket is opened.
+        m_queuedMessages.push(new Message(pktHeader, m_msgBuffer, m_packetMessage->length()));
+    }
 }
 
 void YapProxy::ioFunction(GIOChannel* channel, GIOCondition condition)
@@ -290,10 +290,10 @@ void YapProxy::ioFunction(GIOChannel* channel, GIOCondition condition)
     pktLen   = *((uint16_t*) ppp);
     pktLen   = bswap_16(pktLen);
     pktFlags = (pktHeader[3]);
-	if (pktLen > kMaxMsgLen) {
-		fprintf(stderr, "YAP: Invalid message length %u > %d\n", pktLen, kMaxMsgLen);
-		goto Detached;
-	}
+    if (pktLen > kMaxMsgLen) {
+        fprintf(stderr, "YAP: Invalid message length %u > %d\n", pktLen, kMaxMsgLen);
+        goto Detached;
+    }
 
     // Get the packet data
     if (!readSocket(m_cmdSocketFd, (char*) m_cmdBuffer, pktLen)) {
@@ -342,12 +342,12 @@ void YapProxy::ioFunction(GIOChannel* channel, GIOCondition condition)
 
     m_inSyncMode = false;
 
-	if (m_terminate) {
-		goto Detached;
-	}
+    if (m_terminate) {
+        goto Detached;
+    }
 
     return;
-    
+
  Detached:
 
     m_server->clientDisconnected(this);
@@ -412,7 +412,7 @@ bool YapProxy::connected() const
 
 int YapProxy::messageSocketFd() const
 {
-	return m_msgSocketFd;    
+    return m_msgSocketFd;
 }
 
 int YapProxy::commandSocketFd() const
