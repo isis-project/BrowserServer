@@ -23,24 +23,24 @@ class ProcessMutex
 {
 public:
 
-	ProcessMutex(int dataSize, int key = -1);
-	~ProcessMutex();
+    ProcessMutex(int dataSize, int key = -1);
+    ~ProcessMutex();
 
-	int key() const { return m_key; }
+    int key() const { return m_key; }
 
-	bool isValid() const;
-	
-	bool tryLock(int numTries=10);
-	void lock();
-	void unlock();
+    bool isValid() const;
 
-	void* data() const;
+    bool tryLock(int numTries=10);
+    void lock();
+    void unlock();
+
+    void* data() const;
 
 private:
 
-	int m_key;
-	void* m_data;
-	int m_dataSize;
+    int m_key;
+    void* m_data;
+    int m_dataSize;
 };
 
 #endif /* PROCESSMUTEX_H */
