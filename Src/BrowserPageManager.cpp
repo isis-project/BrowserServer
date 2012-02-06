@@ -84,7 +84,7 @@ BrowserPageManager::expireWatchedPages(gpointer)
             delete page;
             page = 0;
         } else {
-            iter_page++;
+            ++iter_page;
         }
     }
     return TRUE;
