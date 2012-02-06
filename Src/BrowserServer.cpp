@@ -1133,8 +1133,6 @@ bool BrowserServer::msmStatusCallback(LSHandle *sh, LSMessage *message, void *ct
     json_object* json = NULL;
     json_object* value = NULL;
 
-    bool enteringMSMMode;
-
     json = json_tokener_parse(payload);
     if (!json || is_error(json)) {
         return false;
@@ -1142,7 +1140,7 @@ bool BrowserServer::msmStatusCallback(LSHandle *sh, LSMessage *message, void *ct
 
     value = json_object_object_get(json, "inMSM");
     if (ValidJsonObject(value)) {
-        enteringMSMMode = json_object_get_boolean(value);
+        bool enteringMSMMode = json_object_get_boolean(value);
         if (enteringMSMMode) {
             g_message(" ENTERING MSM_MODE, shutting down plugin directory watcher");
             bs->m_pluginDirWatcher->suspend();
