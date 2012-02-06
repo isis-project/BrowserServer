@@ -1774,8 +1774,7 @@ BrowserPage::dialogUserPassword(const char* inMsg, std::string& userName, std::s
 
         if (replyArray->len >= 2) {
             val = static_cast<const char*>(g_ptr_array_index(replyArray, 1));
-            if (replyArray)
-                userName = val;
+            userName = val;
         }
         else {
             BERR("Username not provided");
