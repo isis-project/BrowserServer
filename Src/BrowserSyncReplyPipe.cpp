@@ -215,7 +215,7 @@ BrowserSyncReplyPipe::readFull(char* buf, int len, int fd)
 gboolean
 BrowserSyncReplyPipe::socketCallback(GIOChannel* channel, GIOCondition condition, gpointer arg)
 {
-    BrowserSyncReplyPipe* b = (BrowserSyncReplyPipe*) arg;
+    BrowserSyncReplyPipe* b = static_cast<BrowserSyncReplyPipe*>(arg);
     if (condition & G_IO_HUP ||
         condition & G_IO_ERR ||
         condition & G_IO_NVAL) {
@@ -230,7 +230,7 @@ BrowserSyncReplyPipe::socketCallback(GIOChannel* channel, GIOCondition condition
 gboolean
 BrowserSyncReplyPipe::pipeCallback(GIOChannel* channel, GIOCondition condition, gpointer arg)
 {
-    BrowserSyncReplyPipe* b = (BrowserSyncReplyPipe*) arg;
+    BrowserSyncReplyPipe* b = static_cast<BrowserSyncReplyPipe*>(arg);
     if (condition & G_IO_IN) {
         b->m_pipeReadFailed = false;
         g_main_loop_quit(b->m_mainLoop);
