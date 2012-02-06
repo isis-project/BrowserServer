@@ -1130,13 +1130,11 @@ bool BrowserServer::msmStatusCallback(LSHandle *sh, LSMessage *message, void *ct
 
     BrowserServer *bs = reinterpret_cast<BrowserServer*>(ctx);
 
-    json_object* label = NULL;
     json_object* json = NULL;
     json_object* value = NULL;
 
     bool enteringMSMMode;
 
-    label = 0;
     json = json_tokener_parse(payload);
     if (!json || is_error(json)) {
         return false;
