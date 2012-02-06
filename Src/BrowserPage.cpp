@@ -2715,14 +2715,6 @@ void BrowserPage::removeInteractiveWidgetRect(uintptr_t id, Palm::InteractiveRec
 }
 
 /**
- * The context information for our smart key search.
- */
-struct SmartKeySearchContext
-{
-    int requestId;
-};
-
-/**
  * Called by luna service when a response to a smart key search is received.
  */
 bool BrowserPage::smartKeySearchCallback(LSHandle *sh, LSMessage *message, void *ctx)
