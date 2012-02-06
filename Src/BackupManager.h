@@ -23,14 +23,12 @@ LICENSE@@@ */
 #include <list>
 #include <map>
 #include "lunaservice.h"
+#include "DbBackupStatus.h"
 
 struct LSHandle;
 struct LSMessage;
 
-namespace Palm
-{
-    struct DbBackupStatus;
-};
+const char* const k_PhonyCookieUrl = "cookie:db";
 
 /**
  * Manages the backup and restore of the Mojo applications (files and HTML5 databases)
@@ -40,11 +38,11 @@ class BackupManager
 {
 public:
 
-    bool init(GMainLoop* mainLoop, LSHandle* server_handle);
-    void dbDumpStarted(const Palm::DbBackupStatus& status, void* userData);
-    void dbDumpStopped(const Palm::DbBackupStatus& status, void* userData);
-    void dbRestoreStarted(const Palm::DbBackupStatus& status, void* userData);
-    void dbRestoreStopped(const Palm::DbBackupStatus& status, void* userData);
+	bool	init			(GMainLoop* mainLoop, LSHandle* server_handle);
+	void	dbDumpStarted	(const DbBackupStatus& status, void* userData);
+	void	dbDumpStopped	(const DbBackupStatus& status, void* userData);
+	void	dbRestoreStarted(const DbBackupStatus& status, void* userData);
+	void	dbRestoreStopped(const DbBackupStatus& status, void* userData);
 
     static BackupManager* instance();
     void testDb();

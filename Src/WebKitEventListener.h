@@ -19,21 +19,20 @@ LICENSE@@@ */
 #ifndef WEBKITEVENTLISTENER_H
 #define WEBKITEVENTLISTENER_H
 
-#include <palmwebglobal.h>
+#include "DbBackupStatus.h"
 
 class BackupManager;
 
-class WebKitEventListener : public Palm::WebKitEventListener
-{
+class WebKitEventListener {
 public:
 
     WebKitEventListener( BackupManager* backupMgr );
 
-    virtual void dbDumpStarted( const Palm::DbBackupStatus& status, void* userData );
-    virtual void dbDumpStopped( const Palm::DbBackupStatus& status, void* userData );
-    virtual void dbRestoreStarted( const Palm::DbBackupStatus& status, void* userData );
-    virtual void dbRestoreStopped( const Palm::DbBackupStatus& status, void* userData );
-    virtual void dbMoveStatus( int err );
+    virtual void    dbDumpStarted   ( const DbBackupStatus& status, void* userData );
+    virtual void    dbDumpStopped   ( const DbBackupStatus& status, void* userData );
+    virtual void    dbRestoreStarted( const DbBackupStatus& status, void* userData );
+    virtual void    dbRestoreStopped( const DbBackupStatus& status, void* userData );
+    virtual void    dbMoveStatus    ( int err );
 
 private:
 

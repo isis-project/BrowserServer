@@ -27,22 +27,22 @@ WebKitEventListener::WebKitEventListener(BackupManager* backupMgr) :
     assert(backupMgr != NULL);
 }
 
-void WebKitEventListener::dbDumpStarted( const Palm::DbBackupStatus& status, void* userData )
+void WebKitEventListener::dbDumpStarted( const DbBackupStatus& status, void* userData )
 {
     m_backupMgr->dbDumpStarted(status, userData);
 }
 
-void WebKitEventListener::dbDumpStopped( const Palm::DbBackupStatus& status, void* userData )
+void WebKitEventListener::dbDumpStopped( const DbBackupStatus& status, void* userData )
 {
     m_backupMgr->dbDumpStopped(status, userData);
 }
 
-void WebKitEventListener::dbRestoreStarted( const Palm::DbBackupStatus& status, void* userData )
+void WebKitEventListener::dbRestoreStarted( const DbBackupStatus& status, void* userData )
 {
     m_backupMgr->dbRestoreStarted(status, userData);
 }
 
-void WebKitEventListener::dbRestoreStopped( const Palm::DbBackupStatus& status, void* userData )
+void WebKitEventListener::dbRestoreStopped( const DbBackupStatus& status, void* userData )
 {
     m_backupMgr->dbRestoreStopped(status, userData);
 }
