@@ -28,7 +28,6 @@ LICENSE@@@ */
 #include <malloc.h>
 
 #include <webkitpalmsettings.h>
-#include <palmmemstats.h>
 #include <palmwebview.h>
 #include <pbnjson.hpp>
 #include <qpersistentcookiejar.h>
