@@ -244,7 +244,7 @@ void
 BrowserServer::clientDisconnected(YapProxy* proxy)
 {
     BDBG("Client disconnected: %p", proxy);
-    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
     if (pPage) {
         delete pPage;
         m_pageCount--;
@@ -269,7 +269,7 @@ BrowserServer::asyncCmdConnect(YapProxy* proxy, int32_t pageWidth, int32_t pageH
 {
     BDBG("Client connected: %p", proxy);
 
-    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
     if (pPage) {
         BERR("Client already send Connect command: %p", proxy);
         return;
@@ -319,7 +319,7 @@ void BrowserServer::asyncCmdDisconnect(YapProxy *proxy)
 void
 BrowserServer::asyncCmdInspectUrlAtPoint(YapProxy* proxy, int32_t queryNum, int32_t pointX, int32_t pointY)
 {
-    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
     if (!pPage) {
         BERR("No page for this client.");
         return;
@@ -337,7 +337,7 @@ BrowserServer::asyncCmdInspectUrlAtPoint(YapProxy* proxy, int32_t queryNum, int3
 void
 BrowserServer::asyncCmdSetWindowSize(YapProxy* proxy, int32_t width, int32_t height)
 {
-    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
     if (!pPage) {
         BERR("No page for this client.");
         return;
@@ -348,7 +348,7 @@ BrowserServer::asyncCmdSetWindowSize(YapProxy* proxy, int32_t width, int32_t hei
 
 void BrowserServer::asyncCmdSetVirtualWindowSize(YapProxy *proxy, int32_t width, int32_t height)
 {
-    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
     if (!pPage) {
         BERR("No page for this client.");
         return;
@@ -360,7 +360,7 @@ void BrowserServer::asyncCmdSetVirtualWindowSize(YapProxy *proxy, int32_t width,
 void
 BrowserServer::asyncCmdSetUserAgent(YapProxy* proxy, const char* userAgent)
 {
-    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
     if (!pPage) {
         BERR("No page for this client.");
         return;
@@ -372,7 +372,7 @@ BrowserServer::asyncCmdSetUserAgent(YapProxy* proxy, const char* userAgent)
 void
 BrowserServer::asyncCmdOpenUrl(YapProxy* proxy, const char* url)
 {
-    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
     if (!pPage) {
         BERR("No page for this client.");
         return;
@@ -385,7 +385,7 @@ BrowserServer::asyncCmdOpenUrl(YapProxy* proxy, const char* url)
 void
 BrowserServer::asyncCmdSetHtml(YapProxy* proxy, const char* url, const char* body)
 {
-    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
     if (!pPage) {
         BERR("No page for this client.");
         return;
@@ -400,7 +400,7 @@ BrowserServer::asyncCmdSetHtml(YapProxy* proxy, const char* url, const char* bod
 void
 BrowserServer::asyncCmdClickAt(YapProxy* proxy, int32_t contentX, int32_t contentY, int32_t numClicks, int32_t counter)
 {
-    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
     if (!pPage) {
         BERR("No page for this client.");
         return;
@@ -420,7 +420,7 @@ BrowserServer::asyncCmdClickAt(YapProxy* proxy, int32_t contentX, int32_t conten
 void
 BrowserServer::asyncCmdHoldAt(YapProxy* proxy, int32_t contentX, int32_t contentY)
 {
-    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
     if (!pPage) {
         BERR("No page for this client.");
         return;
@@ -432,7 +432,7 @@ BrowserServer::asyncCmdHoldAt(YapProxy* proxy, int32_t contentX, int32_t content
 void
 BrowserServer::asyncCmdEnableSelection(YapProxy* proxy, int32_t mouseX, int32_t mouseY)
 {
-    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
     if (!pPage) {
         BERR("No page for this client.");
         return;
@@ -454,7 +454,7 @@ BrowserServer::asyncCmdEnableSelection(YapProxy* proxy, int32_t mouseX, int32_t 
 void
 BrowserServer::asyncCmdDisableSelection(YapProxy* proxy)
 {
-    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
     if (!pPage) {
         BERR("No page for this client.");
         return;
@@ -466,7 +466,7 @@ BrowserServer::asyncCmdDisableSelection(YapProxy* proxy)
 void
 BrowserServer::asyncCmdKeyDown(YapProxy* proxy, uint16_t key, uint16_t modifiers)
 {
-    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
     if (!pPage) {
         BERR("No page for this client.");
         return;
@@ -480,7 +480,7 @@ BrowserServer::asyncCmdKeyDown(YapProxy* proxy, uint16_t key, uint16_t modifiers
 void
 BrowserServer::asyncCmdKeyUp(YapProxy* proxy, uint16_t key, uint16_t modifiers)
 {
-    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
     if (!pPage) {
         BERR("No page for this client.");
         return;
@@ -492,7 +492,7 @@ BrowserServer::asyncCmdKeyUp(YapProxy* proxy, uint16_t key, uint16_t modifiers)
 void
 BrowserServer::asyncCmdForward(YapProxy* proxy)
 {
-    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
     if (!pPage) {
         BERR("No page for this client.");
         return;
@@ -505,7 +505,7 @@ BrowserServer::asyncCmdForward(YapProxy* proxy)
 void
 BrowserServer::asyncCmdBack(YapProxy* proxy)
 {
-    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
     if (!pPage) {
         BERR("No page for this client.");
         return;
@@ -518,7 +518,7 @@ BrowserServer::asyncCmdBack(YapProxy* proxy)
 void
 BrowserServer::asyncCmdReload(YapProxy* proxy)
 {
-    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
     if (!pPage) {
         BERR("No page for this client.");
         return;
@@ -531,7 +531,7 @@ BrowserServer::asyncCmdReload(YapProxy* proxy)
 void
 BrowserServer::asyncCmdStop(YapProxy* proxy)
 {
-    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
     if (!pPage) {
         BERR("No page for this client.");
         return;
@@ -544,7 +544,7 @@ BrowserServer::asyncCmdStop(YapProxy* proxy)
 void
 BrowserServer::asyncCmdPageFocused(YapProxy* proxy, bool focused)
 {
-    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
     if (!pPage) {
         BERR("No page for this client.");
         return;
@@ -588,7 +588,7 @@ BrowserServer::asyncCmdExit(YapProxy* proxy)
 
 void BrowserServer::asyncCmdCancelDownload(YapProxy* proxy, const char* url)
 {
-    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
     if (!pPage) {
         BERR("No page for this client.");
 
@@ -601,7 +601,7 @@ void BrowserServer::asyncCmdCancelDownload(YapProxy* proxy, const char* url)
 
 void BrowserServer::asyncCmdInterrogateClicks(YapProxy* proxy, bool enable)
 {
-    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
     if (!pPage) {
         BERR("No page for this client.");
 
@@ -613,7 +613,7 @@ void BrowserServer::asyncCmdInterrogateClicks(YapProxy* proxy, bool enable)
 
 void BrowserServer::asyncCmdDragStart(YapProxy* proxy, int32_t contentX, int32_t contentY)
 {
-    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
     if (!pPage) {
         BERR("No page for this client.");
 
@@ -626,7 +626,7 @@ void BrowserServer::asyncCmdDragStart(YapProxy* proxy, int32_t contentX, int32_t
 
 void BrowserServer::asyncCmdDragProcess(YapProxy* proxy, int32_t deltaX, int32_t deltaY)
 {
-    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
     if (!pPage) {
         BERR("No page for this client.");
 
@@ -639,7 +639,7 @@ void BrowserServer::asyncCmdDragProcess(YapProxy* proxy, int32_t deltaX, int32_t
 
 void BrowserServer::asyncCmdDragEnd(YapProxy* proxy, int32_t contentX, int32_t contentY)
 {
-    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
     if (!pPage) {
         BERR("No page for this client.");
 
@@ -652,7 +652,7 @@ void BrowserServer::asyncCmdDragEnd(YapProxy* proxy, int32_t contentX, int32_t c
 
 void BrowserServer::asyncCmdSetMinFontSize(YapProxy* proxy, int32_t minFontSizePt)
 {
-    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
     if (!pPage) {
         BERR("No page for this client.");
         return;
@@ -663,7 +663,7 @@ void BrowserServer::asyncCmdSetMinFontSize(YapProxy* proxy, int32_t minFontSizeP
 
 void BrowserServer::asyncCmdFindString(YapProxy* proxy, const char* str, bool fwd)
 {
-    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
     if (!pPage) {
         BERR("No page for this client.");
         return;
@@ -678,7 +678,7 @@ void BrowserServer::asyncCmdFindString(YapProxy* proxy, const char* str, bool fw
 
 void BrowserServer::asyncCmdSelectAll(YapProxy* proxy)
 {
-    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
     if (!pPage) {
         BERR("No page for this client.");
         return;
@@ -689,7 +689,7 @@ void BrowserServer::asyncCmdSelectAll(YapProxy* proxy)
 
 void BrowserServer::asyncCmdPaste(YapProxy* proxy)
 {
-    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
     if (!pPage) {
         BERR("No page for this client.");
         return;
@@ -700,7 +700,7 @@ void BrowserServer::asyncCmdPaste(YapProxy* proxy)
 
 void BrowserServer::asyncCmdCut(YapProxy* proxy)
 {
-    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
     if (!pPage) {
         BERR("No page for this client.");
         return;
@@ -711,7 +711,7 @@ void BrowserServer::asyncCmdCut(YapProxy* proxy)
 
 void BrowserServer::asyncCmdCopy(YapProxy* proxy, int queryNum)
 {
-    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
     if (!pPage) {
         BERR("No page for this client.");
         return;
@@ -724,7 +724,7 @@ void BrowserServer::asyncCmdCopy(YapProxy* proxy, int queryNum)
 
 void BrowserServer::asyncCmdClearSelection(YapProxy* proxy)
 {
-    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
     if (!pPage) {
         BERR("No page for this client.");
         return;
@@ -766,7 +766,7 @@ void BrowserServer::asyncCmdZoomSmartCalculateRequest(YapProxy* proxy, int32_t p
 void BrowserServer::asyncCmdSetEnableJavaScript(YapProxy* proxy, bool enable)
 {
     // setting for current proxy's page
-    BrowserPage* page = (BrowserPage*) proxy->privateData();
+    BrowserPage* page = static_cast<BrowserPage*>(proxy->privateData());
     if (!page) {
         BERR("javascript enable/disable : No page for this client.");
         return;
@@ -777,7 +777,7 @@ void BrowserServer::asyncCmdSetEnableJavaScript(YapProxy* proxy, bool enable)
 void BrowserServer::asyncCmdSetBlockPopups(YapProxy* proxy, bool block)
 {
     QWebSettings::globalSettings()->setAttribute(QWebSettings::JavascriptCanOpenWindows, !block);
-    BrowserPage* page = (BrowserPage*) proxy->privateData();
+    BrowserPage* page = static_cast<BrowserPage*>(proxy->privateData());
     if (!page) {
         BERR("No page for this client.");
         return;
@@ -792,7 +792,7 @@ void BrowserServer::asyncCmdSetAcceptCookies(YapProxy* proxy, bool enable)
 
 void BrowserServer::asyncCmdSetShowClickedLink(YapProxy* proxy, bool enable) 
 {
-    BrowserPage* page = (BrowserPage*) proxy->privateData();
+    BrowserPage* page = static_cast<BrowserPage*>(proxy->privateData());
     if (!page) {
         BERR("No page for this client.");
         return;
@@ -802,7 +802,7 @@ void BrowserServer::asyncCmdSetShowClickedLink(YapProxy* proxy, bool enable)
 
 void BrowserServer::asyncCmdGetInteractiveNodeRects(YapProxy* proxy, int32_t mouseX, int32_t mouseY)
 {
-    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
     if (!pPage) {
         BERR("No page for this client.");
         return;
@@ -813,7 +813,7 @@ void BrowserServer::asyncCmdGetInteractiveNodeRects(YapProxy* proxy, int32_t mou
 
 void BrowserServer::asyncCmdMouseEvent(YapProxy* proxy, int32_t type, int32_t contentX, int32_t contentY, int32_t detail)
 {
-    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
     if (!pPage) {
         BERR("No page for this client.");
         return;
@@ -825,7 +825,7 @@ void BrowserServer::asyncCmdMouseEvent(YapProxy* proxy, int32_t type, int32_t co
 
 void BrowserServer::asyncCmdGestureEvent(YapProxy* proxy, int32_t type, int32_t contentX, int32_t contentY, double scale, double rotate, int32_t centerX, int32_t centerY)
 {
-    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
     if (!pPage) {
         BERR("No page for this client.");
         return;
@@ -837,7 +837,7 @@ void BrowserServer::asyncCmdGestureEvent(YapProxy* proxy, int32_t type, int32_t 
 
 void BrowserServer::asyncCmdFreeze(YapProxy* proxy)
 {
-    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
     if (!pPage) {
         return;
     }
@@ -846,7 +846,7 @@ void BrowserServer::asyncCmdFreeze(YapProxy* proxy)
 
 void BrowserServer::asyncCmdThaw(YapProxy* proxy, int32_t sharedBufferKey1, int32_t sharedBufferKey2, int32_t sharedBufferSize)
 {
-    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
     if (!pPage) {
         return;
     }
@@ -856,7 +856,7 @@ void BrowserServer::asyncCmdThaw(YapProxy* proxy, int32_t sharedBufferKey1, int3
 
 void BrowserServer::asyncCmdReturnBuffer(YapProxy* proxy, int32_t sharedBufferKey)
 {
-    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
     if (!pPage) {
         return;
     }
@@ -866,7 +866,7 @@ void BrowserServer::asyncCmdReturnBuffer(YapProxy* proxy, int32_t sharedBufferKe
 
 void BrowserServer::asyncCmdSetScrollPosition(YapProxy* proxy, int32_t cx, int32_t cy, int32_t cw, int32_t ch)
 {
-    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
     if (!pPage) {
         return;
     }
@@ -875,7 +875,7 @@ void BrowserServer::asyncCmdSetScrollPosition(YapProxy* proxy, int32_t cx, int32
 
 void BrowserServer::asyncCmdPluginSpotlightStart(YapProxy* proxy, int32_t cx, int32_t cy, int32_t cw, int32_t ch)
 {
-    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
     if (!pPage) {
         return;
     }
@@ -884,7 +884,7 @@ void BrowserServer::asyncCmdPluginSpotlightStart(YapProxy* proxy, int32_t cx, in
 
 void BrowserServer::asyncCmdPluginSpotlightEnd(YapProxy* proxy)
 {
-    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
     if (!pPage) {
         return;
     }
@@ -893,7 +893,7 @@ void BrowserServer::asyncCmdPluginSpotlightEnd(YapProxy* proxy)
 
 void BrowserServer::asyncCmdHideSpellingWidget(YapProxy* proxy)
 {
-    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
     if (!pPage) {
         return;
     }
@@ -902,7 +902,7 @@ void BrowserServer::asyncCmdHideSpellingWidget(YapProxy* proxy)
 
 void BrowserServer::asyncCmdDisableEnhancedViewport(YapProxy* proxy,bool disable)
 {
-    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
     if (!pPage) {
         return;
     }
@@ -912,7 +912,7 @@ void BrowserServer::asyncCmdDisableEnhancedViewport(YapProxy* proxy,bool disable
 
 void BrowserServer::syncCmdRenderToFile(YapProxy* proxy, const char* filename, int32_t viewX, int32_t viewY, int32_t viewW, int32_t viewH, int32_t& result)
 {
-    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
     if (!pPage) {
         result = ENOMEM;
         return;
@@ -2022,7 +2022,7 @@ unsigned char* BrowserServer::getOffscreenBackupBuffer(int bufferSize) {
 
 void BrowserServer::asyncCmdPrintFrame(YapProxy* proxy, const char* frameName, int lpsJobId, int width, int height, int dpi, bool landscape, bool reverseOrder)
 {
-    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
     if (!pPage) {
         BERR("No page for this client.");
 
@@ -2034,7 +2034,7 @@ void BrowserServer::asyncCmdPrintFrame(YapProxy* proxy, const char* frameName, i
 
 void BrowserServer::asyncCmdTouchEvent(YapProxy* proxy, int32_t type, int32_t touchCount, int32_t modifiers, const char* touchesJson)
 {
-    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
     if (!pPage) {
         BERR("No page for this client.");
         return;
@@ -2045,7 +2045,7 @@ void BrowserServer::asyncCmdTouchEvent(YapProxy* proxy, int32_t type, int32_t to
 void
 BrowserServer::asyncCmdGetTextCaretBounds(YapProxy* proxy, int32_t queryNum)
 {
-    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
     if (!pPage) {
         BERR("No page for this client.");
         return;
@@ -2058,7 +2058,7 @@ BrowserServer::asyncCmdGetTextCaretBounds(YapProxy* proxy, int32_t queryNum)
 
 void BrowserServer::asyncCmdSetZoomAndScroll(YapProxy* proxy, double zoom, int32_t cx, int32_t cy)
 {
-    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
     if (!pPage) {
         BERR("No page for this client.");
         return;
@@ -2069,7 +2069,7 @@ void BrowserServer::asyncCmdSetZoomAndScroll(YapProxy* proxy, double zoom, int32
 
 void BrowserServer::asyncCmdScrollLayer(YapProxy* proxy, int32_t id, int32_t deltaX, int32_t deltaY)
 {
-    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
     if (!pPage) {
         BERR("No page for this client.");
         return;
