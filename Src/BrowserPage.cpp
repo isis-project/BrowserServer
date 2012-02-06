@@ -232,7 +232,7 @@ BrowserPage::~BrowserPage()
 
     int result=0;
     //get rid of temporary serials
-    for (std::list<int32_t>::iterator it = temporaryCertSerials.begin();it != temporaryCertSerials.end();it++) {
+    for (std::list<int32_t>::iterator it = temporaryCertSerials.begin(); it != temporaryCertSerials.end(); ++it) {
         result = CertRemoveCertificate(*it);
         if (result == CERT_OK) {
             g_debug("BrowserServer [bpage = %u]: (dtor) removed certificate %d",bpageId,*it);
@@ -2026,9 +2026,7 @@ void BrowserPage::getInteractiveNodeRects(int32_t mouseX, int32_t mouseY)
     prevRect.bottom = -1;
     prevRect.right = -1;
 
-    for (std::vector<Palm::WebRect>::iterator rects_iter = nodeRects.begin();
-         rects_iter != nodeRects.end();
-         rects_iter++)
+    for (std::vector<Palm::WebRect>::iterator rects_iter = nodeRects.begin(); rects_iter != nodeRects.end(); ++rects_iter)
     {
         Palm::WebRect r = *rects_iter;
         g_debug("%s: see rect with left: %d, top: %d, right: %d, bottom: %d\n",
