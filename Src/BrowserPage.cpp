@@ -2128,7 +2128,7 @@ void BrowserPage::gestureEvent(int type, int contentX, int contentY, double scal
         GestureEnd
     };
 
-    // These values are from the Palm::GestureEventType enumeration from FrankenKit
+    // These values are from the Palm::GestureEventType enumeration 
     const int Palm_GestureStart = 0;
     const int Palm_GestureChange = 1;
     const int Palm_GestureEnd = 2;
