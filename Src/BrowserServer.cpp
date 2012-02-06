@@ -68,15 +68,15 @@ static const int kTimerSecs = 15;
 // Luna Service 
 
 static LSMethod s_serviceMethods[] = {
-		{ "deleteImage",  BrowserServer::serviceCmdDeleteImage  },
-		{ "clearCache",   BrowserServer::serviceCmdClearCache   },
-		{ "clearCookies", BrowserServer::serviceCmdClearCookies },
+    { "deleteImage",  BrowserServer::serviceCmdDeleteImage  },
+    { "clearCache",   BrowserServer::serviceCmdClearCache   },
+    { "clearCookies", BrowserServer::serviceCmdClearCookies },
 #ifdef USE_HEAP_PROFILER
-		{ "dumpHeapProfile", BrowserServer::serviceCmdDumpHeapProfiler },
+    { "dumpHeapProfile", BrowserServer::serviceCmdDumpHeapProfiler },
 #endif
-        { "getStats", BrowserServer::privateGetLunaStats },
-        { "gc", BrowserServer::privateDoGc },
-		{ 0, 0},
+    { "getStats", BrowserServer::privateGetLunaStats },
+    { "gc", BrowserServer::privateDoGc },
+    { 0, 0},
 };
 
 static const char* const k_pszSimpleJsonSuccessResponse = "{\"returnValue\":true}";
@@ -88,7 +88,7 @@ bool BrowserServer::isInternetConnectionAvailable = true;
 template <class T>
 bool ValidJsonObject(T jsonObj)
 {
-	return NULL != jsonObj && !is_error(jsonObj);
+    return NULL != jsonObj && !is_error(jsonObj);
 }
 
 
@@ -97,32 +97,32 @@ BrowserServer* BrowserServer::instance()
     if (m_instance == NULL) {
         new BrowserServer();
     }
-     
+
     return m_instance;
 }
 
 BrowserServer::BrowserServer()
     : BrowserServerBase("browser")
-	, m_pageCount(0)
+    , m_pageCount(0)
     , m_networkAccessManager(0)
     , m_cookieJar(0)
-	, m_service(0)
-	, m_connectionManagerStatusToken(0)
+    , m_service(0)
+    , m_connectionManagerStatusToken(0)
     , m_wkEventListener(0)
-	, m_pluginDirWatcher(0)
+    , m_pluginDirWatcher(0)
     , m_defaultDownloadDir()
 #if defined(__arm__)
-	, m_memchute(MEMCHUTE_NORMAL)
+    , m_memchute(MEMCHUTE_NORMAL)
 #endif
-	, m_offscreenBackupBuffer(0)
-	, m_offscreenBackupBufferLength(0)
-	, m_comboBoxes(*this)
+    , m_offscreenBackupBuffer(0)
+    , m_offscreenBackupBufferLength(0)
+    , m_comboBoxes(*this)
 {
 
-	QSettings settings;
-	m_defaultDownloadDir = settings.value("DownloadPath").toString();
+    QSettings settings;
+    m_defaultDownloadDir = settings.value("DownloadPath").toString();
 
-	m_pluginDirWatcher = new PluginDirWatcher();
+    m_pluginDirWatcher = new PluginDirWatcher();
     m_instance = this;
 
     m_networkAccessManager = new QNetworkAccessManager;
@@ -141,55 +141,55 @@ BrowserServer::BrowserServer()
 BrowserServer::~BrowserServer()
 {
     shutdownBrowserServer();
-	delete m_pluginDirWatcher;
+    delete m_pluginDirWatcher;
     m_instance = NULL;
     if (m_offscreenBackupBuffer) free(m_offscreenBackupBuffer);
 }
 
 bool BrowserServer::init() {
-	return init(0,NULL);
+    return init(0,NULL);
 }
 
 bool BrowserServer::init(int argc,char ** argv) {
 
-	QSettings settings;
+    QSettings settings;
 
-	int rValue;
-	if (0 != (rValue = (CertInitCertMgr("/etc/ssl/openssl.cnf")))) {
-		g_critical("Unable to initialize certificate mgr: %d", rValue);
-	}
+    int rValue;
+    if (0 != (rValue = (CertInitCertMgr("/etc/ssl/openssl.cnf")))) {
+        g_critical("Unable to initialize certificate mgr: %d", rValue);
+    }
 
-	InitWebSettings();
+    InitWebSettings();
 
-	int	ignore(0);
-	int memTotal(0);
+    int ignore(0);
+    int memTotal(0);
 
-	int memFree  = getMemInfo(memTotal, ignore, ignore, ignore, ignore, ignore);
-	if (memFree > 0 && memTotal >= 238) {	// Castle has 239 MB of RAM, Pixie only 194 MB.
-		webkitInit();
-	}
-	else {
-		g_debug("Will initialize WebKit later.");
-	}
+    int memFree  = getMemInfo(memTotal, ignore, ignore, ignore, ignore, ignore);
+    if (memFree > 0 && memTotal >= 238) {
+        webkitInit();
+    }
+    else {
+        g_debug("Will initialize WebKit later.");
+    }
 
-	QString userInstalledPluginPath = settings.value("WebSettings/PluginSupplementalUserPath").toString();
-	if (!userInstalledPluginPath.isEmpty()) {
-		// create the directory if it doesn't exist, so it will be scanned
-		// without needing to restart BS after a user installs a plugin.
-		g_mkdir_with_parents(qPrintable(userInstalledPluginPath), 0755);
-		if (!m_pluginDirWatcher->init(qPrintable(userInstalledPluginPath))) {
-			g_warning("Unable to initialize plugin directory watcher");
-		}
-	}
+    QString userInstalledPluginPath = settings.value("WebSettings/PluginSupplementalUserPath").toString();
+    if (!userInstalledPluginPath.isEmpty()) {
+        // create the directory if it doesn't exist, so it will be scanned
+        // without needing to restart BS after a user installs a plugin.
+        g_mkdir_with_parents(qPrintable(userInstalledPluginPath), 0755);
+        if (!m_pluginDirWatcher->init(qPrintable(userInstalledPluginPath))) {
+            g_warning("Unable to initialize plugin directory watcher");
+        }
+    }
 
-	//TODO: a proper init return code; always success for now
-	return true;
+    //TODO: a proper init return code; always success for now
+    return true;
 }
 
 bool
 BrowserServer::webKitInitialized() const
 {
-	return gWebKitInit;
+    return gWebKitInit;
 }
 
 void BrowserServer::initPlatformPlugin()
@@ -219,18 +219,18 @@ BrowserServer::webkitInit()
     if (gWebKitInit) 
         return true;
 
-	g_debug("Initializing WebKit.");
+    g_debug("Initializing WebKit.");
 
 
 
-	if (!m_instance->m_carrierCode.empty()) {
-        #ifdef FIXME_QT
-		Palm::WebGlobal::addAppendedHTTPHeader( "X-Palm-Carrier", m_instance->m_carrierCode.c_str() );
-        #endif
-	}
+    if (!m_instance->m_carrierCode.empty()) {
+#ifdef FIXME_QT
+        Palm::WebGlobal::addAppendedHTTPHeader( "X-Palm-Carrier", m_instance->m_carrierCode.c_str() );
+#endif
+    }
 
     initPlatformPlugin();
-    	
+
     gWebKitInit = true;
     return true;
 }
@@ -238,7 +238,7 @@ BrowserServer::webkitInit()
 void
 BrowserServer::clientConnected(YapProxy* proxy)
 {
-	BDBG("Client connected: %p", proxy);
+    BDBG("Client connected: %p", proxy);
     if (!webkitInit())
         return; // probably should refuse client connection here.
 }
@@ -250,18 +250,18 @@ BrowserServer::clientDisconnected(YapProxy* proxy)
     BrowserPage* pPage = (BrowserPage*) proxy->privateData();
     if (pPage) {
         delete pPage;
-		m_pageCount--;
+        m_pageCount--;
         proxy->setPrivateData(0);
     }
-	
+
 #if defined(__arm__)
-	// Exit -- we'll get relaunched, but this will cause us to free any
-	// memory we leaked.
-	if( !m_pageCount ) {
-		g_message("Last client disconnected. Exiting BrowserServer.");
+    // Exit -- we'll get relaunched, but this will cause us to free any
+    // memory we leaked.
+    if( !m_pageCount ) {
+        g_message("Last client disconnected. Exiting BrowserServer.");
         shutdownBrowserServer();
-		exit(0);
-	}
+        exit(0);
+    }
 #endif
 }
 
@@ -271,7 +271,7 @@ BrowserServer::asyncCmdConnect(YapProxy* proxy, int32_t pageWidth, int32_t pageH
                                int32_t sharedBufferSize, int32_t identifier)
 {
     BDBG("Client connected: %p", proxy);
-    
+
     BrowserPage* pPage = (BrowserPage*) proxy->privateData();
     if (pPage) {
         BERR("Client already send Connect command: %p", proxy);
@@ -288,27 +288,27 @@ BrowserServer::asyncCmdConnect(YapProxy* proxy, int32_t pageWidth, int32_t pageH
 
         pPage->attachToBuffer(pageWidth, pageHeight, sharedBufferKey1, sharedBufferKey2, sharedBufferSize);
 
-		proxy->transferQueuedMessage(pPage->getProxy());
-        pPage->setProxy(proxy);        
+        proxy->transferQueuedMessage(pPage->getProxy());
+        pPage->setProxy(proxy);
 
         BrowserPageManager::instance()->registerPage(pPage);
-        
+
     } else {  // making a new BP
 
         pPage = new BrowserPage(this, proxy, m_service);
-        
+
         if (pPage == NULL) {
             g_error("Failed to allocate Browser Page");
             return;
         }
-    
+
         if (!pPage->init(pageWidth, pageHeight, sharedBufferKey1, sharedBufferKey2, sharedBufferSize)) {
             g_warning("Failed to initialize Browser Page");
             return;
         }
     }
-    
-	m_pageCount++;
+
+    m_pageCount++;
 
     proxy->setPrivateData(pPage);  
     BrowserPageManager::instance()->raisePagePriority(pPage);
@@ -316,13 +316,13 @@ BrowserServer::asyncCmdConnect(YapProxy* proxy, int32_t pageWidth, int32_t pageH
 
 void BrowserServer::asyncCmdDisconnect(YapProxy *proxy)
 {
-	proxy->setTerminate();
+    proxy->setTerminate();
 }
 
 void
 BrowserServer::asyncCmdInspectUrlAtPoint(YapProxy* proxy, int32_t queryNum, int32_t pointX, int32_t pointY)
 {
-	BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
     if (!pPage) {
         BERR("No page for this client.");
         return;
@@ -349,8 +349,7 @@ BrowserServer::asyncCmdSetWindowSize(YapProxy* proxy, int32_t width, int32_t hei
     pPage->setWindowSize(width, height);
 }
 
-void BrowserServer::asyncCmdSetVirtualWindowSize(YapProxy *proxy,
-		int32_t width, int32_t height)
+void BrowserServer::asyncCmdSetVirtualWindowSize(YapProxy *proxy, int32_t width, int32_t height)
 {
     BrowserPage* pPage = (BrowserPage*) proxy->privateData();
     if (!pPage) {
@@ -395,9 +394,9 @@ BrowserServer::asyncCmdSetHtml(YapProxy* proxy, const char* url, const char* bod
         return;
     }
 
-	if (!url || !body) {
-		return;
-	}
+    if (!url || !body) {
+        return;
+    }
     pPage->setHTML(url, body);
 }
 
@@ -410,14 +409,14 @@ BrowserServer::asyncCmdClickAt(YapProxy* proxy, int32_t contentX, int32_t conten
         return;
     }
 
-	bool isInteractive = pPage->isInteractiveAtPoint(contentX, contentY);
+    bool isInteractive = pPage->isInteractiveAtPoint(contentX, contentY);
 
-	pPage->clickAt(contentX, contentY, numClicks);		
-	
-	// FIXME: Jesse says this is not fool-proof
-	if (!isInteractive)
-		msgClickRejected(proxy, counter);
-    
+    pPage->clickAt(contentX, contentY, numClicks);
+
+    // FIXME: Jesse says this is not fool-proof
+    if (!isInteractive)
+        msgClickRejected(proxy, counter);
+
     BrowserPageManager::instance()->raisePagePriority(pPage);
 }
 
@@ -447,13 +446,13 @@ BrowserServer::asyncCmdEnableSelection(YapProxy* proxy, int32_t mouseX, int32_t 
     pPage->clickAt(mouseX, mouseY, 1);  // 1 = number of clicks
 
     pPage->setSelectionMode(false);
-    
+
     msgRemoveSelectionReticle(proxy);
 }
 
 /**
  * Called on mouse up when in selection mode
- * 
+ *
  */
 void
 BrowserServer::asyncCmdDisableSelection(YapProxy* proxy)
@@ -476,8 +475,8 @@ BrowserServer::asyncCmdKeyDown(YapProxy* proxy, uint16_t key, uint16_t modifiers
         return;
     }
 
-	pPage->keyDown(key, modifiers);
-    
+    pPage->keyDown(key, modifiers);
+
     BrowserPageManager::instance()->raisePagePriority(pPage);
 }
 
@@ -541,7 +540,7 @@ BrowserServer::asyncCmdStop(YapProxy* proxy)
         return;
     }
 
-    pPage->pageStop();    
+    pPage->pageStop();
     BrowserPageManager::instance()->raisePagePriority(pPage);
 }
 
@@ -554,8 +553,8 @@ BrowserServer::asyncCmdPageFocused(YapProxy* proxy, bool focused)
         return;
     }
 
-	pPage->setFocus(focused);
-	BrowserPageManager::instance()->setFocusedPage(pPage, focused);
+    pPage->setFocus(focused);
+    BrowserPageManager::instance()->setFocusedPage(pPage, focused);
 }
 
 bool BrowserServer::showComboBoxPopup(int id, const char* fileName)
@@ -656,13 +655,13 @@ void BrowserServer::asyncCmdDragEnd(YapProxy* proxy, int32_t contentX, int32_t c
 
 void BrowserServer::asyncCmdSetMinFontSize(YapProxy* proxy, int32_t minFontSizePt)
 {
-	BrowserPage* pPage = (BrowserPage*) proxy->privateData();
-	if (!pPage) {
-		BERR("No page for this client.");
-		return;
-	}
-	
-	pPage->setMinFontSize(minFontSizePt);    
+    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    if (!pPage) {
+        BERR("No page for this client.");
+        return;
+    }
+
+    pPage->setMinFontSize(minFontSizePt);
 }
 
 void BrowserServer::asyncCmdFindString(YapProxy* proxy, const char* str, bool fwd)
@@ -676,8 +675,8 @@ void BrowserServer::asyncCmdFindString(YapProxy* proxy, const char* str, bool fw
     pPage->findString(str, fwd);
 
     BrowserPageManager::instance()->raisePagePriority(pPage);
-    
-	// FIXME: should return number of hits
+
+    // FIXME: should return number of hits
 }
 
 void BrowserServer::asyncCmdSelectAll(YapProxy* proxy)
@@ -699,7 +698,7 @@ void BrowserServer::asyncCmdPaste(YapProxy* proxy)
         return;
     }
 
-    pPage->paste();    
+    pPage->paste();
 }
 
 void BrowserServer::asyncCmdCut(YapProxy* proxy)
@@ -710,7 +709,7 @@ void BrowserServer::asyncCmdCut(YapProxy* proxy)
         return;
     }
 
-    pPage->cut();    
+    pPage->cut();
 }
 
 void BrowserServer::asyncCmdCopy(YapProxy* proxy, int queryNum)
@@ -720,7 +719,7 @@ void BrowserServer::asyncCmdCopy(YapProxy* proxy, int queryNum)
         BERR("No page for this client.");
         return;
     }
-    
+
     bool success = pPage->copy();
 
     msgCopySuccessResponse(proxy, queryNum, success);
@@ -734,7 +733,7 @@ void BrowserServer::asyncCmdClearSelection(YapProxy* proxy)
         return;
     }
 
-    pPage->clearSelection();    
+    pPage->clearSelection();
 }
 
 void BrowserServer::asyncCmdClearCache(YapProxy* proxy)
@@ -759,12 +758,12 @@ void BrowserServer::asyncCmdZoomSmartCalculateRequest(YapProxy* proxy, int32_t p
 {
     BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
     if (pPage) {
-		pPage->smartZoomCalculate( pointX, pointY );
-	    BrowserPageManager::instance()->raisePagePriority(pPage);
+        pPage->smartZoomCalculate( pointX, pointY );
+        BrowserPageManager::instance()->raisePagePriority(pPage);
     }
-	else {
+    else {
         BERR("No page for this client.");
-	}
+    }
 }
 
 void BrowserServer::asyncCmdSetEnableJavaScript(YapProxy* proxy, bool enable)
@@ -811,27 +810,25 @@ void BrowserServer::asyncCmdGetInteractiveNodeRects(YapProxy* proxy, int32_t mou
         BERR("No page for this client.");
         return;
     }
-    
+
     pPage->getInteractiveNodeRects(mouseX, mouseY);
 }
 
-void BrowserServer::asyncCmdMouseEvent(YapProxy* proxy, int32_t type, int32_t contentX, int32_t contentY,
-									   int32_t detail)
+void BrowserServer::asyncCmdMouseEvent(YapProxy* proxy, int32_t type, int32_t contentX, int32_t contentY, int32_t detail)
 {
-	BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
     if (!pPage) {
         BERR("No page for this client.");
         return;
     }
 
-    pPage->mouseEvent(type, contentX, contentY, detail);   
+    pPage->mouseEvent(type, contentX, contentY, detail);
     BrowserPageManager::instance()->raisePagePriority(pPage);
 }
 
-void BrowserServer::asyncCmdGestureEvent(YapProxy* proxy, int32_t type, int32_t contentX, int32_t contentY,
-										 double scale, double rotate, int32_t centerX, int32_t centerY)
+void BrowserServer::asyncCmdGestureEvent(YapProxy* proxy, int32_t type, int32_t contentX, int32_t contentY, double scale, double rotate, int32_t centerX, int32_t centerY)
 {
-	BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
     if (!pPage) {
         BERR("No page for this client.");
         return;
@@ -843,96 +840,96 @@ void BrowserServer::asyncCmdGestureEvent(YapProxy* proxy, int32_t type, int32_t 
 
 void BrowserServer::asyncCmdFreeze(YapProxy* proxy)
 {
-	BrowserPage* pPage = (BrowserPage*) proxy->privateData();
-	if (!pPage) {
-		return;
-	}
-	pPage->freeze();   
+    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    if (!pPage) {
+        return;
+    }
+    pPage->freeze();
 }
 
 void BrowserServer::asyncCmdThaw(YapProxy* proxy, int32_t sharedBufferKey1, int32_t sharedBufferKey2, int32_t sharedBufferSize)
 {
-	BrowserPage* pPage = (BrowserPage*) proxy->privateData();
-	if (!pPage) {
-		return;
-	}
+    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    if (!pPage) {
+        return;
+    }
 
-	pPage->thaw(sharedBufferKey1, sharedBufferKey2, sharedBufferSize); 
+    pPage->thaw(sharedBufferKey1, sharedBufferKey2, sharedBufferSize); 
 }
 
 void BrowserServer::asyncCmdReturnBuffer(YapProxy* proxy, int32_t sharedBufferKey)
 {
-	BrowserPage* pPage = (BrowserPage*) proxy->privateData();
-	if (!pPage) {
-		return;
-	}
+    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    if (!pPage) {
+        return;
+    }
 
-	pPage->bufferReturned(sharedBufferKey);
+    pPage->bufferReturned(sharedBufferKey);
 }
 
 void BrowserServer::asyncCmdSetScrollPosition(YapProxy* proxy, int32_t cx, int32_t cy, int32_t cw, int32_t ch)
 {
-	BrowserPage* pPage = (BrowserPage*) proxy->privateData();
-	if (!pPage) {
-		return;
-	}
-	pPage->setScrollPosition(cx, cy, cw, ch);   
+    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    if (!pPage) {
+        return;
+    }
+    pPage->setScrollPosition(cx, cy, cw, ch);
 }
 
 void BrowserServer::asyncCmdPluginSpotlightStart(YapProxy* proxy, int32_t cx, int32_t cy, int32_t cw, int32_t ch)
 {
-	BrowserPage* pPage = (BrowserPage*) proxy->privateData();
-	if (!pPage) {
-		return;
-	}
-	pPage->pluginSpotlightStart(cx, cy, cw, ch);   
+    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    if (!pPage) {
+        return;
+    }
+    pPage->pluginSpotlightStart(cx, cy, cw, ch);
 }
 
 void BrowserServer::asyncCmdPluginSpotlightEnd(YapProxy* proxy)
 {
-	BrowserPage* pPage = (BrowserPage*) proxy->privateData();
-	if (!pPage) {
-		return;
-	}
-	pPage->pluginSpotlightEnd();   
+    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    if (!pPage) {
+        return;
+    }
+    pPage->pluginSpotlightEnd();
 }
 
 void BrowserServer::asyncCmdHideSpellingWidget(YapProxy* proxy)
 {
-	BrowserPage* pPage = (BrowserPage*) proxy->privateData();
-	if (!pPage) {
-		return;
-	}
-	pPage->hideSpellingWidget();   
+    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    if (!pPage) {
+        return;
+    }
+    pPage->hideSpellingWidget();
 }
 
 void BrowserServer::asyncCmdDisableEnhancedViewport(YapProxy* proxy,bool disable)
 {
-	BrowserPage* pPage = (BrowserPage*) proxy->privateData();
-	if (!pPage) {
-		return;
-	}
-	pPage->disableEnhancedViewport(disable);   
+    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    if (!pPage) {
+        return;
+    }
+    pPage->disableEnhancedViewport(disable);
 
 }
 
 void BrowserServer::syncCmdRenderToFile(YapProxy* proxy, const char* filename, int32_t viewX, int32_t viewY, int32_t viewW, int32_t viewH, int32_t& result)
 {
-	BrowserPage* pPage = (BrowserPage*) proxy->privateData();
-	if (!pPage) {
-		result = ENOMEM;
-		return;
-	}
-	result = pPage->renderToFile(filename, viewX, viewY, viewW, viewH);   
+    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    if (!pPage) {
+        result = ENOMEM;
+        return;
+    }
+    result = pPage->renderToFile(filename, viewX, viewY, viewW, viewH);
 }
 
 void BrowserServer::asyncCmdGetHistoryState(YapProxy* proxy, int32_t queryNum)
 {
-	BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
+    BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
     if (pPage) {
-		msgGetHistoryStateResponse(proxy, queryNum, pPage->canGoBackward(), pPage->canGoForward());
-	}
-	else {
+        msgGetHistoryStateResponse(proxy, queryNum, pPage->canGoBackward(), pPage->canGoForward());
+    }
+    else {
         BERR("No page for this client.");
     }
 }
@@ -952,12 +949,12 @@ void BrowserServer::asyncCmdIsEditing(YapProxy* proxy, int32_t queryNum)
 void BrowserServer::asyncCmdInsertStringAtCursor(YapProxy* proxy, const char* str)
 {
     BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
-    
+
     if (!pPage) {
         BERR("No page for this client");
         return;
     }
-    
+
     pPage->insertStringAtCursor(str);
 }
 
@@ -965,9 +962,9 @@ void BrowserServer::asyncCmdClearHistory(YapProxy* proxy)
 {
     BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
     if (pPage) {
-    	pPage->clearHistory(); 
-	}
-	else {
+        pPage->clearHistory();
+    }
+    else {
         BERR("No page for this client.");
     }
 }
@@ -975,68 +972,68 @@ void BrowserServer::asyncCmdClearHistory(YapProxy* proxy)
 
 void BrowserServer::asyncCmdSetAppIdentifier(YapProxy* proxy, const char* identifier)
 {
-	BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
+    BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
     if (!pPage) {
         BERR("No page for this client.");
         return;
     }
-    
+
     pPage->setIdentifier(identifier);
 }
 
 void BrowserServer::asyncCmdAddUrlRedirect(YapProxy* proxy, const char* urlRe, int type, bool redirect, const char* userData)
 {
-	BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
-	if (pPage) {
-		UrlMatchType redirType;
-		switch (type) {
-			case 0:
-				redirType = UrlMatchRedirect;
-				break;
-			case 1:
-				redirType = UrlMatchCommand;
-				break;
-			default:
-				g_warning("Unknown redirect type: %d.", type);
-				redirType = UrlMatchRedirect;
-		}
+    BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
+    if (pPage) {
+        UrlMatchType redirType;
+        switch (type) {
+            case 0:
+                redirType = UrlMatchRedirect;
+                break;
+            case 1:
+                redirType = UrlMatchCommand;
+                break;
+            default:
+                g_warning("Unknown redirect type: %d.", type);
+                redirType = UrlMatchRedirect;
+        }
 
-		pPage->addUrlRedirect(urlRe, redirType, redirect, userData);
-	}
-	else {
+        pPage->addUrlRedirect(urlRe, redirType, redirect, userData);
+    }
+    else {
         BERR("No page for this client.");
-	}
+    }
 }
 
 void
 BrowserServer::asyncCmdSaveImageAtPoint(YapProxy* proxy, int32_t queryNum, int32_t pointX, int32_t pointY, const char* saveDir)
 {
-	BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
-	if (!pPage) {
-		BERR("No page for this client.");
-		return;
-	}
+    BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
+    if (!pPage) {
+        BERR("No page for this client.");
+        return;
+    }
 
-	QString filepath (saveDir);
-	if (filepath.isEmpty()) {
-		filepath = m_defaultDownloadDir;
-	}
-	bool succeeded = pPage->saveImageAtPoint(pointX, pointY, filepath);
-	if (!succeeded) {
-		filepath.clear();
-	}
+    QString filepath (saveDir);
+    if (filepath.isEmpty()) {
+        filepath = m_defaultDownloadDir;
+    }
+    bool succeeded = pPage->saveImageAtPoint(pointX, pointY, filepath);
+    if (!succeeded) {
+        filepath.clear();
+    }
 
-	msgSaveImageAtPointResponse(proxy, queryNum, succeeded, qPrintable(filepath));
+    msgSaveImageAtPointResponse(proxy, queryNum, succeeded, qPrintable(filepath));
 }
 
 void
 BrowserServer::asyncCmdGetImageInfoAtPoint(YapProxy* proxy, int32_t queryNum, int32_t pointX, int32_t pointY)
 {
-	BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
-	if (!pPage) {
-		BERR("No page for this client.");
-		return;
-	}
+    BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
+    if (!pPage) {
+        BERR("No page for this client.");
+        return;
+    }
 
    QWebHitTestResult hitResult = pPage->hitTest(pointX, pointY);
     bool succeeded = !hitResult.imageUrl().isEmpty();
@@ -1054,271 +1051,270 @@ BrowserServer::asyncCmdGetImageInfoAtPoint(YapProxy* proxy, int32_t queryNum, in
 void
 BrowserServer::asyncCmdIgnoreMetaTags(YapProxy* proxy,bool ignore)
 {
-	BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
-	if (!pPage) {
-		BERR("No page for this client.");
-		return;
-	}
-	pPage->setIgnoreMetaRefreshTags(ignore);
-	pPage->setIgnoreMetaViewport(ignore);
+    BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
+    if (!pPage) {
+        BERR("No page for this client.");
+        return;
+    }
+    pPage->setIgnoreMetaRefreshTags(ignore);
+    pPage->setIgnoreMetaViewport(ignore);
 
 }
 
 void
 BrowserServer::asyncCmdSetNetworkInterface(YapProxy* proxy,const char* name)
 {
-	BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
-	if (!pPage) {
-		BERR("No page for this client.");
-		return;
-	}
-	pPage->setNetworkInterface(name);
+    BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
+    if (!pPage) {
+        BERR("No page for this client.");
+        return;
+    }
+    pPage->setNetworkInterface(name);
 
 }
 
 void
 BrowserServer::asyncCmdIsInteractiveAtPoint(YapProxy* proxy, int32_t queryNum, int32_t pointX, int32_t pointY)
 {
-	BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
-	if (!pPage) {
-		BERR("No page for this client.");
-		return;
-	}
+    BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
+    if (!pPage) {
+        BERR("No page for this client.");
+        return;
+    }
 
-	msgIsInteractiveAtPointResponse(proxy, queryNum, pPage->isInteractiveAtPoint(pointX, pointY));
+    msgIsInteractiveAtPointResponse(proxy, queryNum, pPage->isInteractiveAtPoint(pointX, pointY));
 }
 
 void
 BrowserServer::asyncCmdGetElementInfoAtPoint(YapProxy* proxy, int32_t queryNum, int32_t pointX, int32_t pointY)
 {
-	BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
-	if (!pPage) {
-		BERR("No page for this client.");
-		return;
-	}
+    BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
+    if (!pPage) {
+        BERR("No page for this client.");
+        return;
+    }
 
 #ifdef FIXME_QT
-	Palm::ElementInfo info;
-	bool succeeded = pPage->getElementInfoAtPoint(pointX, pointY, info);
+    Palm::ElementInfo info;
+    bool succeeded = pPage->getElementInfoAtPoint(pointX, pointY, info);
 
-	msgGetElementInfoAtPointResponse(proxy, queryNum, succeeded, 
-			info.element.empty() ? "" : info.element.c_str(),
-			info.id.empty() ? "" : info.id.c_str(),
-			info.name.empty() ? "" : info.name.c_str(),
-			info.cname.empty() ? "" : info.cname.c_str(),
-			info.type.empty() ? "" : info.type.c_str(),
-			info.bounds.left, info.bounds.top, info.bounds.right, info.bounds.bottom, info.isEditable);
+    msgGetElementInfoAtPointResponse(proxy, queryNum, succeeded,
+        info.element.empty() ? "" : info.element.c_str(),
+        info.id.empty() ? "" : info.id.c_str(),
+        info.name.empty() ? "" : info.name.c_str(),
+        info.cname.empty() ? "" : info.cname.c_str(),
+        info.type.empty() ? "" : info.type.c_str(),
+        info.bounds.left, info.bounds.top, info.bounds.right, info.bounds.bottom, info.isEditable);
 #endif // FIXME_QT
 }
 
 bool
 BrowserServer::connectToMSMService()
 {
-	LSError error;
-	LSErrorInit(&error);
-	
-	bool ret = LSCall(m_service,
-			  "palm://com.palm.lunabus/signal/addmatch", "{\"category\":\"/storaged\",\"method\":\"MSMStatus\",\"subscribe\":true}",
-				 msmStatusCallback, this, NULL, &error);
-	if (!ret) {
-		syslog(LOG_ERR, "Failed in calling palm://com.palm.lunabus/signal/addmatch: %s", error.message);
-		LSErrorFree(&error);
-	}
+    LSError error;
+    LSErrorInit(&error);
 
-	return ret;
+    bool ret = LSCall(m_service,
+        "palm://com.palm.lunabus/signal/addmatch", "{\"category\":\"/storaged\",\"method\":\"MSMStatus\",\"subscribe\":true}",
+        msmStatusCallback, this, NULL, &error);
+    if (!ret) {
+        syslog(LOG_ERR, "Failed in calling palm://com.palm.lunabus/signal/addmatch: %s", error.message);
+        LSErrorFree(&error);
+    }
+
+    return ret;
 }
 
 bool BrowserServer::msmStatusCallback(LSHandle *sh, LSMessage *message, void *ctx)
 {
-	const char* payload = LSMessageGetPayload(message);
-	if (!message)
-		return true;
+    const char* payload = LSMessageGetPayload(message);
+    if (!message)
+        return true;
 
-	BrowserServer *bs = reinterpret_cast<BrowserServer*>(ctx);
-		
-	json_object* label = NULL;
-	json_object* json = NULL;
-	json_object* value = NULL;
+    BrowserServer *bs = reinterpret_cast<BrowserServer*>(ctx);
 
-	bool enteringMSMMode;
-	
-	label = 0;		
-	json = json_tokener_parse(payload);
-	if (!json || is_error(json)) {
-		return false;
-	}
+    json_object* label = NULL;
+    json_object* json = NULL;
+    json_object* value = NULL;
 
-	value = json_object_object_get(json, "inMSM");
-	if (ValidJsonObject(value)) {
-		enteringMSMMode = json_object_get_boolean(value);
-		if (enteringMSMMode) {
-			g_message(" ENTERING MSM_MODE, shutting down plugin directory watcher");
-			bs->m_pluginDirWatcher->suspend();
-		}
-		else {
-			g_message(" EXITING MSM_MODE, restarting plugin directory watcher");
-			bs->m_pluginDirWatcher->resume();
-		}
-	}
+    bool enteringMSMMode;
 
-	json_object_put(json);
-	return true;
+    label = 0;
+    json = json_tokener_parse(payload);
+    if (!json || is_error(json)) {
+        return false;
+    }
+
+    value = json_object_object_get(json, "inMSM");
+    if (ValidJsonObject(value)) {
+        enteringMSMMode = json_object_get_boolean(value);
+        if (enteringMSMMode) {
+            g_message(" ENTERING MSM_MODE, shutting down plugin directory watcher");
+            bs->m_pluginDirWatcher->suspend();
+        }
+        else {
+            g_message(" EXITING MSM_MODE, restarting plugin directory watcher");
+            bs->m_pluginDirWatcher->resume();
+        }
+    }
+
+    json_object_put(json);
+    return true;
 }
 
 
 bool
 BrowserServer::connectToPrefsService()
 {
-    
-	LSError error;
-	LSErrorInit(&error);
-	
-	bool ret = LSCall(m_service,
-			  "palm://com.palm.systemservice/getPreferences", "{\"subscribe\":true, \"keys\": [ \"locale\", \"x_palm_carrier\", \"x_palm_textinput\" ]}",
-				 getPreferencesCallback, NULL, NULL, &error);
-	if (!ret) {
-		syslog(LOG_ERR, "Failed in calling palm://com.palm.systemservice/getPreferences: %s",
-					  error.message);
-		LSErrorFree(&error);
-	}
 
-	return ret;
+    LSError error;
+    LSErrorInit(&error);
+
+    bool ret = LSCall(m_service,
+        "palm://com.palm.systemservice/getPreferences", "{\"subscribe\":true, \"keys\": [ \"locale\", \"x_palm_carrier\", \"x_palm_textinput\" ]}",
+        getPreferencesCallback, NULL, NULL, &error);
+    if (!ret) {
+        syslog(LOG_ERR, "Failed in calling palm://com.palm.systemservice/getPreferences: %s", error.message);
+        LSErrorFree(&error);
+    }
+
+    return ret;
 
 
 }
 
 bool BrowserServer::getPreferencesCallback(LSHandle *sh, LSMessage *message, void *ctx)
 {
-	const char* payload = LSMessageGetPayload(message);
-	if (!message)
-		return true;
+    const char* payload = LSMessageGetPayload(message);
+    if (!message)
+        return true;
 
-	json_object* label = NULL;
-	json_object* json = NULL;
-	json_object* value = NULL;
+    json_object* label = NULL;
+    json_object* json = NULL;
+    json_object* value = NULL;
 
-	const char* languageCode = NULL;
-	const char* countryCode = NULL;
-	std::string newLocale;
+    const char* languageCode = NULL;
+    const char* countryCode = NULL;
+    std::string newLocale;
 
-	label = 0;		
-	json = json_tokener_parse(payload);
-	if (!json || is_error(json)) {
-		return false;
-	}
-		
-	value = json_object_object_get(json, "x_palm_carrier" );
-	if( ValidJsonObject(value) )
-	{
-		char* carrierCode = json_object_get_string(value);
-		if (gWebKitInit) {
-            #ifdef FIXME_QT
-			Palm::WebGlobal::addAppendedHTTPHeader( "X-Palm-Carrier", carrierCode );
-            #endif
-		}
-		if (m_instance != NULL) {
-			m_instance->m_carrierCode = carrierCode;
-		}
-	}
-	else
-		g_message(" NO PALM CARRIER in PREFS DB" );
+    label = 0;
+    json = json_tokener_parse(payload);
+    if (!json || is_error(json)) {
+        return false;
+    }
 
-	value = json_object_object_get(json, "x_palm_textinput");
-	if (ValidJsonObject(value)) {
-
-		std::string strProp;
-
-		json_object* prop = json_object_object_get(value, "spellChecking");
-		if (ValidJsonObject(prop)) {
-
-			strProp = json_object_get_string(prop);
+    value = json_object_object_get(json, "x_palm_carrier" );
+    if( ValidJsonObject(value) )
+    {
+        char* carrierCode = json_object_get_string(value);
+        if (gWebKitInit) {
 #ifdef FIXME_QT
-			if (strProp == "disabled")
-				PalmBrowserSettings()->checkSpelling = WebKitPalmSettings::DISABLED;
-			else if (strProp == "autoCorrect")
-				PalmBrowserSettings()->checkSpelling = WebKitPalmSettings::AUTO_CORRECT;
-			else if (strProp == "underline")
-				PalmBrowserSettings()->checkSpelling = WebKitPalmSettings::UNDERLINE;
-			else {
-				g_warning("Unknown spellChecking flag: '%s'", strProp.c_str());
-			}
+            Palm::WebGlobal::addAppendedHTTPHeader( "X-Palm-Carrier", carrierCode );
 #endif
-		}
+        }
+        if (m_instance != NULL) {
+            m_instance->m_carrierCode = carrierCode;
+        }
+    }
+    else
+        g_message(" NO PALM CARRIER in PREFS DB" );
 
-		prop = json_object_object_get(value, "grammarChecking");
-		if (ValidJsonObject(prop)) {
+    value = json_object_object_get(json, "x_palm_textinput");
+    if (ValidJsonObject(value)) {
 
-			strProp = json_object_get_string(prop);
+        std::string strProp;
+
+        json_object* prop = json_object_object_get(value, "spellChecking");
+        if (ValidJsonObject(prop)) {
+
+            strProp = json_object_get_string(prop);
 #ifdef FIXME_QT
-			PalmBrowserSettings()->checkGrammar = strProp == "autoCorrect";
+            if (strProp == "disabled")
+                PalmBrowserSettings()->checkSpelling = WebKitPalmSettings::DISABLED;
+            else if (strProp == "autoCorrect")
+                PalmBrowserSettings()->checkSpelling = WebKitPalmSettings::AUTO_CORRECT;
+            else if (strProp == "underline")
+                PalmBrowserSettings()->checkSpelling = WebKitPalmSettings::UNDERLINE;
+            else {
+                g_warning("Unknown spellChecking flag: '%s'", strProp.c_str());
+            }
 #endif
-		}
+        }
 
-		prop = json_object_object_get(value, "shortcutChecking");
-		if (ValidJsonObject(prop)) {
+        prop = json_object_object_get(value, "grammarChecking");
+        if (ValidJsonObject(prop)) {
 
-			strProp = json_object_get_string(prop);
+            strProp = json_object_get_string(prop);
 #ifdef FIXME_QT
-			PalmBrowserSettings()->shortcutChecking = strProp == "autoCorrect";
+            PalmBrowserSettings()->checkGrammar = strProp == "autoCorrect";
 #endif
-		}
-	}
-	else {
-		g_warning("Oops, no x_palm_textinput preference");
-	}
+        }
 
-	value = json_object_object_get(json, "locale");
-	if ((value) && (!is_error(value))) {
-		
-		label = json_object_object_get(value, "languageCode");
-		if ((label) || (!is_error(label))) {
-			languageCode = json_object_get_string(label);
-		}
+        prop = json_object_object_get(value, "shortcutChecking");
+        if (ValidJsonObject(prop)) {
 
-		label = json_object_object_get(value, "countryCode");
-		if ((label) || (!is_error(label))) {
-			countryCode = json_object_get_string(label);
-		}
+            strProp = json_object_get_string(prop);
+#ifdef FIXME_QT
+            PalmBrowserSettings()->shortcutChecking = strProp == "autoCorrect";
+#endif
+        }
+    }
+    else {
+        g_warning("Oops, no x_palm_textinput preference");
+    }
 
-		newLocale = languageCode;
-		newLocale += "_";
-		newLocale += countryCode;
+    value = json_object_object_get(json, "locale");
+    if ((value) && (!is_error(value))) {
+
+        label = json_object_object_get(value, "languageCode");
+        if ((label) || (!is_error(label))) {
+            languageCode = json_object_get_string(label);
+        }
+
+        label = json_object_object_get(value, "countryCode");
+        if ((label) || (!is_error(label))) {
+            countryCode = json_object_get_string(label);
+        }
+
+        newLocale = languageCode;
+        newLocale += "_";
+        newLocale += countryCode;
 
         QLocale::setDefault(QLocale(QString::fromAscii(newLocale.c_str())));
 
-		// may have cached pages that were loaded with old locale -- but if NOT
-		// then we DO NOT want to dump the cache. We get this locale every time
-		// BS starts up, so let's cache it in tmpfs so we don't have to keep 
-		// flushing the cache every single time we start up.		
-		if (gWebKitInit) {
-			const char* kLocaleCacheFile = "/media/cryptofs/.cached-locale";
-			gchar* buffer;
-			gsize sz;
-			if( TRUE == g_file_get_contents( kLocaleCacheFile, &buffer, &sz, 0 ) )
-			{
-				if( strcmp(buffer,newLocale.c_str() ) )
-				{
-					// the locale HAS changed. flush the disk cache.
-					g_file_set_contents( kLocaleCacheFile, newLocale.c_str(), newLocale.size(), 0 );
+        // may have cached pages that were loaded with old locale -- but if NOT
+        // then we DO NOT want to dump the cache. We get this locale every time
+        // BS starts up, so let's cache it in tmpfs so we don't have to keep
+        // flushing the cache every single time we start up.
+        if (gWebKitInit) {
+            const char* kLocaleCacheFile = "/media/cryptofs/.cached-locale";
+            gchar* buffer;
+            gsize sz;
+            if( TRUE == g_file_get_contents( kLocaleCacheFile, &buffer, &sz, 0 ) )
+            {
+                if( strcmp(buffer,newLocale.c_str() ) )
+                {
+                    // the locale HAS changed. flush the disk cache.
+                    g_file_set_contents( kLocaleCacheFile, newLocale.c_str(), newLocale.size(), 0 );
                     instance()->clearCache();
-				}
-				g_free(buffer);
-			}
-			else
-			{
-				g_file_set_contents( kLocaleCacheFile, newLocale.c_str(), newLocale.size(), 0 );
+                }
+                g_free(buffer);
+            }
+            else
+            {
+                g_file_set_contents( kLocaleCacheFile, newLocale.c_str(), newLocale.size(), 0 );
                 instance()->clearCache();
-			}
-		}
-	}
+            }
+        }
+    }
 
-	json_object_put(json);
+    json_object_put(json);
 
-	return true;
+    return true;
 }
 
-bool 
-BrowserServer::startService() 
+bool
+BrowserServer::startService()
 {
     LSError lsError;
     LSErrorInit(&lsError);
@@ -1333,19 +1329,19 @@ BrowserServer::startService()
 
     result = LSGmainAttach(m_service, mainLoop(), &lsError);
 
-	if (result) {
-		if (BackupManager::instance()->init(mainLoop(),m_service)) {
-			m_instance->m_wkEventListener = new WebKitEventListener(BackupManager::instance());
-		}
-		else {
-			syslog(LOG_ERR, "Unable to initialize backup manager.");
-		}
-		connectToPrefsService();
-		connectToMSMService();
-		registerForConnectionManager();
-	}
+    if (result) {
+        if (BackupManager::instance()->init(mainLoop(),m_service)) {
+            m_instance->m_wkEventListener = new WebKitEventListener(BackupManager::instance());
+        }
+        else {
+            syslog(LOG_ERR, "Unable to initialize backup manager.");
+        }
+        connectToPrefsService();
+        connectToMSMService();
+        registerForConnectionManager();
+    }
 
-Exit: 
+Exit:
     if (!result) {
         g_message("%s: BrowserServer service failed to start, with error: %s",
                 __FUNCTION__, lsError.message);
@@ -1396,8 +1392,8 @@ void BrowserServer::doMemWatch()
 
 #if defined(__arm__)
     MemchuteThreshold threshold = m_memchute;
-	static int counter = 0;
-	static const int kCounterIntervalForCleanup = 4;
+    static int counter = 0;
+    static const int kCounterIntervalForCleanup = 4;
 
     counter++;
     if (counter >= kCounterIntervalForCleanup) {
@@ -1529,18 +1525,18 @@ int BrowserServer::getMemInfo(int& memTotal, int& memFree, int& swapTotal,
 
 static const char* MemchuteThresholdName(MemchuteThreshold threshold)
 {
-	static char buff[48];
-	switch (threshold) {
-		case MEMCHUTE_NORMAL:   return "MEMCHUTE_NORMAL";
-		case MEMCHUTE_MEDIUM:   return "MEMCHUTE_MEDIUM";
-		case MEMCHUTE_LOW:      return "MEMCHUTE_LOW";
-		case MEMCHUTE_CRITICAL: return "MEMCHUTE_CRITICAL";
-		case MEMCHUTE_REBOOT:   return "MEMCHUTE_REBOOT";
-		default: {
-			snprintf(buff, G_N_ELEMENTS(buff), "<unknown (%d)>", int(threshold));
-			return buff;
-		}
-	}
+    static char buff[48];
+    switch (threshold) {
+        case MEMCHUTE_NORMAL:   return "MEMCHUTE_NORMAL";
+        case MEMCHUTE_MEDIUM:   return "MEMCHUTE_MEDIUM";
+        case MEMCHUTE_LOW:      return "MEMCHUTE_LOW";
+        case MEMCHUTE_CRITICAL: return "MEMCHUTE_CRITICAL";
+        case MEMCHUTE_REBOOT:   return "MEMCHUTE_REBOOT";
+        default: {
+            snprintf(buff, G_N_ELEMENTS(buff), "<unknown (%d)>", int(threshold));
+            return buff;
+        }
+    }
 }
 
 // Purpose: This handler is called back in response to memchute notifications.
@@ -1548,14 +1544,14 @@ static const char* MemchuteThresholdName(MemchuteThreshold threshold)
 void
 BrowserServer::handleMemchuteNotification(MemchuteThreshold threshold)
 {
-	BrowserServer::instance()->m_memchute = threshold;
+    BrowserServer::instance()->m_memchute = threshold;
     g_warning("Received %s", MemchuteThresholdName(threshold));
 }
 
 
 #endif // __arm__ 
 
-void 
+void
 BrowserServer::stopService() 
 {
     LSError lsError;
@@ -1566,9 +1562,9 @@ BrowserServer::stopService()
         LSErrorFree(&lsError);
 
     m_service = NULL;
-}	
+}
 
-bool 
+bool
 BrowserServer::serviceCmdDeleteImage(LSHandle *lsHandle, LSMessage *message, void *ctx) 
 {
     LSError lserror;
@@ -1629,28 +1625,28 @@ Exit:
     json_object_object_add(replyJson, 
             (char*) "returnValue",
             json_object_new_boolean(success));
-    
+
     if (!success) {
         json_object_object_add(replyJson, 
                 (char*) "errorCode",
                 json_object_new_int(-1));
-        
+
         json_object_object_add(replyJson, 
                 (char*) "errorText",
                 json_object_new_string(errText.c_str()));
     }
-    
+
     // send response
     if (!LSMessageReply(lsHandle, message, json_object_to_json_string(replyJson), &lserror)) {
         LSErrorFree(&lserror);
     }
 
     json_object_put(replyJson);
-    
+
     return true;
 }
 
-bool 
+bool
 BrowserServer::serviceCmdClearCache(LSHandle *lsHandle, LSMessage *message, void *ctx) 
 {
     bool success = false;
@@ -1671,7 +1667,7 @@ BrowserServer::serviceCmdClearCache(LSHandle *lsHandle, LSMessage *message, void
     return true;
 }
 
-bool 
+bool
 BrowserServer::serviceCmdClearCookies(LSHandle *lsHandle, LSMessage *message, void *ctx) 
 {
     bool success = false;
@@ -1705,119 +1701,118 @@ BrowserServer::serviceCmdDumpHeapProfiler(LSHandle* lsHandle, LSMessage *message
 
 gboolean BrowserServer::postStats(gpointer ctxt)
 {
-	LSError lsError;
-	std::string jsonStr;
-	std::string counters;
-	std::multimap<std::string,std::string> docMap;
+    LSError lsError;
+    std::string jsonStr;
+    std::string counters;
+    std::multimap<std::string,std::string> docMap;
 
     return TRUE;
 
-	LSErrorInit(&lsError);
-	
-		
-	jsonStr = "{ ";		
-		
-	// assemble the documents array:
-	jsonStr += " \"documents\": [";
+    LSErrorInit(&lsError);
 
-	int index = 0;
-	std::multimap<std::string,std::string>::const_iterator it;
-	for (it=docMap.begin(), index = 0; it != docMap.end(); ++it, ++index) {
 
-		if (index != 0)
-			jsonStr += ", ";
+    jsonStr = "{ ";
 
-		jsonStr += "{ ";
-		jsonStr +=  it->second;
-		jsonStr += " }";
-	}			
+    // assemble the documents array:
+    jsonStr += " \"documents\": [";
 
-	jsonStr += " ],\n";
-	
-	// assemble the counters frame:
-	jsonStr += " \"counters\": {";
-	jsonStr += counters;
-	jsonStr += " } ";
-		
-	jsonStr += " }";
+    int index = 0;
+    std::multimap<std::string,std::string>::const_iterator it;
+    for (it=docMap.begin(), index = 0; it != docMap.end(); ++it, ++index) {
 
-	if (!LSSubscriptionPost(BrowserServer::instance()->m_service,
-							"/", "getStats", jsonStr.c_str(), &lsError))
-		LSErrorFree (&lsError);	
+        if (index != 0)
+            jsonStr += ", ";
 
-	return TRUE;
+        jsonStr += "{ ";
+        jsonStr +=  it->second;
+        jsonStr += " }";
+    }
+
+    jsonStr += " ],\n";
+
+    // assemble the counters frame:
+    jsonStr += " \"counters\": {";
+    jsonStr += counters;
+    jsonStr += " } ";
+
+    jsonStr += " }";
+
+    if (!LSSubscriptionPost(BrowserServer::instance()->m_service, "/", "getStats", jsonStr.c_str(), &lsError))
+        LSErrorFree (&lsError);
+
+    return TRUE;
 }
 
 
 void BrowserServer::initiateStatsReporting()
 {
-	static GSource* src = 0;
-	if (!src) {
+    static GSource* src = 0;
+    if (!src) {
         static const int kStatsReportingIntervalSecs = 5;
 
-		src = g_timeout_source_new_seconds(kStatsReportingIntervalSecs);
-		g_source_set_callback(src, BrowserServer::postStats, NULL, NULL);
-		g_source_attach(src, g_main_loop_get_context(BrowserServer::instance()->mainLoop()));
-		g_source_unref(src);
-	}    
+        src = g_timeout_source_new_seconds(kStatsReportingIntervalSecs);
+        g_source_set_callback(src, BrowserServer::postStats, NULL, NULL);
+        g_source_attach(src, g_main_loop_get_context(BrowserServer::instance()->mainLoop()));
+        g_source_unref(src);
+    }
 }
 
 
 bool
 BrowserServer::privateGetLunaStats(LSHandle* handle, LSMessage* message, void* ctxt)
 {
-	bool ret(false);
-	LSError lsError;
-	bool subscribed = false;
-	std::string jsonStr;
-	std::string counters;
-	std::multimap<std::string,std::string> docMap;
-	
-	LSErrorInit(&lsError);
+    bool ret(false);
+    LSError lsError;
+    bool subscribed = false;
+    std::string jsonStr;
+    std::string counters;
+    std::multimap<std::string,std::string> docMap;
 
-	jsonStr = "{ ";
-		
-	if (!message) {
-		ret = false;
-		goto Done;
-	}
+    LSErrorInit(&lsError);
 
-	if (LSMessageIsSubscription(message)) {
+    jsonStr = "{ ";
 
-		ret = LSSubscriptionProcess(handle, message, &subscribed, &lsError);
-		if (!ret) {
-			LSErrorFree(&lsError);
-			goto Done;
-		}
-	}
+    if (!message) {
+        ret = false;
+        goto Done;
+    }
 
-	if (subscribed)
-		BrowserServer::instance()->initiateStatsReporting();
+    if (LSMessageIsSubscription(message)) {
+
+        ret = LSSubscriptionProcess(handle, message, &subscribed, &lsError);
+        if (!ret) {
+            LSErrorFree(&lsError);
+            goto Done;
+        }
+    }
+
+    if (subscribed)
+        BrowserServer::instance()->initiateStatsReporting();
 
 Done:
 
-	jsonStr += "\"returnValue\":";
-	jsonStr += ret ? "true" : "false";
-	jsonStr += ", ";
+    jsonStr += "\"returnValue\":";
+    jsonStr += ret ? "true" : "false";
+    jsonStr += ", ";
 
-	jsonStr += "\"subscribed\":";
-	jsonStr += subscribed ? "true" : "false";
-	jsonStr += " }";
+    jsonStr += "\"subscribed\":";
+    jsonStr += subscribed ? "true" : "false";
+    jsonStr += " }";
 
-	if (!LSMessageReply(handle, message, jsonStr.c_str(), &lsError))
-		LSErrorFree(&lsError);
+    if (!LSMessageReply(handle, message, jsonStr.c_str(), &lsError))
+        LSErrorFree(&lsError);
 
-	return true;
+    return true;
 }
 
 
 bool
 BrowserServer::privateDoGc(LSHandle* handle, LSMessage* message, void* ctxt)
 {
-    #ifdef FIXME_QT
-	Palm::WebGlobal::garbageCollectNow();
-    #endif
-	return true;
+#ifdef FIXME_QT
+    Palm::WebGlobal::garbageCollectNow();
+#endif
+    return true;
 }
 
 
@@ -1843,12 +1838,12 @@ bool BrowserServer::connectionManagerConnectCallback(LSHandle *sh, LSMessage *me
     if (!message)
         return true;
 
-    const char* payload = LSMessageGetPayload(message); 
+    const char* payload = LSMessageGetPayload(message);
     json_object* label = 0;
     json_object* json = 0;
     bool connected = false;
-    
-    label = 0;      
+
+    label = 0;
     json = json_tokener_parse(payload);
     if (!json || is_error(json))
         goto Done;
@@ -1862,11 +1857,11 @@ bool BrowserServer::connectionManagerConnectCallback(LSHandle *sh, LSMessage *me
 
         // We are connected to the systemservice. call and get the connection manager status        
         BrowserServer* bs = BrowserServer::instance();
-        
+
         bool ret = false;
         LSError error;
         LSErrorInit(&error);
-        
+
         ret = LSCall(bs->m_service,
                      "palm://com.palm.connectionmanager/getstatus", "{\"subscribe\":true}",
                      connectionManagerGetStatusCallback, bs, NULL, &error);
@@ -1882,9 +1877,9 @@ Done:
     if (json && !is_error(json))
         json_object_put(json);
 
-    return true;    
+    return true;
 }
- 
+
 bool BrowserServer::connectionManagerGetStatusCallback(LSHandle* sh, LSMessage* message, void* ctxt)
 {
     if (!message)
@@ -1906,8 +1901,8 @@ bool BrowserServer::connectionManagerGetStatusCallback(LSHandle* sh, LSMessage* 
 
     label = json_object_object_get(json, "isInternetConnectionAvailable");
     if (label && !is_error(label)) {
-    	isInternetConnectionAvailable = json_object_get_boolean(label);
-	}
+        isInternetConnectionAvailable = json_object_get_boolean(label);
+    }
 
     label = json_object_object_get(json, (char*) "wifi");
     if (label && !is_error(label)) {
@@ -1915,7 +1910,7 @@ bool BrowserServer::connectionManagerGetStatusCallback(LSHandle* sh, LSMessage* 
         json_object* l = json_object_object_get(label, (char*) "ipAddress");
         if (l && !is_error(l)) {
             wifiIpAddress = json_object_get_string(l);
-        }       
+        }
     }
 
     label = json_object_object_get(json, (char*) "wan");
@@ -1924,7 +1919,7 @@ bool BrowserServer::connectionManagerGetStatusCallback(LSHandle* sh, LSMessage* 
         json_object* l = json_object_object_get(label, (char*) "ipAddress");
         if (l && !is_error(l)) {
             wanIpAddress = json_object_get_string(l);
-        }       
+        }
     }
 
     json_object_put(json);
@@ -1932,7 +1927,7 @@ bool BrowserServer::connectionManagerGetStatusCallback(LSHandle* sh, LSMessage* 
     // Prefer WIFI over WAN
     if (!wanIpAddress.empty())
         selectedIpAddress = wanIpAddress;
-        
+
     if (!wifiIpAddress.empty())
         selectedIpAddress = wifiIpAddress;
 
@@ -1940,7 +1935,7 @@ bool BrowserServer::connectionManagerGetStatusCallback(LSHandle* sh, LSMessage* 
     if (!selectedIpAddress.empty() && selectedIpAddress != bs->m_ipAddress) {
 
         g_message("IP address changed: %s. Restarting network", selectedIpAddress.c_str());
-        
+
         bs->m_ipAddress = selectedIpAddress;
 
         // Restart networking only if webkit has been initialized
@@ -1957,26 +1952,26 @@ bool BrowserServer::connectionManagerGetStatusCallback(LSHandle* sh, LSMessage* 
 void
 BrowserServer::asyncCmdSetMouseMode(YapProxy* proxy, int32_t mode)
 {
-	BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
-	if (!pPage) {
-		BERR("No page for this client.");
-		return;
-	}
+    BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
+    if (!pPage) {
+        BERR("No page for this client.");
+        return;
+    }
 
-	pPage->setMouseMode(static_cast<Palm::MouseMode>(mode));
+    pPage->setMouseMode(static_cast<Palm::MouseMode>(mode));
 }
 
 void BrowserServer::asyncCmdHitTest(YapProxy *proxy, int32_t queryNum, int32_t cx, int32_t cy)
 {
-	BrowserPage *pPage = static_cast<BrowserPage *>(proxy->privateData());
-	if (!pPage) {
-		BERR("No page for this client.");
-		return;
-	}
+    BrowserPage *pPage = static_cast<BrowserPage *>(proxy->privateData());
+    if (!pPage) {
+        BERR("No page for this client.");
+        return;
+    }
 
-	pbnjson::JValue obj = pbnjson::Object();
-	obj.put("x", cx);
-	obj.put("y", cy);
+    pbnjson::JValue obj = pbnjson::Object();
+    obj.put("x", cx);
+    obj.put("y", cy);
 
     QWebHitTestResult hitResult = pPage->hitTest(cx, cy);
     if(!hitResult.isNull()) {
@@ -2018,15 +2013,15 @@ void BrowserServer::asyncCmdHitTest(YapProxy *proxy, int32_t queryNum, int32_t c
         }
     }
 
-	pbnjson::JGenerator serializer(NULL);
-	std::string json;
-	pbnjson::JSchemaFile schema("/etc/palm/browser/HitTest.schema");
-	if (!serializer.toString(obj, schema, json)) {
-		BERR("Error generating JSON");
-	} else {
-		BDBG("Generated JSON:\n %s\n", json.c_str());
-		msgHitTestResponse(proxy, queryNum, json.c_str());
-	}
+    pbnjson::JGenerator serializer(NULL);
+    std::string json;
+    pbnjson::JSchemaFile schema("/etc/palm/browser/HitTest.schema");
+    if (!serializer.toString(obj, schema, json)) {
+        BERR("Error generating JSON");
+    } else {
+        BDBG("Generated JSON:\n %s\n", json.c_str());
+        msgHitTestResponse(proxy, queryNum, json.c_str());
+    }
 }
 
 unsigned char* BrowserServer::getOffscreenBackupBuffer(int bufferSize) {
@@ -2060,7 +2055,7 @@ void BrowserServer::asyncCmdTouchEvent(YapProxy* proxy, int32_t type, int32_t to
         BERR("No page for this client.");
         return;
     }
-	pPage->touchEvent(type, touchCount, modifiers, touchesJson);
+    pPage->touchEvent(type, touchCount, modifiers, touchesJson);
 }
 
 void
@@ -2071,32 +2066,32 @@ BrowserServer::asyncCmdGetTextCaretBounds(YapProxy* proxy, int32_t queryNum)
         BERR("No page for this client.");
         return;
     }
-	int left, top, right, bottom;
-	left = top = right = bottom = 0;
-	pPage->getTextCaretBounds(left, top, right, bottom);
-	msgGetTextCaretBoundsResponse(proxy, queryNum, left, top, right, bottom);
+    int left, top, right, bottom;
+    left = top = right = bottom = 0;
+    pPage->getTextCaretBounds(left, top, right, bottom);
+    msgGetTextCaretBoundsResponse(proxy, queryNum, left, top, right, bottom);
 }
 
 void BrowserServer::asyncCmdSetZoomAndScroll(YapProxy* proxy, double zoom, int32_t cx, int32_t cy)
 {
-	BrowserPage* pPage = (BrowserPage*) proxy->privateData();
-	if (!pPage) {
-		BERR("No page for this client.");
-		return;
-	}
+    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    if (!pPage) {
+        BERR("No page for this client.");
+        return;
+    }
 
-	pPage->setZoomAndScroll(zoom, cx, cy);    
+    pPage->setZoomAndScroll(zoom, cx, cy);
 }
 
 void BrowserServer::asyncCmdScrollLayer(YapProxy* proxy, int32_t id, int32_t deltaX, int32_t deltaY)
 {
-	BrowserPage* pPage = (BrowserPage*) proxy->privateData();
-	if (!pPage) {
-		BERR("No page for this client.");
-		return;
-	}
+    BrowserPage* pPage = (BrowserPage*) proxy->privateData();
+    if (!pPage) {
+        BERR("No page for this client.");
+        return;
+    }
 
-	pPage->scrollLayer(id, deltaX, deltaY);    
+    pPage->scrollLayer(id, deltaX, deltaY);
 }
 
 void

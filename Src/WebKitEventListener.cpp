@@ -22,37 +22,37 @@ LICENSE@@@ */
 
 
 WebKitEventListener::WebKitEventListener(BackupManager* backupMgr) :
-	m_backupMgr(backupMgr)
+    m_backupMgr(backupMgr)
 {
-	assert(backupMgr != NULL);
+    assert(backupMgr != NULL);
 }
 
 void WebKitEventListener::dbDumpStarted( const Palm::DbBackupStatus& status, void* userData )
 {
-	m_backupMgr->dbDumpStarted(status, userData);
+    m_backupMgr->dbDumpStarted(status, userData);
 }
 
 void WebKitEventListener::dbDumpStopped( const Palm::DbBackupStatus& status, void* userData )
 {
-	m_backupMgr->dbDumpStopped(status, userData);
+    m_backupMgr->dbDumpStopped(status, userData);
 }
 
 void WebKitEventListener::dbRestoreStarted( const Palm::DbBackupStatus& status, void* userData )
 {
-	m_backupMgr->dbRestoreStarted(status, userData);
+    m_backupMgr->dbRestoreStarted(status, userData);
 }
 
 void WebKitEventListener::dbRestoreStopped( const Palm::DbBackupStatus& status, void* userData )
 {
-	m_backupMgr->dbRestoreStopped(status, userData);
+    m_backupMgr->dbRestoreStopped(status, userData);
 }
 
 void WebKitEventListener::dbMoveStatus( int err )
 {
-	if (err == 0) {
-		g_message("Successfully moved HTML5 databases");
-	}
-	else {
-		g_warning("ERROR %d moving HTML5 databases", err);
-	}
+    if (err == 0) {
+        g_message("Successfully moved HTML5 databases");
+    }
+    else {
+        g_warning("ERROR %d moving HTML5 databases", err);
+    }
 }

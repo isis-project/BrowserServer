@@ -24,19 +24,19 @@ LICENSE@@@ */
 
 BrowserRect doubleToIntRoundDown(const BrowserDoubleRect & rect)
 {
-	int x = ceil(rect.x());
-	int y = ceil(rect.y());
-	int r = floor(rect.r());
-	int b = floor(rect.b());
-	return BrowserRect(x, y, r-x, b-y);
+    int x = ceil(rect.x());
+    int y = ceil(rect.y());
+    int r = floor(rect.r());
+    int b = floor(rect.b());
+    return BrowserRect(x, y, r-x, b-y);
 }
 
 BrowserRect doubleToIntRoundUp(const BrowserDoubleRect & rect)
 {
-	int x = floor(rect.x());
-	int y = floor(rect.y());
-	int r = ceil(rect.r());
-	int b = ceil(rect.b());
-	return BrowserRect(x, y, r-x, b-y);
+    int x = floor(rect.x());
+    int y = floor(rect.y());
+    int r = ceil(rect.r());
+    int b = ceil(rect.b());
+    return BrowserRect(x, y, r-x, b-y);
 }
 

@@ -33,34 +33,34 @@ public:
     const char* postfix() const { return m_msgSocketPostfix; }
     void  setPrivateData(void* priv);
     void* privateData() const;
-	void  setTerminate();
-	bool  isRecordProxy() const;
+    void  setTerminate();
+    bool  isRecordProxy() const;
 
     YapPacket* packetMessage();
     void sendMessage();
-	void transferQueuedMessage(YapProxy* srcProxy);
+    void transferQueuedMessage(YapProxy* srcProxy);
 
-	bool connected() const;
+    bool connected() const;
 
-	int messageSocketFd() const;
-	int commandSocketFd() const;
-	int serverSocketFd() const;
-    
+    int messageSocketFd() const;
+    int commandSocketFd() const;
+    int serverSocketFd() const;
+
 private:
 
-	struct Message {
-		char     hdr[4]; ///< Message header
-		uint8_t* data;   ///< Message data
-		int      len;    ///< Message data length
+    struct Message {
+        char     hdr[4]; ///< Message header
+        uint8_t* data;   ///< Message data
+        int      len;    ///< Message data length
 
-		Message( const char* hdr, const uint8_t* data, int dataLen );
-		~Message();
+        Message( const char* hdr, const uint8_t* data, int dataLen );
+        ~Message();
 
-		private:
+        private:
 
-		Message* operator=(const Message& rhs);
-		Message(const Message& rhs);
-	};
+        Message* operator=(const Message& rhs);
+        Message(const Message& rhs);
+    };
 
     YapProxy(YapServer* server, int cmdSocketFd, char* msgSocketPath, char* msgSocketPostfix);
     ~YapProxy();
@@ -81,13 +81,13 @@ private:
     GSource*    m_ioSource;
 
     bool        m_inSyncMode;
-	bool		m_terminate;
-	std::queue<Message*> m_queuedMessages;	///< Messages sent before connection go here.
+    bool        m_terminate;
+    std::queue<Message*> m_queuedMessages; ///< Messages sent before connection go here.
 
     YapPacket*  m_packetCommand;
     YapPacket*  m_packetReply;
     YapPacket*  m_packetMessage;
-    
+
     // Copy not allowed
     YapProxy(const YapProxy&);
     YapProxy& operator=(const YapProxy&);

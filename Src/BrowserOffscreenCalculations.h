@@ -21,41 +21,41 @@ LICENSE@@@ */
 
 struct BrowserOffscreenCalculations
 {
-	BrowserOffscreenCalculations() {
-		reset();
-	}
-	
-	void reset() {
-		bufferWidth = 0;
-		bufferHeight = 0;
+    BrowserOffscreenCalculations() {
+        reset();
+    }
 
-		contentZoom = 1.0;
+    void reset() {
+        bufferWidth = 0;
+        bufferHeight = 0;
 
-		viewportWidth = 0;
-		viewportHeight = 0;
-		contentWidth = 0;
-		contentHeight = 0;
+        contentZoom = 1.0;
 
-		renderX = 0;
-		renderY = 0;
-		renderWidth = 0;
-		renderHeight = 0;
-	}
-	
-	int bufferWidth;
-	int bufferHeight;
+        viewportWidth = 0;
+        viewportHeight = 0;
+        contentWidth = 0;
+        contentHeight = 0;
 
-	double contentZoom;
+        renderX = 0;
+        renderY = 0;
+        renderWidth = 0;
+        renderHeight = 0;
+    }
 
-	int viewportWidth;
-	int viewportHeight;
-	int contentWidth;
-	int contentHeight;
+    int bufferWidth;
+    int bufferHeight;
 
-	int renderX;
-	int renderY;
-	int renderWidth;
-	int renderHeight;
+    double contentZoom;
+
+    int viewportWidth;
+    int viewportHeight;
+    int contentWidth;
+    int contentHeight;
+
+    int renderX;
+    int renderY;
+    int renderWidth;
+    int renderHeight;
 };
 
 #endif /* BROWSEROFFSCREENCALCULATIONS_H */

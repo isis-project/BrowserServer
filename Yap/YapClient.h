@@ -28,50 +28,50 @@ class YapClientPriv;
 class YapClient
 {
 public:
-	
-	// Allocates GMainContext & GMainLoop internally, used via run().
+
+    // Allocates GMainContext & GMainLoop internally, used via run().
     YapClient(const char* name);
-	
-	// Uses given GMainContext, or default if NULL. Don't call run().
-	YapClient(const char* name, GMainContext *ctxt);
-	
-	virtual ~YapClient();
+
+    // Uses given GMainContext, or default if NULL. Don't call run().
+    YapClient(const char* name, GMainContext *ctxt);
+
+    virtual ~YapClient();
 
     bool connect();
-    
+
     GMainLoop* mainLoop() const;
     bool run();
 
     YapPacket* packetCommand();
     YapPacket* packetReply();
-    
+
     const char* incrementPostfix();
     const char* postfix() const;
 
     bool sendAsyncCommand();
     bool sendSyncCommand();
-    
+
     virtual void serverConnected() = 0;
     virtual void serverDisconnected() = 0;
     virtual void handleAsyncMessage(YapPacket* msg) = 0;
 
 private:
 
-	void init(const char* name);
+    void init(const char* name);
     void ioCallback(GIOChannel* channel, GIOCondition condition);
     bool readSocket(int fd, char* buf, int len);
     bool readSocketSync(int fd, char* buf, int len);
     bool writeSocket(int fd, char* buf, int len);
-	void closeMsgSocket(void);
-	void closeCmdSocket(void);
+    void closeMsgSocket(void);
+    void closeCmdSocket(void);
 
-	static int s_socketNum;
+    static int s_socketNum;
     YapClientPriv* d;
 
     // Copy not allowed
     YapClient(const YapClient&);
     YapClient& operator=(const YapClient&);
-    
+
     friend class YapClientPriv;
 };
 

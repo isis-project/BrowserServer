@@ -29,7 +29,7 @@ struct LSMessage;
 
 namespace Palm
 {
-	struct DbBackupStatus;
+    struct DbBackupStatus;
 };
 
 /**
@@ -40,94 +40,94 @@ class BackupManager
 {
 public:
 
-	bool	init			(GMainLoop* mainLoop, LSHandle* server_handle);
-	void	dbDumpStarted	(const Palm::DbBackupStatus& status, void* userData);
-	void	dbDumpStopped	(const Palm::DbBackupStatus& status, void* userData);
-	void	dbRestoreStarted(const Palm::DbBackupStatus& status, void* userData);
-	void	dbRestoreStopped(const Palm::DbBackupStatus& status, void* userData);
+    bool init(GMainLoop* mainLoop, LSHandle* server_handle);
+    void dbDumpStarted(const Palm::DbBackupStatus& status, void* userData);
+    void dbDumpStopped(const Palm::DbBackupStatus& status, void* userData);
+    void dbRestoreStarted(const Palm::DbBackupStatus& status, void* userData);
+    void dbRestoreStopped(const Palm::DbBackupStatus& status, void* userData);
 
-	static BackupManager*	instance();
-	void testDb();
+    static BackupManager* instance();
+    void testDb();
 
 private:
 
-	/**
-	 * The different types of things that the backup service can backup/restore.
-	 */
-	enum BackupType {
-		BackupFile = 0,			// This number is defined by the backup service API.
-		BackupDirectory = 1,	// This number is defined by the backup service API.
-		BackupHtml5Db = 100,
-	};
+    /**
+     * The different types of things that the backup service can backup/restore.
+     */
+    enum BackupType {
+        BackupFile = 0,      // This number is defined by the backup service API.
+        BackupDirectory = 1, // This number is defined by the backup service API.
+        BackupHtml5Db = 100,
+    };
 
-	/**
-	 * A description of an item that the BackupManager is managing the backup and restoration of.
-	 */
-	struct BackupItem {
-		std::string	m_appid;     ///< The app id whose data we're managing the backup of.
-		std::string	m_path;      ///< The path to the file/directory we're backing up.
-		std::string m_dbname;    ///< HTML5 database name - only for type BackupHtml5Db.
-		BackupType  m_eType;     ///< The type of thing we're backing up.
-		int		    m_recursive; ///< For dir backups only.
-		std::string	m_metaData;  ///< Our own metadata we keep for a backup item.
-		double		m_version;   ///< The version of the backup item.
-		time_t		m_dbModTime; ///< The last time the database file was modified.
+    /**
+     * A description of an item that the BackupManager is managing the backup and restoration of.
+     */
+    struct BackupItem {
+        std::string m_appid;     ///< The app id whose data we're managing the backup of.
+        std::string m_path;      ///< The path to the file/directory we're backing up.
+        std::string m_dbname;    ///< HTML5 database name - only for type BackupHtml5Db.
+        BackupType  m_eType;     ///< The type of thing we're backing up.
+        int m_recursive;         ///< For dir backups only.
+        std::string m_metaData;  ///< Our own metadata we keep for a backup item.
+        double m_version;        ///< The version of the backup item.
+        time_t m_dbModTime;      ///< The last time the database file was modified.
 
-		BackupItem() : m_eType(BackupFile), m_recursive(0), m_version(0.0), m_dbModTime(0) {}
-		BackupItem(const std::string& appId, BackupType eType, int recursive, double version);
-		BackupItem(const BackupItem& src);
-		BackupItem& operator=(const BackupItem& rhs);
-		void	setMetadata();
-	};
+        BackupItem() : m_eType(BackupFile), m_recursive(0), m_version(0.0), m_dbModTime(0) {}
+        BackupItem(const std::string& appId, BackupType eType, int recursive, double version);
+        BackupItem(const BackupItem& src);
+        BackupItem& operator=(const BackupItem& rhs);
+        void setMetadata();
+    };
 
-	struct BackupOperationData {
-		BackupManager*	mgr;
-		LSMessage*		requestMessage;
-		BackupItem		item;	///< The item being backed up or restored
-	};
+    struct BackupOperationData {
+        BackupManager* mgr;
+        LSMessage* requestMessage;
+        BackupItem item; ///< The item being backed up or restored
+    };
 
-	BackupManager	();
-	~BackupManager	();
+    BackupManager();
+    ~BackupManager();
 
-	bool	registerForBackup();
-	bool	queryBackupService		();
-	bool	registerWithServiceBus	();
-	bool	unregisterWithServiceBus();
-	bool	registerBackupServiceMethods	();
-	bool	registerForBackupServiceStatus();
-	static bool	preBackup				(LSHandle* lshandle, LSMessage *message, void *user_data);
-	static bool	postBackup				(LSHandle* lshandle, LSMessage *message, void *user_data);
-	static bool	preRestore				(LSHandle* lshandle, LSMessage *message, void *user_data);
-	static bool	postRestore				(LSHandle* lshandle, LSMessage *message, void *user_data);
-	bool	sendItemMessageReply	(LSMessage *message, const std::string& operation,
-										const BackupItem& item, const std::string& errorText);
-	bool sendEmptyResponse(LSMessage *message);
-	bool sendPreBackupReply(LSMessage *message,const char* url,const std::string& errorText);
-	
+    bool registerForBackup();
+    bool queryBackupService();
+    bool registerWithServiceBus();
+    bool unregisterWithServiceBus();
+    bool registerBackupServiceMethods();
+    bool registerForBackupServiceStatus();
+    static bool preBackup(LSHandle* lshandle, LSMessage *message, void *user_data);
+    static bool postBackup(LSHandle* lshandle, LSMessage *message, void *user_data);
+    static bool preRestore(LSHandle* lshandle, LSMessage *message, void *user_data);
+    static bool postRestore(LSHandle* lshandle, LSMessage *message, void *user_data);
+    bool sendItemMessageReply(LSMessage *message, const std::string& operation,
+    const BackupItem& item, const std::string& errorText);
+    bool sendEmptyResponse(LSMessage *message);
+    bool sendPreBackupReply(LSMessage *message,const char* url,const std::string& errorText);
+
     static bool backupRegistrationCallback(LSHandle *sh, LSMessage *message, void *ctx);
-	static bool backupCallback( LSHandle* lshandle, LSMessage *message, void *user_data);
-	static bool queryBackupServiceCallback(LSHandle *sh, LSMessage *message, void *ctx);
-	static bool parseBackupServiceItem(struct json_object* jsonItem, BackupItem& item);
-	static int  parseBackupServiceItemList(struct array_list* jsonItems, std::map<std::string, BackupItem>& items);
-	static std::string getHtml5BackupFile(const std::string& appid,const std::string& path);
-	static std::string getHtml5Url(const std::string& appid);
-	static bool getJsonPropVal(json_object* obj, const char* propName, std::string& val);
-	static bool getJsonPropVal(json_object* obj, const char* propName, double& val);
-	static bool getJsonPropVal(json_object* obj, const char* propName, int& val);
-	static bool getJsonPropVal(json_object* obj, const char* propName, bool& val);
-	static bool simpleMessageReply(LSHandle* lshandle, LSMessage *message, const std::string& errorText);
-	static void addItemDataToJsonObj(json_object* obj, const BackupItem& item);
-	static bool backupServiceConnectCallback(LSHandle *sh, LSMessage *message, void *ctx);
+    static bool backupCallback( LSHandle* lshandle, LSMessage *message, void *user_data);
+    static bool queryBackupServiceCallback(LSHandle *sh, LSMessage *message, void *ctx);
+    static bool parseBackupServiceItem(struct json_object* jsonItem, BackupItem& item);
+    static int  parseBackupServiceItemList(struct array_list* jsonItems, std::map<std::string, BackupItem>& items);
+    static std::string getHtml5BackupFile(const std::string& appid,const std::string& path);
+    static std::string getHtml5Url(const std::string& appid);
+    static bool getJsonPropVal(json_object* obj, const char* propName, std::string& val);
+    static bool getJsonPropVal(json_object* obj, const char* propName, double& val);
+    static bool getJsonPropVal(json_object* obj, const char* propName, int& val);
+    static bool getJsonPropVal(json_object* obj, const char* propName, bool& val);
+    static bool simpleMessageReply(LSHandle* lshandle, LSMessage *message, const std::string& errorText);
+    static void addItemDataToJsonObj(json_object* obj, const BackupItem& item);
+    static bool backupServiceConnectCallback(LSHandle *sh, LSMessage *message, void *ctx);
 
-	GMainLoop*		m_mainLoop;
-	LSHandle* m_clientService;		///< The client's connection to the backup service.
-	LSPalmService*	m_serverService;		///< The methods we expose to the backup service.
-	LSMessageToken	m_backupServiceStatusToken;	///< Used to know when backup services goes up/down.
-	BackupItem	m_backupItem;	///< Backing up browser cookies
-	std::map<std::string, time_t>	m_currentBackupModTimes;
-	static LSMethod	s_BackupServerMethods[];
-	static BackupManager* s_instance;
-	
+    GMainLoop* m_mainLoop;
+    LSHandle* m_clientService; ///< The client's connection to the backup service.
+    LSPalmService* m_serverService; ///< The methods we expose to the backup service.
+    LSMessageToken m_backupServiceStatusToken; ///< Used to know when backup services goes up/down.
+    BackupItem m_backupItem; ///< Backing up browser cookies
+    std::map<std::string, time_t> m_currentBackupModTimes;
+    static LSMethod s_BackupServerMethods[];
+    static BackupManager* s_instance;
+
 };
 
 

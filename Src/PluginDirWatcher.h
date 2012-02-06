@@ -30,15 +30,15 @@ struct SourceWatchData;
  */
 struct PluginDirWatcher
 {
-	PluginDirWatcher();
-	~PluginDirWatcher();
-	bool init(const char* path);
-	void suspend();
-	void resume();
-	
+    PluginDirWatcher();
+    ~PluginDirWatcher();
+    bool init(const char* path);
+    void suspend();
+    void resume();
+
 private:
-	GSource* mSource;
-	char *mPath;
+    GSource* mSource;
+    char *mPath;
 };
 
 

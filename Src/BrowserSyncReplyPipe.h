@@ -31,21 +31,21 @@ public:
     ~BrowserSyncReplyPipe();
 
     const char* pipePath() const;
-    
+
     bool getReply(GPtrArray** reply, int mainSocketFd);
 
 private:
 
     bool readFull(char* buf, int len, int fd);
 
-	static gboolean socketCallback(GIOChannel* channel, GIOCondition condition, gpointer arg);
-	static gboolean pipeCallback(GIOChannel* channel, GIOCondition condition, gpointer arg);
+    static gboolean socketCallback(GIOChannel* channel, GIOCondition condition, gpointer arg);
+    static gboolean pipeCallback(GIOChannel* channel, GIOCondition condition, gpointer arg);
 
     char* m_pipePath;
     char* m_replyBuffer;
-	GMainLoop* m_mainLoop;
-	GMainContext* m_mainCtxt;
-	bool m_pipeReadFailed;
+    GMainLoop* m_mainLoop;
+    GMainContext* m_mainCtxt;
+    bool m_pipeReadFailed;
 };
 
 #endif /* BROWSERSYNCREPLYPIPE_H */

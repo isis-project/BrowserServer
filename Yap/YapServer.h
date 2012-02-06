@@ -39,9 +39,9 @@ public:
     void       resumeDeadlockDetection();
     void       incrementDeadlockCounter();
     void       setDeadlockDetectionInterval(const int IntervalInSeconds);
-	YapProxy*  createRecordProxy();
-	void       deleteRecordProxy(YapProxy* proxy);
-	int        serverSocketFd() const;
+    YapProxy*  createRecordProxy();
+    void       deleteRecordProxy(YapProxy* proxy);
+    int        serverSocketFd() const;
 
     virtual void clientConnected(YapProxy* proxy) = 0;
     virtual void clientDisconnected(YapProxy* proxy) = 0;
@@ -59,7 +59,7 @@ private:
     // Copy not allowed
     YapServer(const YapServer&);
     YapServer& operator=(const YapServer&);
-    
+
     friend class YapServerPriv;
 };
 

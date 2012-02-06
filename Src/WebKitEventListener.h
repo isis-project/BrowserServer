@@ -27,17 +27,17 @@ class WebKitEventListener : public Palm::WebKitEventListener
 {
 public:
 
-	WebKitEventListener	( BackupManager* backupMgr );
+    WebKitEventListener( BackupManager* backupMgr );
 
-	virtual	void	dbDumpStarted	( const Palm::DbBackupStatus& status, void* userData );
-	virtual	void	dbDumpStopped	( const Palm::DbBackupStatus& status, void* userData );
-	virtual	void	dbRestoreStarted( const Palm::DbBackupStatus& status, void* userData );
-	virtual	void	dbRestoreStopped( const Palm::DbBackupStatus& status, void* userData );
-	virtual void 	dbMoveStatus    ( int err );
+    virtual void dbDumpStarted( const Palm::DbBackupStatus& status, void* userData );
+    virtual void dbDumpStopped( const Palm::DbBackupStatus& status, void* userData );
+    virtual void dbRestoreStarted( const Palm::DbBackupStatus& status, void* userData );
+    virtual void dbRestoreStopped( const Palm::DbBackupStatus& status, void* userData );
+    virtual void dbMoveStatus( int err );
 
 private:
 
-	BackupManager*	m_backupMgr;
+    BackupManager* m_backupMgr;
 };
 
 #endif // WEBKITEVENTLISTENER_H
