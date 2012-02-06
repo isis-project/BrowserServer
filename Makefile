@@ -40,7 +40,6 @@ LIBS := -L$(LIB_DIR) \
 	-llunaservice \
 	-licuuc \
 	-lcjson \
-	-lmjson \
 	-lpbnjson_c \
 	-lpbnjson_cpp \
 	-lyajl \
