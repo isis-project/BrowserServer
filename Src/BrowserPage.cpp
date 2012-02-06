@@ -38,7 +38,6 @@ LICENSE@@@ */
 #include <qpersistentcookiejar.h>
 #include <qwebevent.h>
 #include <palmwebtypes.h>
-#include <palmerrorcodes.h>
 #include <cjson/json.h>
 #include <pbnjson.hpp>
 #include <syslog.h>
@@ -2279,6 +2278,8 @@ BrowserPage::dispatchFailedLoad(const char* domain, int errorCode, const char* f
     m_server->msgFailedLoad(m_proxy, domain, errorCode, failingURL, localizedDescription);
 }
 
+const int ERR_NO_INTERNET_CONNECTION = 1005;
+
 void
 BrowserPage::setMainDocumentError(const char* domain, int errorCode, const char* failingURL, const char* localizedDescription)
 {
@@ -2293,7 +2294,7 @@ BrowserPage::setMainDocumentError(const char* domain, int errorCode, const char*
     }
     else {
         // send "no internet connection" error
-        m_server->msgSetMainDocumentError(m_proxy, domain, Palm::ERR_NO_INTERNET_CONNECTION, failingURL, "No Internet Connection");
+        m_server->msgSetMainDocumentError(m_proxy, domain, ERR_NO_INTERNET_CONNECTION, failingURL, "No Internet Connection");
     }
 }
 
