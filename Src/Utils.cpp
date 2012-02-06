@@ -106,6 +106,7 @@ bool deleteFile(const char* filePath)
         return false;
 
     return (unlink(filePath) == 0);
+}
 
 
 X509 * findSSLCertInLocalStore(X509 * cert,int& ret_certSerialNb)
