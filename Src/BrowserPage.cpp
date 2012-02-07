@@ -113,10 +113,6 @@ struct PaintRequest {
     BrowserRect rect;
 };
 
-#if P_BACKEND == P_BACKEND_LAG
-static const char* s_mapsIdentifier = "com.palm.app.maps";
-#endif
-
 unsigned int BrowserPage::idGen = 0;
 bool BrowserPage::keyMapInit = false;
 std::map<unsigned short, int> BrowserPage::keyMap;
