@@ -21,11 +21,6 @@ LICENSE@@@ */
 
 #include <stdint.h>
 #include <regex.h>
-#include <webkitpalmtimer.h>
-#include <palmwebpage.h>
-#include <palmwebpageclient.h>
-#include <palmwebviewclient.h>
-#include <palmwebsslinfo.h>
 #include <glib.h>
 #include <string>
 #include <set>
@@ -48,15 +43,12 @@ LICENSE@@@ */
 
 #include <semaphore.h>
 
+#include "SSLValidationInfo.h"
+#include "BrowserAdapterTypes.h"
+
 class BrowserSyncReplyPipe;
 class BrowserServer;
 class YapProxy;
-
-namespace Palm {
-struct ImageInfo;
-struct ElementInfo;
-enum MouseMode;
-}
 
 /**
  * Redirects only happen once the page is loaded but commands (i.e. schema's)
@@ -148,7 +140,7 @@ public:
     void invalContents(int x, int y, int width, int height);
 
 
-    void setMouseMode(enum Palm::MouseMode mode);
+    void setMouseMode(enum BATypes::MouseMode mode);
 
     void didFinishDocumentLoad();
 
@@ -201,7 +193,7 @@ public:
      * 
      * return true if things went ok and user presented a response, false otherwise
      */
-    bool dialogSSLConfirm(Palm::SSLValidationInfo& sslInfo);
+    bool dialogSSLConfirm(SSLValidationInfo& sslInfo);
 
     void takeActionOnData( const char* dataType, const char* data );
     bool takeActionOnData(const char * urlString);
@@ -276,19 +268,17 @@ public:
     virtual void statusMessage(const char*) {}
     virtual void dispatchFailedLoad(const char* domain, int errorCode, const char* failingURL, const char* localizedDescription);
     virtual void setMainDocumentError(const char* domain, int errorCode, const char* failingURL, const char* localizedDescription);
-    virtual void editorFocused(bool focused, const PalmIME::EditorState& state);
+    virtual void editorFocused(bool focused, const BATypes::EditorState& state);
     virtual void focused() {}
     virtual void unfocused() {}
-    virtual Palm::TextCaretType textCaretAppearance() { return Palm::TextCaretNormal; }
     virtual void selectionChanged();
-    virtual void startDrag(int, int, int, int, void*, PalmClipboard*) {}
     virtual void makePointVisible(int x, int y);
     virtual void copiedToClipboard();
     virtual void pastedFromClipboard();
     virtual void pluginFullscreenSpotlightCreate(int handle, int rectx, int recty, int rectw, int recth);
     virtual void pluginFullscreenSpotlightRemove();
-    virtual void addInteractiveWidgetRect(uintptr_t id, int x, int y, int width, int height, Palm::InteractiveRectType);
-    virtual void removeInteractiveWidgetRect(uintptr_t id, Palm::InteractiveRectType);
+    virtual void addInteractiveWidgetRect(uintptr_t id, int x, int y, int width, int height, InteractiveRectType);
+    virtual void removeInteractiveWidgetRect(uintptr_t id, InteractiveRectType);
     virtual bool smartKeySearch(int requestId, const char* query);
     virtual bool smartKeyLearn(const char* word);
 
@@ -412,10 +402,12 @@ private:
     bool m_focused;
     int m_fingerEventCount; ///< # of times that a mouse/touch/gesture event has occurred.
     bool m_hasFocusedNode;  ///< Is there a node currently focused on the page?
-    PalmIME::EditorState m_lastEditorState;
+    BATypes::EditorState m_lastEditorState;
 
-    typedef std::map<uintptr_t, Palm::ScrollableLayerItem> ScrollableLayerItemMap;
+#ifdef FIXME_QT
+    typedef std::map<uintptr_t, ScrollableLayerItem> ScrollableLayerItemMap;
     ScrollableLayerItemMap m_scrollableLayerItems;
+#endif
 
 private:
 
@@ -428,7 +420,7 @@ private:
     void handleFingerEvent();
     void initWebViewWidgetState();
 
-    json_object* rectToJson(uintptr_t id, int x, int y, int width, int height, Palm::InteractiveRectType);
+    json_object* rectToJson(uintptr_t id, int x, int y, int width, int height, InteractiveRectType);
 
     void freePtrArray(GPtrArray* array);
 

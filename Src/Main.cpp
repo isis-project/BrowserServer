@@ -37,7 +37,6 @@ LICENSE@@@ */
 #include "Settings.h"
 #include "SSLSupport.h"
 
-#include "webkitpalmsettings.h"
 #include <QApplication>
 #include <QSettings>
 

@@ -16,6 +16,9 @@
 *
 LICENSE@@@ */
 
+#ifndef SSLSUPPORT_H
+#define SSLSUPPORT_H
+
 #include <pthread.h>
 
 class SSLSupport
@@ -36,3 +39,5 @@ private:
     static long s_nLocks;
 
 };
+
+#endif

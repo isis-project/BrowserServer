@@ -33,11 +33,8 @@ LICENSE@@@ */
 #include <QtGui>
 #include <QtNetwork>
 
-#include <palmwebpage.h>
-#include <palmwebview.h>
 #include <qpersistentcookiejar.h>
 #include <qwebevent.h>
-#include <palmwebtypes.h>
 #include <cjson/json.h>
 #include <pbnjson.hpp>
 #include <syslog.h>
@@ -112,10 +109,6 @@ struct PaintRequest {
     BrowserPage * page;
     BrowserRect rect;
 };
-
-#if P_BACKEND == P_BACKEND_LAG
-static const char* s_mapsIdentifier = "com.palm.app.maps";
-#endif
 
 unsigned int BrowserPage::idGen = 0;
 bool BrowserPage::keyMapInit = false;
@@ -835,7 +828,7 @@ void BrowserPage::smartZoomCalculate( uint32_t pointX, uint32_t pointY  )
 }
 
 
-void BrowserPage::editorFocused(bool focused, const PalmIME::EditorState& state)
+void BrowserPage::editorFocused(bool focused, const BATypes::EditorState& state)
 {
     m_hasFocusedNode = focused;
     m_lastEditorState = state;
@@ -890,7 +883,7 @@ BrowserPage::initWebViewWidgetState()
     if (m_hasFocusedNode) {
         // Set the finger event count to > 0 so that editorFocused will correctly blur
         m_fingerEventCount = 1;
-        editorFocused(false, PalmIME::FieldType_Text);
+        editorFocused(false, BATypes::FieldType_Text);
     }
     m_fingerEventCount = 0;
 
@@ -1382,7 +1375,9 @@ BrowserPage::zoomedContents(double scaleFactor, int newWidth, int newHeight, int
     if (newWidth == 0 && newHeight == 0) {
         // start of a new page
         initWebViewWidgetState();
+#ifdef FIXME_QT
         m_scrollableLayerItems.clear();
+#endif
         resetMetaViewport();
         m_zoomLevel = kInvalidZoom;
         m_pageX = 0;
@@ -1487,17 +1482,17 @@ BrowserPage::urlChanged(const QUrl& url) {
 void
 BrowserPage::updateEditorFocus() {
     bool active = m_webView->flags() & QGraphicsItem::ItemAcceptsInputMethod;
-    PalmIME::EditorState editorState(PalmIME::FieldType_Text);
+    BATypes::EditorState editorState(BATypes::FieldType_Text);
     if (active) {
         Qt::InputMethodHints hints = m_webView->inputMethodHints();
         if (hints & Qt::ImhEmailCharactersOnly) {
-            editorState.type = PalmIME::FieldType_Email;
+            editorState.type = BATypes::FieldType_Email;
         } else if (hints & Qt::ImhUrlCharactersOnly) {
-            editorState.type = PalmIME::FieldType_URL;
+            editorState.type = BATypes::FieldType_URL;
         } else if (hints & Qt::ImhDialableCharactersOnly) {
-            editorState.type = PalmIME::FieldType_Phone;
+            editorState.type = BATypes::FieldType_Phone;
         } else if (hints & (Qt::ImhPreferNumbers | Qt::ImhDigitsOnly | Qt::ImhFormattedNumbersOnly)) {
-            editorState.type = PalmIME::FieldType_Number;
+            editorState.type = BATypes::FieldType_Number;
         }
     }
 
@@ -1609,7 +1604,7 @@ BrowserPage::urlTitleChanged(const char* pUrl, const char* pTitle)
     m_server->msgTitleAndUrlChanged(m_proxy, pTitle, pUrl, canGoBackward(), canGoForward());
 }
 
-void BrowserPage::setMouseMode(Palm::MouseMode mode)
+void BrowserPage::setMouseMode(BATypes::MouseMode mode)
 {
 #ifdef FIXME_QT
     if (m_webView) {
@@ -1811,7 +1806,7 @@ BrowserPage::dialogUserPassword(const char* inMsg, std::string& userName, std::s
  * 
  */
 bool
-BrowserPage::dialogSSLConfirm(Palm::SSLValidationInfo& sslInfo)
+BrowserPage::dialogSSLConfirm(SSLValidationInfo& sslInfo)
 {
     if (!proxyConnected())
         return false;
@@ -2000,15 +1995,16 @@ void BrowserPage::getInteractiveNodeRects(int32_t mouseX, int32_t mouseY)
 
     clientPointToServer((uint32_t&)mouseX, (uint32_t&)mouseY);
 
-    std::vector<Palm::WebRect> nodeRects;
 #ifdef FIXME_QT
-    m_webView->getInteractiveNodeRects(mouseX, mouseY, nodeRects); 
-#endif // FIXME_QT
+    std::vector<Palm::WebRect> nodeRects;
+    m_webView->getInteractiveNodeRects(mouseX, mouseY, nodeRects);
 
     if (nodeRects.empty()) {
         //printf("BrowserPage::getInteractiveNodeRects: %d, %d is Empty\n", mouseX, mouseY);
         return;
     }
+
+    // Due to the previous if, everything from this point on is dead code anyway without the m_webView->getInteractiveNodeRect() call.
 
     //printf("BrowserPage::getInteractiveNodeRects: %d, %d returned %d rects\n", mouseX, mouseY, nodeRects.size());
 
@@ -2082,6 +2078,7 @@ void BrowserPage::getInteractiveNodeRects(int32_t mouseX, int32_t mouseY)
     m_server->msgHighlightRects(m_proxy, rectsStr);
 
     json_object_put(rectsJson);
+#endif // FIXME_QT
 
 }
 
@@ -2161,7 +2158,7 @@ void BrowserPage::gestureEvent(int type, int contentX, int contentY, double scal
 
 void BrowserPage::touchEvent(int type, int32_t touchCount, int32_t modifiers, const char *touchesJson)
 {
-    static Palm::TouchPointPalm touches[10];
+    static BATypes::TouchPoint touches[10];
     pbnjson::JSchemaFragment inputSchema("{}");
     pbnjson::JDomParser parser(NULL);
     if (!parser.parse(std::string(touchesJson), inputSchema, NULL)) {
@@ -2177,7 +2174,7 @@ void BrowserPage::touchEvent(int type, int32_t touchCount, int32_t modifiers, co
         parsed[i]["state"].asNumber<int>(state);
         touches[i].x = x;
         touches[i].y = y;
-        touches[i].state = (Palm::TouchPointPalm::State)state;
+        touches[i].state = (BATypes::TouchPoint::State)state;
     }
 
     handleFingerEvent();
@@ -2649,7 +2646,7 @@ void BrowserPage::pluginFullscreenSpotlightRemove()
     }
 }
 
-json_object* BrowserPage::rectToJson(uintptr_t id, int x, int y, int width, int height, Palm::InteractiveRectType type)
+json_object* BrowserPage::rectToJson(uintptr_t id, int x, int y, int width, int height, InteractiveRectType type)
 {
     json_object* rectsJson = json_object_new_array();
     if (!rectsJson || is_error(rectsJson))
@@ -2677,7 +2674,7 @@ json_object* BrowserPage::rectToJson(uintptr_t id, int x, int y, int width, int 
     return rectsJson;
 }
 
-void BrowserPage::addInteractiveWidgetRect(uintptr_t id, int x, int y, int width, int height, Palm::InteractiveRectType type)
+void BrowserPage::addInteractiveWidgetRect(uintptr_t id, int x, int y, int width, int height, InteractiveRectType type)
 {
     json_object* rectsJson = rectToJson(id, x, y, width, height, type);
 
@@ -2695,7 +2692,7 @@ void BrowserPage::addInteractiveWidgetRect(uintptr_t id, int x, int y, int width
     json_object_put(rectsJson);
 }
 
-void BrowserPage::removeInteractiveWidgetRect(uintptr_t id, Palm::InteractiveRectType type)
+void BrowserPage::removeInteractiveWidgetRect(uintptr_t id, InteractiveRectType type)
 {
     json_object* rectsJson = json_object_new_object();
 
@@ -3325,20 +3322,20 @@ void BrowserPage::doSelectionChanged()
     m_topMarker->setVisible(true);
     m_bottomMarker->setVisible(true);
 
-    removeInteractiveWidgetRect((uintptr_t)m_topMarker,Palm::InteractiveRectDefault);
-    removeInteractiveWidgetRect((uintptr_t)m_bottomMarker,Palm::InteractiveRectDefault);
+    removeInteractiveWidgetRect((uintptr_t)m_topMarker,InteractiveRectDefault);
+    removeInteractiveWidgetRect((uintptr_t)m_bottomMarker,InteractiveRectDefault);
     addInteractiveWidgetRect((uintptr_t)m_topMarker,
             m_topMarker->offset().x()-selectMarkerExtraPixels,
             m_topMarker->offset().y()-selectMarkerExtraPixels,
             m_topMarker->boundingRect().width()+selectMarkerExtraPixels,
             m_topMarker->boundingRect().height()+selectMarkerExtraPixels,
-            Palm::InteractiveRectDefault);
+            InteractiveRectDefault);
     addInteractiveWidgetRect((uintptr_t)m_bottomMarker,
             m_bottomMarker->offset().x()-selectMarkerExtraPixels,
             m_bottomMarker->offset().y()-selectMarkerExtraPixels,
             m_bottomMarker->boundingRect().width()+selectMarkerExtraPixels,
             m_bottomMarker->boundingRect().height()+selectMarkerExtraPixels,
-            Palm::InteractiveRectDefault);
+            InteractiveRectDefault);
 
 }
 void BrowserPage::loadSelectionMarkers()
@@ -3361,7 +3358,7 @@ void BrowserPage::hideSelectionMarkers()
 {
     m_topMarker->setVisible(false);
     m_bottomMarker->setVisible(false);
-    removeInteractiveWidgetRect((uintptr_t)m_topMarker,Palm::InteractiveRectDefault);
-    removeInteractiveWidgetRect((uintptr_t)m_bottomMarker,Palm::InteractiveRectDefault);
+    removeInteractiveWidgetRect((uintptr_t)m_topMarker,InteractiveRectDefault);
+    removeInteractiveWidgetRect((uintptr_t)m_bottomMarker,InteractiveRectDefault);
 
 }
