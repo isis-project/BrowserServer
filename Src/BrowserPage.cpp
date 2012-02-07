@@ -2002,15 +2002,16 @@ void BrowserPage::getInteractiveNodeRects(int32_t mouseX, int32_t mouseY)
 
     clientPointToServer((uint32_t&)mouseX, (uint32_t&)mouseY);
 
-    std::vector<Palm::WebRect> nodeRects;
 #ifdef FIXME_QT
-    m_webView->getInteractiveNodeRects(mouseX, mouseY, nodeRects); 
-#endif // FIXME_QT
+    std::vector<Palm::WebRect> nodeRects;
+    m_webView->getInteractiveNodeRects(mouseX, mouseY, nodeRects);
 
     if (nodeRects.empty()) {
         //printf("BrowserPage::getInteractiveNodeRects: %d, %d is Empty\n", mouseX, mouseY);
         return;
     }
+
+    // Due to the previous if, everything from this point on is dead code anyway without the m_webView->getInteractiveNodeRect() call.
 
     //printf("BrowserPage::getInteractiveNodeRects: %d, %d returned %d rects\n", mouseX, mouseY, nodeRects.size());
 
@@ -2084,6 +2085,7 @@ void BrowserPage::getInteractiveNodeRects(int32_t mouseX, int32_t mouseY)
     m_server->msgHighlightRects(m_proxy, rectsStr);
 
     json_object_put(rectsJson);
+#endif // FIXME_QT
 
 }
 
