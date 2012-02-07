@@ -286,8 +286,8 @@ public:
     virtual void pastedFromClipboard();
     virtual void pluginFullscreenSpotlightCreate(int handle, int rectx, int recty, int rectw, int recth);
     virtual void pluginFullscreenSpotlightRemove();
-    virtual void addInteractiveWidgetRect(uintptr_t id, int x, int y, int width, int height, Palm::InteractiveRectType);
-    virtual void removeInteractiveWidgetRect(uintptr_t id, Palm::InteractiveRectType);
+    virtual void addInteractiveWidgetRect(uintptr_t id, int x, int y, int width, int height, InteractiveRectType);
+    virtual void removeInteractiveWidgetRect(uintptr_t id, InteractiveRectType);
     virtual bool smartKeySearch(int requestId, const char* query);
     virtual bool smartKeyLearn(const char* word);
 
@@ -429,7 +429,7 @@ private:
     void handleFingerEvent();
     void initWebViewWidgetState();
 
-    json_object* rectToJson(uintptr_t id, int x, int y, int width, int height, Palm::InteractiveRectType);
+    json_object* rectToJson(uintptr_t id, int x, int y, int width, int height, InteractiveRectType);
 
     void freePtrArray(GPtrArray* array);
 

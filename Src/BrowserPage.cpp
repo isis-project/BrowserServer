@@ -2653,7 +2653,7 @@ void BrowserPage::pluginFullscreenSpotlightRemove()
     }
 }
 
-json_object* BrowserPage::rectToJson(uintptr_t id, int x, int y, int width, int height, Palm::InteractiveRectType type)
+json_object* BrowserPage::rectToJson(uintptr_t id, int x, int y, int width, int height, InteractiveRectType type)
 {
     json_object* rectsJson = json_object_new_array();
     if (!rectsJson || is_error(rectsJson))
@@ -2681,7 +2681,7 @@ json_object* BrowserPage::rectToJson(uintptr_t id, int x, int y, int width, int 
     return rectsJson;
 }
 
-void BrowserPage::addInteractiveWidgetRect(uintptr_t id, int x, int y, int width, int height, Palm::InteractiveRectType type)
+void BrowserPage::addInteractiveWidgetRect(uintptr_t id, int x, int y, int width, int height, InteractiveRectType type)
 {
     json_object* rectsJson = rectToJson(id, x, y, width, height, type);
 
@@ -2699,7 +2699,7 @@ void BrowserPage::addInteractiveWidgetRect(uintptr_t id, int x, int y, int width
     json_object_put(rectsJson);
 }
 
-void BrowserPage::removeInteractiveWidgetRect(uintptr_t id, Palm::InteractiveRectType type)
+void BrowserPage::removeInteractiveWidgetRect(uintptr_t id, InteractiveRectType type)
 {
     json_object* rectsJson = json_object_new_object();
 
@@ -3329,20 +3329,20 @@ void BrowserPage::doSelectionChanged()
     m_topMarker->setVisible(true);
     m_bottomMarker->setVisible(true);
 
-    removeInteractiveWidgetRect((uintptr_t)m_topMarker,Palm::InteractiveRectDefault);
-    removeInteractiveWidgetRect((uintptr_t)m_bottomMarker,Palm::InteractiveRectDefault);
+    removeInteractiveWidgetRect((uintptr_t)m_topMarker,InteractiveRectDefault);
+    removeInteractiveWidgetRect((uintptr_t)m_bottomMarker,InteractiveRectDefault);
     addInteractiveWidgetRect((uintptr_t)m_topMarker,
             m_topMarker->offset().x()-selectMarkerExtraPixels,
             m_topMarker->offset().y()-selectMarkerExtraPixels,
             m_topMarker->boundingRect().width()+selectMarkerExtraPixels,
             m_topMarker->boundingRect().height()+selectMarkerExtraPixels,
-            Palm::InteractiveRectDefault);
+            InteractiveRectDefault);
     addInteractiveWidgetRect((uintptr_t)m_bottomMarker,
             m_bottomMarker->offset().x()-selectMarkerExtraPixels,
             m_bottomMarker->offset().y()-selectMarkerExtraPixels,
             m_bottomMarker->boundingRect().width()+selectMarkerExtraPixels,
             m_bottomMarker->boundingRect().height()+selectMarkerExtraPixels,
-            Palm::InteractiveRectDefault);
+            InteractiveRectDefault);
 
 }
 void BrowserPage::loadSelectionMarkers()
@@ -3365,7 +3365,7 @@ void BrowserPage::hideSelectionMarkers()
 {
     m_topMarker->setVisible(false);
     m_bottomMarker->setVisible(false);
-    removeInteractiveWidgetRect((uintptr_t)m_topMarker,Palm::InteractiveRectDefault);
-    removeInteractiveWidgetRect((uintptr_t)m_bottomMarker,Palm::InteractiveRectDefault);
+    removeInteractiveWidgetRect((uintptr_t)m_topMarker,InteractiveRectDefault);
+    removeInteractiveWidgetRect((uintptr_t)m_bottomMarker,InteractiveRectDefault);
 
 }
