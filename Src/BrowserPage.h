@@ -21,10 +21,6 @@ LICENSE@@@ */
 
 #include <stdint.h>
 #include <regex.h>
-#include <webkitpalmtimer.h>
-#include <palmwebpage.h>
-#include <palmwebpageclient.h>
-#include <palmwebviewclient.h>
 #include <glib.h>
 #include <string>
 #include <set>
@@ -48,16 +44,11 @@ LICENSE@@@ */
 #include <semaphore.h>
 
 #include "SSLValidationInfo.h"
+#include "BrowserAdaptorTypes.h"
 
 class BrowserSyncReplyPipe;
 class BrowserServer;
 class YapProxy;
-
-namespace Palm {
-struct ImageInfo;
-struct ElementInfo;
-enum MouseMode;
-}
 
 /**
  * Redirects only happen once the page is loaded but commands (i.e. schema's)
@@ -149,7 +140,7 @@ public:
     void invalContents(int x, int y, int width, int height);
 
 
-    void setMouseMode(enum Palm::MouseMode mode);
+    void setMouseMode(enum BATypes::MouseMode mode);
 
     void didFinishDocumentLoad();
 
@@ -277,7 +268,7 @@ public:
     virtual void statusMessage(const char*) {}
     virtual void dispatchFailedLoad(const char* domain, int errorCode, const char* failingURL, const char* localizedDescription);
     virtual void setMainDocumentError(const char* domain, int errorCode, const char* failingURL, const char* localizedDescription);
-    virtual void editorFocused(bool focused, const PalmIME::EditorState& state);
+    virtual void editorFocused(bool focused, const BATypes::EditorState& state);
     virtual void focused() {}
     virtual void unfocused() {}
     virtual void selectionChanged();
@@ -411,7 +402,7 @@ private:
     bool m_focused;
     int m_fingerEventCount; ///< # of times that a mouse/touch/gesture event has occurred.
     bool m_hasFocusedNode;  ///< Is there a node currently focused on the page?
-    PalmIME::EditorState m_lastEditorState;
+    BATypes::EditorState m_lastEditorState;
 
 #ifdef FIXME_QT
     typedef std::map<uintptr_t, ScrollableLayerItem> ScrollableLayerItemMap;

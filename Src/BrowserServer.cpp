@@ -27,8 +27,6 @@ LICENSE@@@ */
 #include <assert.h>
 #include <malloc.h>
 
-#include <webkitpalmsettings.h>
-#include <palmwebview.h>
 #include <pbnjson.hpp>
 #include <qpersistentcookiejar.h>
 
@@ -1941,7 +1939,7 @@ BrowserServer::asyncCmdSetMouseMode(YapProxy* proxy, int32_t mode)
         return;
     }
 
-    pPage->setMouseMode(static_cast<Palm::MouseMode>(mode));
+    pPage->setMouseMode(static_cast<BATypes::MouseMode>(mode));
 }
 
 void BrowserServer::asyncCmdHitTest(YapProxy *proxy, int32_t queryNum, int32_t cx, int32_t cy)

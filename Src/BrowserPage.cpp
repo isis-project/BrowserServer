@@ -33,11 +33,8 @@ LICENSE@@@ */
 #include <QtGui>
 #include <QtNetwork>
 
-#include <palmwebpage.h>
-#include <palmwebview.h>
 #include <qpersistentcookiejar.h>
 #include <qwebevent.h>
-#include <palmwebtypes.h>
 #include <cjson/json.h>
 #include <pbnjson.hpp>
 #include <syslog.h>
@@ -831,7 +828,7 @@ void BrowserPage::smartZoomCalculate( uint32_t pointX, uint32_t pointY  )
 }
 
 
-void BrowserPage::editorFocused(bool focused, const PalmIME::EditorState& state)
+void BrowserPage::editorFocused(bool focused, const BATypes::EditorState& state)
 {
     m_hasFocusedNode = focused;
     m_lastEditorState = state;
@@ -886,7 +883,7 @@ BrowserPage::initWebViewWidgetState()
     if (m_hasFocusedNode) {
         // Set the finger event count to > 0 so that editorFocused will correctly blur
         m_fingerEventCount = 1;
-        editorFocused(false, PalmIME::FieldType_Text);
+        editorFocused(false, BATypes::FieldType_Text);
     }
     m_fingerEventCount = 0;
 
@@ -1485,17 +1482,17 @@ BrowserPage::urlChanged(const QUrl& url) {
 void
 BrowserPage::updateEditorFocus() {
     bool active = m_webView->flags() & QGraphicsItem::ItemAcceptsInputMethod;
-    PalmIME::EditorState editorState(PalmIME::FieldType_Text);
+    BATypes::EditorState editorState(BATypes::FieldType_Text);
     if (active) {
         Qt::InputMethodHints hints = m_webView->inputMethodHints();
         if (hints & Qt::ImhEmailCharactersOnly) {
-            editorState.type = PalmIME::FieldType_Email;
+            editorState.type = BATypes::FieldType_Email;
         } else if (hints & Qt::ImhUrlCharactersOnly) {
-            editorState.type = PalmIME::FieldType_URL;
+            editorState.type = BATypes::FieldType_URL;
         } else if (hints & Qt::ImhDialableCharactersOnly) {
-            editorState.type = PalmIME::FieldType_Phone;
+            editorState.type = BATypes::FieldType_Phone;
         } else if (hints & (Qt::ImhPreferNumbers | Qt::ImhDigitsOnly | Qt::ImhFormattedNumbersOnly)) {
-            editorState.type = PalmIME::FieldType_Number;
+            editorState.type = BATypes::FieldType_Number;
         }
     }
 
@@ -1607,7 +1604,7 @@ BrowserPage::urlTitleChanged(const char* pUrl, const char* pTitle)
     m_server->msgTitleAndUrlChanged(m_proxy, pTitle, pUrl, canGoBackward(), canGoForward());
 }
 
-void BrowserPage::setMouseMode(Palm::MouseMode mode)
+void BrowserPage::setMouseMode(BATypes::MouseMode mode)
 {
 #ifdef FIXME_QT
     if (m_webView) {
@@ -2161,7 +2158,7 @@ void BrowserPage::gestureEvent(int type, int contentX, int contentY, double scal
 
 void BrowserPage::touchEvent(int type, int32_t touchCount, int32_t modifiers, const char *touchesJson)
 {
-    static Palm::TouchPointPalm touches[10];
+    static BATypes::TouchPoint touches[10];
     pbnjson::JSchemaFragment inputSchema("{}");
     pbnjson::JDomParser parser(NULL);
     if (!parser.parse(std::string(touchesJson), inputSchema, NULL)) {
@@ -2177,7 +2174,7 @@ void BrowserPage::touchEvent(int type, int32_t touchCount, int32_t modifiers, co
         parsed[i]["state"].asNumber<int>(state);
         touches[i].x = x;
         touches[i].y = y;
-        touches[i].state = (Palm::TouchPointPalm::State)state;
+        touches[i].state = (BATypes::TouchPoint::State)state;
     }
 
     handleFingerEvent();
