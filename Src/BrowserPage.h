@@ -282,7 +282,6 @@ public:
     virtual void unfocused() {}
     virtual Palm::TextCaretType textCaretAppearance() { return Palm::TextCaretNormal; }
     virtual void selectionChanged();
-    virtual void startDrag(int, int, int, int, void*, PalmClipboard*) {}
     virtual void makePointVisible(int x, int y);
     virtual void copiedToClipboard();
     virtual void pastedFromClipboard();
