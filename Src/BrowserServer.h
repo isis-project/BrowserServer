@@ -67,7 +67,6 @@ public:
 #ifdef USE_HEAP_PROFILER
     static bool serviceCmdDumpHeapProfiler(LSHandle* lsHandle, LSMessage *message, void *ctx);
 #endif
-    static bool privateGetLunaStats(LSHandle* handle, LSMessage* message, void* ctxt);
     static bool privateDoGc(LSHandle* handle, LSMessage* message, void* ctxt);
 
     bool        startService();
@@ -204,9 +203,6 @@ private:
     virtual void asyncCmdSetZoomAndScroll(YapProxy* proxy, double zoom, int32_t cx, int32_t cy);
     virtual void asyncCmdScrollLayer(YapProxy* proxy, int32_t id, int32_t deltaX, int32_t deltaY);
     virtual void asyncCmdSetDNSServers(YapProxy* proxy, const char* servers);
-
-    void initiateStatsReporting();
-    static gboolean postStats(gpointer ctxt);
 
     void initPlatformPlugin();
     virtual bool showComboBoxPopup(int id, const char* fileName);

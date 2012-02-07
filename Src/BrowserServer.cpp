@@ -73,7 +73,6 @@ static LSMethod s_serviceMethods[] = {
 #ifdef USE_HEAP_PROFILER
     { "dumpHeapProfile", BrowserServer::serviceCmdDumpHeapProfiler },
 #endif
-    { "getStats", BrowserServer::privateGetLunaStats },
     { "gc", BrowserServer::privateDoGc },
     { 0, 0},
 };
@@ -1686,114 +1685,6 @@ BrowserServer::serviceCmdDumpHeapProfiler(LSHandle* lsHandle, LSMessage *message
 }
 
 #endif  // USE_HEAP_PROFILER
-
-
-gboolean BrowserServer::postStats(gpointer ctxt)
-{
-    LSError lsError;
-    std::string jsonStr;
-    std::string counters;
-    std::multimap<std::string,std::string> docMap;
-
-    return TRUE;
-
-    LSErrorInit(&lsError);
-
-
-    jsonStr = "{ ";
-
-    // assemble the documents array:
-    jsonStr += " \"documents\": [";
-
-    int index = 0;
-    std::multimap<std::string,std::string>::const_iterator it;
-    for (it=docMap.begin(), index = 0; it != docMap.end(); ++it, ++index) {
-
-        if (index != 0)
-            jsonStr += ", ";
-
-        jsonStr += "{ ";
-        jsonStr +=  it->second;
-        jsonStr += " }";
-    }
-
-    jsonStr += " ],\n";
-
-    // assemble the counters frame:
-    jsonStr += " \"counters\": {";
-    jsonStr += counters;
-    jsonStr += " } ";
-
-    jsonStr += " }";
-
-    if (!LSSubscriptionPost(BrowserServer::instance()->m_service, "/", "getStats", jsonStr.c_str(), &lsError))
-        LSErrorFree (&lsError);
-
-    return TRUE;
-}
-
-
-void BrowserServer::initiateStatsReporting()
-{
-    static GSource* src = 0;
-    if (!src) {
-        static const int kStatsReportingIntervalSecs = 5;
-
-        src = g_timeout_source_new_seconds(kStatsReportingIntervalSecs);
-        g_source_set_callback(src, BrowserServer::postStats, NULL, NULL);
-        g_source_attach(src, g_main_loop_get_context(BrowserServer::instance()->mainLoop()));
-        g_source_unref(src);
-    }
-}
-
-
-bool
-BrowserServer::privateGetLunaStats(LSHandle* handle, LSMessage* message, void* ctxt)
-{
-    bool ret(false);
-    LSError lsError;
-    bool subscribed = false;
-    std::string jsonStr;
-    std::string counters;
-    std::multimap<std::string,std::string> docMap;
-
-    LSErrorInit(&lsError);
-
-    jsonStr = "{ ";
-
-    if (!message) {
-        ret = false;
-        goto Done;
-    }
-
-    if (LSMessageIsSubscription(message)) {
-
-        ret = LSSubscriptionProcess(handle, message, &subscribed, &lsError);
-        if (!ret) {
-            LSErrorFree(&lsError);
-            goto Done;
-        }
-    }
-
-    if (subscribed)
-        BrowserServer::instance()->initiateStatsReporting();
-
-Done:
-
-    jsonStr += "\"returnValue\":";
-    jsonStr += ret ? "true" : "false";
-    jsonStr += ", ";
-
-    jsonStr += "\"subscribed\":";
-    jsonStr += subscribed ? "true" : "false";
-    jsonStr += " }";
-
-    if (!LSMessageReply(handle, message, jsonStr.c_str(), &lsError))
-        LSErrorFree(&lsError);
-
-    return true;
-}
-
 
 bool
 BrowserServer::privateDoGc(LSHandle* handle, LSMessage* message, void* ctxt)
