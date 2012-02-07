@@ -39,7 +39,6 @@ LIBS := -L$(LIB_DIR) \
 	-lglib-2.0 \
 	-llunaservice \
 	-lcjson \
-	-lmjson \
 	-lpbnjson_c \
 	-lpbnjson_cpp \
 	-lyajl \
