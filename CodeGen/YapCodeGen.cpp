@@ -220,7 +220,7 @@ printInputTypeArgPairConverted(FILE* f, TypeArgPair pair, const char* source)
         break;
     case (YapString):
         fprintf(f, "char* %s = %s;",
-                pair.second.toLocal8Bit().constData(), source); break;
+                pair.second.toLocal8Bit().constData(), source);
         break;
     }
 }
