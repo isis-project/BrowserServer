@@ -53,10 +53,6 @@ ifeq ("$(PLATFORM)", "arm")
 	FLAGS_OPT += -DTARGET_DEVICE
 endif
 
-ifeq ($(GFX_BACKEND), "piranha")
-	FLAGS_OPT += -DENABLE_PIRANHA=1
-endif
-
 INCLUDES := $(INCLUDES) \
 	-I./Src -I./Yap \
 	-I$(INCLUDE_DIR)/ime \
