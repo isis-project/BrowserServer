@@ -1382,7 +1382,9 @@ BrowserPage::zoomedContents(double scaleFactor, int newWidth, int newHeight, int
     if (newWidth == 0 && newHeight == 0) {
         // start of a new page
         initWebViewWidgetState();
+#ifdef FIXME_QT
         m_scrollableLayerItems.clear();
+#endif
         resetMetaViewport();
         m_zoomLevel = kInvalidZoom;
         m_pageX = 0;

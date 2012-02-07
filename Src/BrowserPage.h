@@ -413,8 +413,10 @@ private:
     bool m_hasFocusedNode;  ///< Is there a node currently focused on the page?
     PalmIME::EditorState m_lastEditorState;
 
-    typedef std::map<uintptr_t, Palm::ScrollableLayerItem> ScrollableLayerItemMap;
+#ifdef FIXME_QT
+    typedef std::map<uintptr_t, ScrollableLayerItem> ScrollableLayerItemMap;
     ScrollableLayerItemMap m_scrollableLayerItems;
+#endif
 
 private:
 
