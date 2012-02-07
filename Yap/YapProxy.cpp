@@ -400,7 +400,7 @@ bool YapProxy::writeSocket(int fd, char* buf, int len)
 
 gboolean YapProxyIoFunction(GIOChannel* channel, GIOCondition condition, void* data)
 {
-    YapProxy* proxy = (YapProxy*) data;
+    YapProxy* proxy = static_cast<YapProxy*>(data);
     proxy->ioFunction(channel, condition);
     return TRUE;
 }

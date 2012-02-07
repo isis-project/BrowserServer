@@ -159,7 +159,6 @@ Chown(char *path, int owner, int group, bool recurse)
     rc = stat(path,&statbuf);
     if (rc == 0) {
         if (S_ISDIR(statbuf.st_mode) && recurse) {
-            int pathlen;
             char newpath[PATH_MAX];
             DIR * dir;
             struct dirent* dent;
@@ -170,7 +169,7 @@ Chown(char *path, int owner, int group, bool recurse)
             dir = opendir(path);
             // recurse into subdirs
             if (dir) {
-                pathlen = strlen(path);
+                int pathlen = strlen(path);
                 while((dent = readdir(dir)) != NULL) {
                     int dlen = strlen(dent->d_name);
                     // skip . and ..

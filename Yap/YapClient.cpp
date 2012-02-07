@@ -91,7 +91,7 @@ public:
 
     static gboolean ioCallback(GIOChannel* channel, GIOCondition condition, void* data)
     {
-        YapClient* client = (YapClient*) data;
+        YapClient* client = static_cast<YapClient*>(data);
         client->ioCallback(channel, condition);
         return TRUE;
     }

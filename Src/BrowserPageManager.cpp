@@ -84,7 +84,7 @@ BrowserPageManager::expireWatchedPages(gpointer)
             delete page;
             page = 0;
         } else {
-            iter_page++;
+            ++iter_page;
         }
     }
     return TRUE;
@@ -109,7 +109,7 @@ BrowserPageManager::unregisterPage(BrowserPage* page)
 void
 BrowserPageManager::watchForPage(BrowserPage* watchingPage, const int32_t identifier)
 {
-    if (m_watchingPageList.size() == 0) {  // attach page expire function to main loop
+    if (m_watchingPageList.empty()) {  // attach page expire function to main loop
         g_idle_add(expireWatchedPages, NULL);
     }
 

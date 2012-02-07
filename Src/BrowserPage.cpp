@@ -225,7 +225,7 @@ BrowserPage::~BrowserPage()
 
     int result=0;
     //get rid of temporary serials
-    for (std::list<int32_t>::iterator it = temporaryCertSerials.begin();it != temporaryCertSerials.end();it++) {
+    for (std::list<int32_t>::iterator it = temporaryCertSerials.begin(); it != temporaryCertSerials.end(); ++it) {
         result = CertRemoveCertificate(*it);
         if (result == CERT_OK) {
             g_debug("BrowserServer [bpage = %u]: (dtor) removed certificate %d",bpageId,*it);
@@ -1769,8 +1769,7 @@ BrowserPage::dialogUserPassword(const char* inMsg, std::string& userName, std::s
 
         if (replyArray->len >= 2) {
             val = static_cast<const char*>(g_ptr_array_index(replyArray, 1));
-            if (replyArray)
-                userName = val;
+            userName = val;
         }
         else {
             BERR("Username not provided");
@@ -2022,9 +2021,7 @@ void BrowserPage::getInteractiveNodeRects(int32_t mouseX, int32_t mouseY)
     prevRect.bottom = -1;
     prevRect.right = -1;
 
-    for (std::vector<Palm::WebRect>::iterator rects_iter = nodeRects.begin();
-         rects_iter != nodeRects.end();
-         rects_iter++)
+    for (std::vector<Palm::WebRect>::iterator rects_iter = nodeRects.begin(); rects_iter != nodeRects.end(); ++rects_iter)
     {
         Palm::WebRect r = *rects_iter;
         g_debug("%s: see rect with left: %d, top: %d, right: %d, bottom: %d\n",
@@ -2712,14 +2709,6 @@ void BrowserPage::removeInteractiveWidgetRect(uintptr_t id, InteractiveRectType 
 
     json_object_put(rectsJson);
 }
-
-/**
- * The context information for our smart key search.
- */
-struct SmartKeySearchContext
-{
-    int requestId;
-};
 
 /**
  * Called by luna service when a response to a smart key search is received.

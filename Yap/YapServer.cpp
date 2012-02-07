@@ -152,7 +152,7 @@ gboolean YapServerDeadlockPriv::deadlockTimerCallback(gpointer data)
 {
     static bool firstCallback = true;
 
-    YapServerDeadlockPriv* d = (YapServerDeadlockPriv*)data;
+    YapServerDeadlockPriv* d = static_cast<YapServerDeadlockPriv*>(data);
     g_atomic_int_inc(&d->watchdogCount);
 
     //g_debug("deadlockTimerCallback!, count: %d", (int)d->watchdogCount);
@@ -167,7 +167,7 @@ gboolean YapServerDeadlockPriv::deadlockTimerCallback(gpointer data)
 
 gboolean YapServerDeadlockPriv::deadlockThreadTimerCallback(gpointer data)
 {
-   YapServerDeadlockPriv* d = (YapServerDeadlockPriv*)data;
+   YapServerDeadlockPriv* d = static_cast<YapServerDeadlockPriv*>(data);
    static gint lastCountSeen = 0;
    static gint lastInterval = -1;
 
@@ -222,7 +222,7 @@ gboolean YapServerDeadlockPriv::deadlockThreadTimerCallback(gpointer data)
 
 void* YapServerDeadlockPriv::deadlockThread(void *arg)
 {
-    YapServerDeadlockPriv* d = (YapServerDeadlockPriv*)arg;
+    YapServerDeadlockPriv* d = static_cast<YapServerDeadlockPriv*>(arg);
 
     if (d->threadTimeoutSource) {
 
@@ -249,7 +249,7 @@ void* YapServerDeadlockPriv::deadlockThread(void *arg)
 
 gboolean YapServerPriv::ioCallback(GIOChannel* channel, GIOCondition condition, void* data)
 {
-    YapServer* server = (YapServer*) data;
+    YapServer* server = static_cast<YapServer*>(data);
     server->ioCallback(channel, condition);
     return TRUE;
 }
