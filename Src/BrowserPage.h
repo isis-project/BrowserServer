@@ -280,7 +280,6 @@ public:
     virtual void editorFocused(bool focused, const PalmIME::EditorState& state);
     virtual void focused() {}
     virtual void unfocused() {}
-    virtual Palm::TextCaretType textCaretAppearance() { return Palm::TextCaretNormal; }
     virtual void selectionChanged();
     virtual void makePointVisible(int x, int y);
     virtual void copiedToClipboard();
