@@ -44,7 +44,7 @@ LICENSE@@@ */
 #include <semaphore.h>
 
 #include "SSLValidationInfo.h"
-#include "BrowserAdaptorTypes.h"
+#include "BrowserAdapterTypes.h"
 
 class BrowserSyncReplyPipe;
 class BrowserServer;
