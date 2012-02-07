@@ -25,7 +25,6 @@ LICENSE@@@ */
 #include <palmwebpage.h>
 #include <palmwebpageclient.h>
 #include <palmwebviewclient.h>
-#include <palmwebsslinfo.h>
 #include <glib.h>
 #include <string>
 #include <set>
@@ -47,6 +46,8 @@ LICENSE@@@ */
 #include <qbsinterface.h>
 
 #include <semaphore.h>
+
+#include "SSLValidationInfo.h"
 
 class BrowserSyncReplyPipe;
 class BrowserServer;
@@ -201,7 +202,7 @@ public:
      * 
      * return true if things went ok and user presented a response, false otherwise
      */
-    bool dialogSSLConfirm(Palm::SSLValidationInfo& sslInfo);
+    bool dialogSSLConfirm(SSLValidationInfo& sslInfo);
 
     void takeActionOnData( const char* dataType, const char* data );
     bool takeActionOnData(const char * urlString);

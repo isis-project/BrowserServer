@@ -1811,7 +1811,7 @@ BrowserPage::dialogUserPassword(const char* inMsg, std::string& userName, std::s
  * 
  */
 bool
-BrowserPage::dialogSSLConfirm(Palm::SSLValidationInfo& sslInfo)
+BrowserPage::dialogSSLConfirm(SSLValidationInfo& sslInfo)
 {
     if (!proxyConnected())
         return false;
