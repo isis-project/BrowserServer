@@ -38,7 +38,6 @@ LIBS := -L$(LIB_DIR) \
 	-lpthread \
 	-lglib-2.0 \
 	-llunaservice \
-	-licuuc \
 	-lcjson \
 	-lmjson \
 	-lpbnjson_c \
