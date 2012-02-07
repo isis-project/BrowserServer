@@ -21,43 +21,52 @@ LICENSE@@@ */
 #include <QFile>
 #include <QTimer>
 
-#include <cjson/json.h>
+#include <pbnjson.hpp>
 
-static inline json_object* createJSONItem(const QWebSelectData& listData, int index)
+static void jsonToString(const pbnjson::JValue& val, std::string& result, const char* schema = "{}")
 {
-    json_object* result = json_object_new_object();
-    if (result) {
-        json_object_object_add(result, const_cast<char*>("text"), json_object_new_string(listData.itemText(index).toUtf8().data()) );
-        json_object_object_add(result, const_cast<char*>("isEnabled"), json_object_new_boolean(listData.itemIsEnabled(index)) );
-        json_object_object_add(result, const_cast<char*>("isSeparator"), json_object_new_boolean(listData.itemType(index) == QWebSelectData::Separator) );
-        json_object_object_add(result, const_cast<char*>("isLabel"), json_object_new_boolean(listData.itemType(index) == QWebSelectData::Group) );
-    }
+  pbnjson::JGenerator serializer;
+
+  if (!serializer.toString(val, pbnjson::JSchemaFragment(schema), result)) {
+    qCritical("jsonToString: failed to generate json result");
+    result = "{}";
+  }
+}
+
+static inline pbnjson::JValue createJSONItem(const QWebSelectData& listData, int index)
+{
+    pbnjson::JValue result = pbnjson::Object();
+
+    result.put(const_cast<char*>("text"), listData.itemText(index).toUtf8().constData());
+    result.put(const_cast<char*>("isEnabled"), listData.itemIsEnabled(index));
+    result.put(const_cast<char*>("isSeparator"), listData.itemType(index) == QWebSelectData::Separator);
+    result.put(const_cast<char*>("isLabel"), listData.itemType(index) == QWebSelectData::Group);
+
     return result;
 }
 
-static inline json_object* createJSONItemList(const QWebSelectData& listData, int& selectedIndex)
+static inline pbnjson::JValue createJSONItemList(const QWebSelectData& listData, int& selectedIndex)
 {
-    json_object* result = json_object_new_array();
-    if (result) {
-        for (int i = 0; i < listData.itemCount(); ++i) {
-            if (listData.itemIsSelected(i))
-                selectedIndex = i;
-            json_object_array_add(result, createJSONItem(listData, i));
-        }
+    pbnjson::JValue result = pbnjson::Array();
+
+    for (int i = 0; i < listData.itemCount(); ++i) {
+      if (listData.itemIsSelected(i))
+        selectedIndex = i;
+      result.append(createJSONItem(listData, i));
     }
+
     return result;
 }
 
 
-static inline json_object* createJSONPopupData(const QWebSelectData& listData)
+static inline pbnjson::JValue createJSONPopupData(const QWebSelectData& listData)
 {
-    json_object* result = json_object_new_object();
-    if (result) {
-        int selectedIndex = -1;
-        json_object_object_add(result, const_cast<char*>("items"), createJSONItemList(listData, selectedIndex));
-        json_object_object_add(result, const_cast<char*>("selectedIdx"), json_object_new_int(selectedIndex) );
+    pbnjson::JValue result = pbnjson::Object();
+    int selectedIndex = -1;
 
-    }
+    result.put(const_cast<char*>("items"), createJSONItemList(listData, selectedIndex));
+    result.put(const_cast<char*>("selectedIdx"), (int64_t) selectedIndex);
+
     return result;
 }
 
@@ -67,10 +76,11 @@ static inline QString writeJSONPopupData(int id, const QWebSelectData& listData)
     if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate))
         return QString();
 
-    json_object* content = createJSONPopupData(listData);
-    const char* data = json_object_get_string(content);
+    pbnjson::JValue content = createJSONPopupData(listData);
+    std::string result;
+    jsonToString(content, result);
+    const char* data = result.c_str();
     file.write(data, strlen(data));
-    json_object_put(content);
 
     return file.flush() ? file.fileName() : QString();
 }
