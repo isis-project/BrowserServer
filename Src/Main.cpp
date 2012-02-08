@@ -240,13 +240,11 @@ static void InitPrivileges() {
     // and set the group to luna:
     Chown((char*)"/dev/DspBridge",0,kGroupId,true);
 
-    // same for broadway:
     // make sure it allows group rw:
     chmod("/dev/msm_vidc_dec",S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP);
     // and set the group to luna:
     Chown((char*)"/dev/msm_vidc_dec",0,kGroupId,true);
 
-    // for manta
     chmod("/dev/pmem_adsp",S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP);
     Chown((char*)"/dev/pmem_adsp",0,kGroupId,true);
 
