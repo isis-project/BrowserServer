@@ -41,7 +41,6 @@ LICENSE@@@ */
 #include <cjson/json.h>
 #include "lunaservice.h"
 
-#include "Utils.h"
 #include <WebKitEventListener.h>
 #include <BackupManager.h>
 #include "PluginDirWatcher.h"

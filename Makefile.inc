@@ -27,7 +27,6 @@ APP_SOURCES := \
 	BackupManager.cpp \
 	CpuAffinity.cpp \
 	WebKitEventListener.cpp \
-	Utils.cpp \
 	Settings.cpp \
 	SSLSupport.cpp \
 	BrowserPage.moc.cpp \

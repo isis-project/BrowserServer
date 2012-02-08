@@ -29,6 +29,7 @@ LICENSE@@@ */
 #include <queue>
 #include <memory>
 #include <set>
+#include <openssl/ssl.h>
 
 #include <QtGui>
 #include <QtNetwork>
@@ -56,9 +57,15 @@ LICENSE@@@ */
 
 #include "webosDeviceKeydefs.h"
 
-#include "Utils.h"
-
 #include <cert_mgr.h>
+#include <cert_mgr_prv.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
+#include <cert_db.h>
+#ifdef __cplusplus
+}
+#endif
 
 using namespace webOS;
 static char* sUserAgent = 0;
@@ -136,6 +143,89 @@ static inline QRect PrvScaledRect(int x, int y, int w, int h, double zoom)
     h -= y;
 
     return QRect(x, y, w, h);
+}
+
+/**
+ * Given a candidate certificate "cert", find a match in the local certificate store
+ * alternately, find a local match for a certificate in the file "certFileAndPath".
+ *
+ * Returns the local certificate in X509 form if found, 0 otherwise.
+ * If non-null return, then 'retCertSerialNb' is populated with the serial number
+ * (which can be used to mess with the cert in the PmCertManager).
+ *
+ * IMPORTANT: X509_free() must be called by the caller on the X509 objects
+ * returned.
+ */
+X509* findSSLCertInLocalStore(X509* cert, int& retCertSerialNb)
+{
+    if (!cert)
+        return 0;
+
+    int items = 0;
+    SSL_library_init();
+    SSL_load_error_strings();
+    CertReturnCode_t result = CertGetDatabaseInfo(CERT_DATABASE_SIZE, &items);
+    if (result == CERT_OK) {
+        for (int i = 0; i < items; ++i) {
+            char serialStr[128];
+            result = CertGetDatabaseStrValue(i, CERT_DATABASE_ITEM_SERIAL, serialStr, 128);
+            if (CERT_OK == result) {
+                char dir[MAX_CERT_PATH];
+                char* endPtr = 0;
+                int serial = strtol(serialStr, &endPtr, 16);
+                result = makePathToCert(serial, dir, MAX_CERT_PATH);
+                if (CERT_OK == result) {
+                    X509 *candidate_cert = 0;
+                    char buf[128] = { '\0' };
+                    memset(buf, 0, sizeof(buf));
+                    result = CertPemToX509(dir, &candidate_cert);
+                    if (!candidate_cert)
+                        continue;
+                    if (result == CERT_OK)
+                        if (!X509_cmp(candidate_cert, cert)) {
+                            retCertSerialNb = serial;
+                            return candidate_cert;
+                        }
+                }
+            }
+        }
+    }
+    return NULL;
+}
+
+X509* findSSLCertInLocalStore(const char* certFileAndPath, int& retCertSerialNb)
+{
+    FILE* fp = fopen(certFileAndPath, "rb");
+    if (!fp)
+        return 0;
+
+    X509* cert = PEM_read_X509(fp, 0, 0, 0);
+    if (!cert)
+        return 0;
+
+    X509* inStoreCert = findSSLCertInLocalStore(cert,retCertSerialNb);
+    X509_free(cert);
+    return inStoreCert;
+}
+
+static QString makeUniqueFileName(const QString& inFileName)
+{
+    if (!QFile::exists(inFileName))
+        return inFileName;
+
+    QFileInfo fi(inFileName);
+    const QString path = fi.absolutePath();
+    const QString base = fi.completeBaseName();
+    const QString suffix = fi.suffix();
+    QString fileName;
+
+    for (int ix = 1; ix < 200; ++ix) {
+        fileName = QString("%1/%2(%3).%4").arg(path).arg(base).arg(ix).arg(suffix);
+        if (!QFile::exists(fileName))
+            return fileName;
+    }
+
+    return fileName;
 }
 
 BrowserPage::BrowserPage(BrowserServer* server, YapProxy* proxy, LSHandle* lsHandle)
