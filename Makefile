@@ -42,7 +42,6 @@ LIBS := -L$(LIB_DIR) \
 	-lpbnjson_c \
 	-lpbnjson_cpp \
 	-lyajl \
-	-luriparser \
 	-lPmCertificateMgr \
 	-laffinity
 
