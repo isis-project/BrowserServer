@@ -63,7 +63,7 @@ INCLUDES := $(INCLUDES) \
 	-I$(INCLUDE_DIR)/WebKitSupplemental \
 	`pkg-config --cflags glib-2.0`
 
-LIBS := $(LIBS) -lglib-2.0 -llunaservice -lcjson -lpbnjson_cpp -luriparser -lPmCertificateMgr -lQtGui -lQtWebKit -lQtNetwork -lWebKitMisc
+LIBS := $(LIBS) -lglib-2.0 -llunaservice -lcjson -lpbnjson_cpp -lPmCertificateMgr -lQtGui -lQtWebKit -lQtNetwork -lWebKitMisc
 
 ifeq ($(PLATFORM),arm)
 LIBS := $(LIBS) -lmemchute
