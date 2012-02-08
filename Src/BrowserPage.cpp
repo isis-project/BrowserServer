@@ -2733,71 +2733,38 @@ void BrowserPage::pluginFullscreenSpotlightRemove()
     }
 }
 
-json_object* BrowserPage::rectToJson(uintptr_t id, int x, int y, int width, int height, InteractiveRectType type)
-{
-    json_object* rectsJson = json_object_new_array();
-    if (!rectsJson || is_error(rectsJson))
-        return NULL;
-
-    //syslog(LOG_DEBUG, "%s: rect with left: %d, top: %d, right: %d, bottom: %d\n",
-    //       __FUNCTION__, x, y, x+width, y+height);
-
-    // construct json string for IntRect
-    json_object* rect = json_object_new_object();
-    if (!rect || is_error(rect)) {
-        json_object_put(rectsJson);
-        return NULL;
-    }
-
-    json_object_object_add(rect, "id", json_object_new_int(id));
-    json_object_object_add(rect, "left", json_object_new_int(x));
-    json_object_object_add(rect, "top", json_object_new_int(y));
-    json_object_object_add(rect, "right", json_object_new_int(x + width));
-    json_object_object_add(rect, "bottom", json_object_new_int(y + height));
-    json_object_object_add(rect, "type", json_object_new_int((int)type));
-
-    json_object_array_add(rectsJson, rect);
-
-    return rectsJson;
-}
-
 void BrowserPage::addInteractiveWidgetRect(uintptr_t id, int x, int y, int width, int height, InteractiveRectType type)
 {
-    json_object* rectsJson = rectToJson(id, x, y, width, height, type);
+    pbnjson::JValue rectJson = pbnjson::Object();
 
-    if (!rectsJson || is_error(rectsJson))
-        return;
+    rectJson.put("id", (int) id);
+    rectJson.put("left", x);
+    rectJson.put("top", y);
+    rectJson.put("right", x + width);
+    rectJson.put("bottom", y + height);
+    rectJson.put("type", (int) type);
 
-    const char* rectsStr = json_object_get_string(rectsJson);
+    pbnjson::JValue rectArrayJson = pbnjson::Array();
 
-    //syslog(LOG_DEBUG, "%s: rectsStr: %s\n",
-    //        __FUNCTION__, rectsStr);
+    rectArrayJson.append(rectJson);
+
+    std::string result = pbnjson::JGenerator::serialize(rectArrayJson, pbnjson::JSchemaFragment("{}"), NULL);
 
     // send json string to BrowserAdapter
-    m_server->msgAddFlashRects(m_proxy, rectsStr);
-
-    json_object_put(rectsJson);
+    m_server->msgAddFlashRects(m_proxy, result.c_str());
 }
 
 void BrowserPage::removeInteractiveWidgetRect(uintptr_t id, InteractiveRectType type)
 {
-    json_object* rectsJson = json_object_new_object();
+    pbnjson::JValue rectJson = pbnjson::Object();
 
-    if (!rectsJson || is_error(rectsJson))
-        return;
+    rectJson.put("id", (int) id);
+    rectJson.put("type", (int) type);
 
-    json_object_object_add(rectsJson, "id", json_object_new_int(id));
-    json_object_object_add(rectsJson, "type", json_object_new_int((int)type));
-
-    const char* rectsStr = json_object_get_string(rectsJson);
-
-    //syslog(LOG_DEBUG, "%s: rectsStr: %s\n",
-    //       __FUNCTION__, rectsStr);
+    std::string result = pbnjson::JGenerator::serialize(rectJson, pbnjson::JSchemaFragment("{}"), NULL);
 
     // send json string to BrowserAdapter
-    m_server->msgRemoveFlashRects(m_proxy, rectsStr);
-
-    json_object_put(rectsJson);
+    m_server->msgRemoveFlashRects(m_proxy, result.c_str());
 }
 
 /**
