@@ -1,7 +1,7 @@
 BrowserServer
 =============
 
-BrowserServer is the web rendering process for the [isis-browser](/isis-project/isis-browser). The isis-browser uses [BrowserAdapter](/isis-project/BrowserAdapter) to display web pages that are rendered by BrowserServer. This is for performance and security reasons. The webOS process itself does not need to be responsible for rendering unknow/untested content from the web.
+BrowserServer is the web rendering process for the [isis-browser](/isis-project/isis-browser). The isis-browser uses [BrowserAdapter](/isis-project/BrowserAdapter) to display web pages that are rendered by BrowserServer. This is for performance and security reasons. The webOS process itself does not need to be responsible for rendering unknown/untested content from the web.
 
 _No further development is planned on the component._
 
