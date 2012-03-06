@@ -91,7 +91,7 @@ ProcessMutex::ProcessMutex(int size, int key)
             ::shmdt(m_data);
             m_data = 0;
             return;
-
+	}
     }
 }
 
