@@ -1679,23 +1679,29 @@ bool BrowserServer::connectionManagerConnectCallback(LSHandle *sh, LSMessage *me
         return true;
 
     const char* payload = LSMessageGetPayload(message);
-    json_object* label = 0;
-    json_object* json = 0;
+    if (!payload)
+        return true;
+
+    BDBG("payload = %s", payload);
+
+    pbnjson::JValue args;
+    pbnjson::JDomParser parser(NULL);
+    pbnjson::JSchemaFragment schema("{}");
+
     bool connected = false;
 
-    label = 0;
-    json = json_tokener_parse(payload);
-    if (!json || is_error(json))
+    if (!parser.parse(payload, schema, NULL))
         goto Done;
 
-    label = json_object_object_get(json, "connected");
-    if (!label || is_error(label))
+    args = parser.getDom();
+    if (!args["connected"].isBoolean())
         goto Done;
-    connected = json_object_get_boolean(label);
+
+    connected = args["connected"].asBool();
 
     if (connected) {
 
-        // We are connected to the systemservice. call and get the connection manager status        
+        // We are connected to the systemservice. call and get the connection manager status
         BrowserServer* bs = BrowserServer::instance();
 
         bool ret = false;
@@ -1713,10 +1719,6 @@ bool BrowserServer::connectionManagerConnectCallback(LSHandle *sh, LSMessage *me
     }
 
 Done:
-
-    if (json && !is_error(json))
-        json_object_put(json);
-
     return true;
 }
 
