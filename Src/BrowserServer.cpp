@@ -1727,44 +1727,35 @@ bool BrowserServer::connectionManagerGetStatusCallback(LSHandle* sh, LSMessage* 
     if (!message)
         return true;
 
-    const char* payload = LSMessageGetPayload(message); 
-    json_object* label = 0;
-    json_object* json = 0;
+    const char* payload = LSMessageGetPayload(message);
+    if (!payload)
+        return true;
+
+    BDBG("payload = %s", payload);
+
+    pbnjson::JValue args;
+    pbnjson::JDomParser parser(NULL);
+    pbnjson::JSchemaFragment schema("{}");
+
+    if (!parser.parse(payload, schema, NULL))
+        return false;
+
+    args = parser.getDom();
+
     std::string wifiIpAddress;
     std::string wanIpAddress;
     std::string selectedIpAddress;
 
     BrowserServer* bs = BrowserServer::instance();
 
-    json = json_tokener_parse(payload);
-    if (!json || is_error(json)) {
-        return false;
-    }
+    if (args["isInternetConnectionAvailable"].isBoolean())
+        isInternetConnectionAvailable = args["isInternetConnectionAvailable"].asBool();
 
-    label = json_object_object_get(json, "isInternetConnectionAvailable");
-    if (label && !is_error(label)) {
-        isInternetConnectionAvailable = json_object_get_boolean(label);
-    }
+    if (args["wifi"].isObject() && args["wifi"]["ipAddress"].isString())
+        wifiIpAddress = args["wifi"]["ipAddress"].asString();
 
-    label = json_object_object_get(json, (char*) "wifi");
-    if (label && !is_error(label)) {
-
-        json_object* l = json_object_object_get(label, (char*) "ipAddress");
-        if (l && !is_error(l)) {
-            wifiIpAddress = json_object_get_string(l);
-        }
-    }
-
-    label = json_object_object_get(json, (char*) "wan");
-    if (label && !is_error(label)) {
-
-        json_object* l = json_object_object_get(label, (char*) "ipAddress");
-        if (l && !is_error(l)) {
-            wanIpAddress = json_object_get_string(l);
-        }
-    }
-
-    json_object_put(json);
+    if (args["wan"].isObject() && args["wan"]["ipAddress"].isString())
+        wanIpAddress = args["wan"]["ipAddress"].asString();
 
     // Prefer WIFI over WAN
     if (!wanIpAddress.empty())
@@ -1775,14 +1766,8 @@ bool BrowserServer::connectionManagerGetStatusCallback(LSHandle* sh, LSMessage* 
 
 
     if (!selectedIpAddress.empty() && selectedIpAddress != bs->m_ipAddress) {
-
         g_message("IP address changed: %s. Restarting network", selectedIpAddress.c_str());
-
         bs->m_ipAddress = selectedIpAddress;
-
-        // Restart networking only if webkit has been initialized
-        if (gWebKitInit) {
-        }
     }
 
     return true;
