@@ -1123,26 +1123,31 @@ bool BrowserServer::msmStatusCallback(LSHandle *sh, LSMessage *message, void *ct
     if (!message)
         return true;
 
+    BDBG("payload = %s", payload);
+
     BrowserServer *bs = reinterpret_cast<BrowserServer*>(ctx);
 
     pbnjson::JValue msmStatus;
     pbnjson::JDomParser parser(NULL);
-    pbnjson::JSchemaFile schema("/etc/palm/browser/MSMStatus.schema");
+    pbnjson::JSchemaFragment schema("{}");
 
     if (!parser.parse(payload, schema, NULL)) {
+        BERR("Couldn't parse the payload");
         return false;
     }
 
     msmStatus = parser.getDom();
-    bool enteringMSMMode = msmStatus["inMSM"].asBool();
+    if (msmStatus["inMSM"].isBoolean()) {
+        bool enteringMSMMode = msmStatus["inMSM"].asBool();
 
-    if (enteringMSMMode) {
-        g_message(" ENTERING MSM_MODE, shutting down plugin directory watcher");
-        bs->m_pluginDirWatcher->suspend();
-    }
-    else {
-        g_message(" EXITING MSM_MODE, restarting plugin directory watcher");
-        bs->m_pluginDirWatcher->resume();
+        if (enteringMSMMode) {
+            g_message(" ENTERING MSM_MODE, shutting down plugin directory watcher");
+            bs->m_pluginDirWatcher->suspend();
+        }
+        else {
+            g_message(" EXITING MSM_MODE, restarting plugin directory watcher");
+            bs->m_pluginDirWatcher->resume();
+        }
     }
 
     return true;
