@@ -1,0 +1,15 @@
+Source: browserserver
+Section: webOS
+Priority: extra
+Maintainer: Anupam <anupam.kaul@palm.com>
+Build-Depends: debhelper (>= 8.0.0)
+Standards-Version: 3.9.2
+Homepage: https://github.com/isis-project/BrowserServer
+#Vcs-Git: git://git.debian.org/collab-maint/browserserver.git
+#Vcs-Browser: http://git.debian.org/?p=collab-maint/browserserver.git;a=summary
+
+Package: browserserver
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: The web rendering process for the isis-browser.
+ Browserserver is the web rendering process for the isis-browser. The isis-browser uses BrowserAdapter to display web pages that are rendered by BrowserServer. This is for performance and security reasons. The webOS process itself does not need to be responsible for rendering unknown/untested content from the web.
