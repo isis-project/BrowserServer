@@ -1125,28 +1125,26 @@ bool BrowserServer::msmStatusCallback(LSHandle *sh, LSMessage *message, void *ct
 
     BrowserServer *bs = reinterpret_cast<BrowserServer*>(ctx);
 
-    json_object* json = NULL;
-    json_object* value = NULL;
+    pbnjson::JValue msmStatus;
+    pbnjson::JDomParser parser(NULL);
+    pbnjson::JSchemaFile schema("/etc/palm/browser/MSMStatus.schema");
 
-    json = json_tokener_parse(payload);
-    if (!json || is_error(json)) {
+    if (!parser.parse(payload, schema, NULL)) {
         return false;
     }
 
-    value = json_object_object_get(json, "inMSM");
-    if (ValidJsonObject(value)) {
-        bool enteringMSMMode = json_object_get_boolean(value);
-        if (enteringMSMMode) {
-            g_message(" ENTERING MSM_MODE, shutting down plugin directory watcher");
-            bs->m_pluginDirWatcher->suspend();
-        }
-        else {
-            g_message(" EXITING MSM_MODE, restarting plugin directory watcher");
-            bs->m_pluginDirWatcher->resume();
-        }
+    msmStatus = parser.getDom();
+    bool enteringMSMMode = msmStatus["inMSM"].asBool();
+
+    if (enteringMSMMode) {
+        g_message(" ENTERING MSM_MODE, shutting down plugin directory watcher");
+        bs->m_pluginDirWatcher->suspend();
+    }
+    else {
+        g_message(" EXITING MSM_MODE, restarting plugin directory watcher");
+        bs->m_pluginDirWatcher->resume();
     }
 
-    json_object_put(json);
     return true;
 }
 

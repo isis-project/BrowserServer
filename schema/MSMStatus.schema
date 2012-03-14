@@ -1,0 +1,10 @@
+{
+    "description" : "Mass Storage Mode Status Schema",
+    "type" : "object",
+    "properties" : {
+        "inMSM" : {
+            "type" : "boolean",
+            "optional" : false
+        }
+    }
+}
