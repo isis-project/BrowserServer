@@ -1525,13 +1525,10 @@ BrowserServer::stopService()
 }
 
 bool
-BrowserServer::serviceCmdDeleteImage(LSHandle *lsHandle, LSMessage *message, void *ctx) 
+BrowserServer::serviceCmdDeleteImage(LSHandle *lsHandle, LSMessage *message, void *ctx)
 {
     LSError lserror;
     LSErrorInit(&lserror);
-
-    struct json_object* root;
-    struct json_object* label;
 
     std::string fileName; // filename argument
     size_t suffixPos; // for filename validation
@@ -1544,22 +1541,26 @@ BrowserServer::serviceCmdDeleteImage(LSHandle *lsHandle, LSMessage *message, voi
         return false;
     }
 
-    root = json_tokener_parse(msgPayload);
-    if (is_error(root)) {
-        root = NULL;
+    BDBG("msgPayload = %s", msgPayload);
+
+    pbnjson::JValue args;
+    pbnjson::JDomParser parser(NULL);
+    pbnjson::JSchemaFragment schema("{}");
+
+    if (!parser.parse(msgPayload, schema, NULL)) {
         goto Exit;
     }
 
-    label = json_object_object_get(root, "file");
-    if (label == NULL || is_error(label)) {
+    args = parser.getDom();
+    if (!args["file"].isString()) {
         g_message("%s: BrowserServer failed to find parameter 'file' in message", __FUNCTION__);
         errText = "file parameter not given";
         goto Exit;
     }
 
-    fileName = json_object_get_string(label);
+    fileName = args["file"].asString();
 
-    // checking if it ends in .png 
+    // checking if it ends in .png
     suffixPos = fileName.rfind(".png");
     if (suffixPos == std::string::npos || (fileName.length()-4 != suffixPos)) {
         g_message("%s: invalid filename '%s'", __FUNCTION__, fileName.c_str());
@@ -1576,32 +1577,22 @@ BrowserServer::serviceCmdDeleteImage(LSHandle *lsHandle, LSMessage *message, voi
     }
 
 Exit:
-    if (root != NULL && !is_error(root)) {
-        json_object_put(root);
-    }
-
-    // construct response json string
-    json_object* replyJson = json_object_new_object();
-    json_object_object_add(replyJson, 
-            (char*) "returnValue",
-            json_object_new_boolean(success));
-
+    pbnjson::JValue reply = pbnjson::Object();
+    reply.put("returnValue", success);
     if (!success) {
-        json_object_object_add(replyJson, 
-                (char*) "errorCode",
-                json_object_new_int(-1));
-
-        json_object_object_add(replyJson, 
-                (char*) "errorText",
-                json_object_new_string(errText.c_str()));
+        reply.put("errorCode", -1);
+        reply.put("errorText", errText);
     }
 
-    // send response
-    if (!LSMessageReply(lsHandle, message, json_object_to_json_string(replyJson), &lserror)) {
-        LSErrorFree(&lserror);
+    pbnjson::JGenerator serializer;
+    std::string replyStr;
+    if (serializer.toString(reply, pbnjson::JSchemaFragment("{}"), replyStr)) {
+        // send response
+        if (!LSMessageReply(lsHandle, message, replyStr.c_str(), &lserror))
+            LSErrorFree(&lserror);
+    } else {
+        g_message("%s: Unable to serialize JSON reply", __FUNCTION__);
     }
-
-    json_object_put(replyJson);
 
     return true;
 }
