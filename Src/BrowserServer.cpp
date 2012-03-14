@@ -1175,42 +1175,29 @@ bool BrowserServer::getPreferencesCallback(LSHandle *sh, LSMessage *message, voi
     if (!message)
         return true;
 
-    json_object* label = NULL;
-    json_object* json = NULL;
-    json_object* value = NULL;
+    BDBG("payload = %s", payload);
 
-    const char* languageCode = NULL;
-    const char* countryCode = NULL;
-    std::string newLocale;
+    pbnjson::JValue prefs, carrier;
+    pbnjson::JDomParser parser(NULL);
+    pbnjson::JSchemaFragment schema("{}");
 
-    label = 0;
-    json = json_tokener_parse(payload);
-    if (!json || is_error(json)) {
+    if (!parser.parse(payload, schema, NULL)) {
+        BERR("Failed to parse %s", payload);
         return false;
     }
 
-    value = json_object_object_get(json, "x_palm_carrier" );
-    if( ValidJsonObject(value) )
-    {
-        char* carrierCode = json_object_get_string(value);
-        if (gWebKitInit) {
-        }
-        if (m_instance != NULL) {
-            m_instance->m_carrierCode = carrierCode;
-        }
-    }
+    prefs = parser.getDom();
+
+    carrier = prefs["x_palm_carrier"];
+    if (carrier.isString() && m_instance)
+        m_instance->m_carrierCode = carrier.asString();
     else
         g_message(" NO PALM CARRIER in PREFS DB" );
 
-    value = json_object_object_get(json, "x_palm_textinput");
-    if (ValidJsonObject(value)) {
-
-        std::string strProp;
-
-        json_object* prop = json_object_object_get(value, "spellChecking");
-        if (ValidJsonObject(prop)) {
-
-            strProp = json_object_get_string(prop);
+    if (prefs["x_palm_textinput"].isObject()) {
+        pbnjson::JValue textInputPrefs = prefs["x_palm_textinput"];
+        if (textInputPrefs["spellChecking"].isString()) {
+            std::string strProp = textInputPrefs["spellChecking"].asString();
 #ifdef FIXME_QT
             if (strProp == "disabled")
                 PalmBrowserSettings()->checkSpelling = WebKitPalmSettings::DISABLED;
@@ -1224,19 +1211,15 @@ bool BrowserServer::getPreferencesCallback(LSHandle *sh, LSMessage *message, voi
 #endif
         }
 
-        prop = json_object_object_get(value, "grammarChecking");
-        if (ValidJsonObject(prop)) {
-
-            strProp = json_object_get_string(prop);
+        if (textInputPrefs["grammarChecking"].isString()) {
+            std::string strProp = textInputPrefs["grammarChecking"].asString();
 #ifdef FIXME_QT
             PalmBrowserSettings()->checkGrammar = strProp == "autoCorrect";
 #endif
         }
 
-        prop = json_object_object_get(value, "shortcutChecking");
-        if (ValidJsonObject(prop)) {
-
-            strProp = json_object_get_string(prop);
+        if (textInputPrefs["shortcutChecking"].isString()) {
+            std::string strProp = textInputPrefs["shortcutChecking"].asString();
 #ifdef FIXME_QT
             PalmBrowserSettings()->shortcutChecking = strProp == "autoCorrect";
 #endif
@@ -1246,18 +1229,13 @@ bool BrowserServer::getPreferencesCallback(LSHandle *sh, LSMessage *message, voi
         g_warning("Oops, no x_palm_textinput preference");
     }
 
-    value = json_object_object_get(json, "locale");
-    if ((value) && (!is_error(value))) {
-
-        label = json_object_object_get(value, "languageCode");
-        if ((label) || (!is_error(label))) {
-            languageCode = json_object_get_string(label);
-        }
-
-        label = json_object_object_get(value, "countryCode");
-        if ((label) || (!is_error(label))) {
-            countryCode = json_object_get_string(label);
-        }
+    if (prefs["locale"].isObject()) {
+        pbnjson::JValue localePrefs = prefs["locale"];
+        std::string languageCode, countryCode, newLocale;
+        if (localePrefs["languageCode"].isString())
+            languageCode = localePrefs["languageCode"].asString();
+        if (localePrefs["countryCode"].isString())
+            countryCode = localePrefs["countryCode"].asString();
 
         newLocale = languageCode;
         newLocale += "_";
@@ -1290,8 +1268,6 @@ bool BrowserServer::getPreferencesCallback(LSHandle *sh, LSMessage *message, voi
             }
         }
     }
-
-    json_object_put(json);
 
     return true;
 }
