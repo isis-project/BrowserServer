@@ -1,0 +1,35 @@
+{
+    "description" : "Interactive Widget Rectangle Schema",
+    "type" : "array",
+    "items" : {
+        "type" : "object",
+        "properties" : {
+            "id" : {
+                "type" : "number",
+                "optional" : false
+            },
+            "left" : {
+                "type" : "number",
+                "optional" : false
+            },
+            "top" : {
+                "type" : "number",
+                "optional" : false
+            },
+            "right" : {
+                "type" : "number",
+                "optional" : false
+            },
+            "bottom" : {
+                "type" : "number",
+                "optional" : false
+            },
+            "type" : {
+                "type" : "number",
+                "optional" : false
+            }
+        },
+        "minItems" : 1,
+        "maxItems" : 1
+    }
+}

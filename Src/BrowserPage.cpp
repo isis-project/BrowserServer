@@ -2748,10 +2748,17 @@ void BrowserPage::addInteractiveWidgetRect(uintptr_t id, int x, int y, int width
 
     rectArrayJson.append(rectJson);
 
-    std::string result = pbnjson::JGenerator::serialize(rectArrayJson, pbnjson::JSchemaFragment("{}"), NULL);
+    pbnjson::JGenerator serializer(NULL);
+    std::string result;
+    pbnjson::JSchemaFile schema("/etc/palm/browser/InteractiveWidgetRect.schema");
 
-    // send json string to BrowserAdapter
-    m_server->msgAddFlashRects(m_proxy, result.c_str());
+    if (!serializer.toString(rectArrayJson, schema, result)) {
+        BERR("Error generating JSON");
+    } else {
+        BDBG("Generated JSON:\n %s\n", result.c_str());
+        // send json string to BrowserAdapter
+        m_server->msgAddFlashRects(m_proxy, result.c_str());
+    }
 }
 
 void BrowserPage::removeInteractiveWidgetRect(uintptr_t id, InteractiveRectType type)
