@@ -38,6 +38,7 @@ LICENSE@@@ */
 
 #include <lunaservice.h>
 #include <cjson/json.h>
+#include <pbnjson.hpp>
 
 #include <qbsinterface.h>
 
@@ -419,8 +420,6 @@ private:
 
     void handleFingerEvent();
     void initWebViewWidgetState();
-
-    json_object* rectToJson(uintptr_t id, int x, int y, int width, int height, InteractiveRectType);
 
     void freePtrArray(GPtrArray* array);
 
