@@ -62,6 +62,7 @@ bool jsonStringToJValueUsingSchemaFile(pbnjson::JValue& val, const std::string& 
     return true;
 }
 
+#ifdef USE_LUNA_SERVICE
 bool lsMessageToJValue(pbnjson::JValue& val, LSMessage* message, const char* schema)
 {
     if (!message)
@@ -70,4 +71,5 @@ bool lsMessageToJValue(pbnjson::JValue& val, LSMessage* message, const char* sch
     const char* payload = LSMessageGetPayload(message);
     return jsonStringToJValue(val, payload, schema);
 }
+#endif /* USE_LUNA_SERVICE */
 

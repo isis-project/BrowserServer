@@ -27,7 +27,9 @@ bool jValueToJsonStringUsingSchemaFile(std::string&, const pbnjson::JValue&, con
 bool jsonStringToJValue(pbnjson::JValue&, const std::string&, const char* schema = "{}");
 bool jsonStringToJValueUsingSchemaFile(pbnjson::JValue&, const std::string&, const char*);
 
+#ifdef USE_LUNA_SERVICE
 #include <lunaservice.h>
 bool lsMessageToJValue(pbnjson::JValue&, LSMessage*, const char* schema = "{}");
+#endif /* USE_LUNA_SERVICE */
 
 #endif /* JSONUTILS_H */
