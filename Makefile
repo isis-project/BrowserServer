@@ -70,6 +70,7 @@ APP_SOURCES := \
 	WebKitEventListener.cpp \
 	Settings.cpp \
 	SSLSupport.cpp \
+	JsonUtils.cpp \
 	BrowserPage.moc.cpp \
 	BrowserComboBox.cpp \
 	BrowserComboBox.moc.cpp \

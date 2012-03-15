@@ -73,6 +73,7 @@ extern "C" {
 }
 #endif
 #endif //USE_CERT_MGR
+#include "JsonUtils.h"
 
 using namespace webOS;
 static char* sUserAgent = 0;
@@ -2275,14 +2276,11 @@ void BrowserPage::gestureEvent(int type, int contentX, int contentY, double scal
 void BrowserPage::touchEvent(int type, int32_t touchCount, int32_t modifiers, const char *touchesJson)
 {
     static BATypes::TouchPoint touches[10];
-    pbnjson::JSchemaFragment inputSchema("{}");
-    pbnjson::JDomParser parser(NULL);
-    if (!parser.parse(std::string(touchesJson), inputSchema, NULL)) {
-        BERR("error parsing json, dropping touch event");
-        return;
-    }
+    pbnjson::JValue parsed;
 
-    pbnjson::JValue parsed = parser.getDom();
+    if (!jsonStringToJValue(parsed, touchesJson))
+        return;
+
     for (int i = 0; i < touchCount; i++) {
         int x, y, state;
         parsed[i]["x"].asNumber<int>(x);
@@ -2781,11 +2779,8 @@ void BrowserPage::addInteractiveWidgetRect(uintptr_t id, int x, int y, int width
 
     rectArrayJson.append(rectJson);
 
-    pbnjson::JGenerator serializer(NULL);
     std::string result;
-    pbnjson::JSchemaFile schema("/etc/palm/browser/InteractiveWidgetRect.schema");
-
-    if (!serializer.toString(rectArrayJson, schema, result)) {
+    if (!jValueToJsonStringUsingSchemaFile(result, rectArrayJson, "/etc/palm/browser/InteractiveWidgetRect.schema")) {
         BERR("Error generating JSON");
     } else {
         BDBG("Generated JSON:\n %s\n", result.c_str());
@@ -2801,10 +2796,13 @@ void BrowserPage::removeInteractiveWidgetRect(uintptr_t id, InteractiveRectType 
     rectJson.put("id", (int) id);
     rectJson.put("type", (int) type);
 
-    std::string result = pbnjson::JGenerator::serialize(rectJson, pbnjson::JSchemaFragment("{}"), NULL);
-
-    // send json string to BrowserAdapter
-    m_server->msgRemoveFlashRects(m_proxy, result.c_str());
+    std::string result;
+    if (!jValueToJsonString(result, rectJson)) {
+        BERR("Error generating JSON");
+    } else {
+        BDBG("Generated JSON:\n %s\n", result.c_str());
+        m_server->msgRemoveFlashRects(m_proxy, result.c_str());
+    }
 }
 
 #ifdef USE_LUNA_SERVICE

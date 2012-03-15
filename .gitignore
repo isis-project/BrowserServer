@@ -5,3 +5,4 @@ CodeGen/BrowserClientBase.*
 CodeGen/BrowserServerBase.*
 CodeGen/CodeGen
 CodeGen/Makefile
+CodeGen/YapCodeGen.o
