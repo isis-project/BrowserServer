@@ -2913,18 +2913,20 @@ void BrowserPage::openSearchUrl(const char* url)
     {
         LSError error;
         LSErrorInit(&error);
-        json_object* payload = json_object_new_object();
-        if (!ValidJsonObject(payload)) {
+        pbnjson::JValue payload = pbnjson::Object();
+        payload.put("xmlUrl", url);
+        std::string payloadStr;
+        if (!jValueToJsonString(payloadStr, payload)) {
             g_warning("Failed to add to Opensearch URL ,unable to create valid JSON object");
             return ;
-        }
-        json_object_object_add(payload, "xmlUrl", json_object_new_string(url));
-        bool ret = LSCall(m_lsHandle,
-                          "palm://com.palm.universalsearch/addOptionalSearchDesc", json_object_get_string(payload),
-                          NULL,NULL, NULL, &error);
-        if (!ret) {
-            g_warning("Failed to add to Opensearch URL to //com.palm.universalsearch: %s", error.message);
-            LSErrorFree(&error);
+        } else {
+            bool ret = LSCall(m_lsHandle,
+                              "palm://com.palm.universalsearch/addOptionalSearchDesc", payloadStr.c_str(),
+                              NULL,NULL, NULL, &error);
+            if (!ret) {
+                g_warning("Failed to add to Opensearch URL to //com.palm.universalsearch: %s", error.message);
+                LSErrorFree(&error);
+            }
         }
 
     }
