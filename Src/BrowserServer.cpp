@@ -51,7 +51,7 @@ LICENSE@@@ */
 #include "WebOSPlatformPlugin.h"
 
 #include <cert_mgr.h>
-
+#include "JsonUtils.h"
 #ifdef USE_HEAP_PROFILER
 #include <google/heap-profiler.h>
 #endif
@@ -1119,23 +1119,15 @@ BrowserServer::connectToMSMService()
 
 bool BrowserServer::msmStatusCallback(LSHandle *sh, LSMessage *message, void *ctx)
 {
-    const char* payload = LSMessageGetPayload(message);
-    if (!message)
-        return true;
+    pbnjson::JValue msmStatus;
+    if (!lsMessageToJValue(msmStatus, message))
+        return false;
 
     BrowserServer *bs = reinterpret_cast<BrowserServer*>(ctx);
 
-    json_object* json = NULL;
-    json_object* value = NULL;
+    if (msmStatus["inMSM"].isBoolean()) {
+        bool enteringMSMMode = msmStatus["inMSM"].asBool();
 
-    json = json_tokener_parse(payload);
-    if (!json || is_error(json)) {
-        return false;
-    }
-
-    value = json_object_object_get(json, "inMSM");
-    if (ValidJsonObject(value)) {
-        bool enteringMSMMode = json_object_get_boolean(value);
         if (enteringMSMMode) {
             g_message(" ENTERING MSM_MODE, shutting down plugin directory watcher");
             bs->m_pluginDirWatcher->suspend();
@@ -1146,7 +1138,6 @@ bool BrowserServer::msmStatusCallback(LSHandle *sh, LSMessage *message, void *ct
         }
     }
 
-    json_object_put(json);
     return true;
 }
 
@@ -1173,46 +1164,20 @@ BrowserServer::connectToPrefsService()
 
 bool BrowserServer::getPreferencesCallback(LSHandle *sh, LSMessage *message, void *ctx)
 {
-    const char* payload = LSMessageGetPayload(message);
-    if (!message)
-        return true;
-
-    json_object* label = NULL;
-    json_object* json = NULL;
-    json_object* value = NULL;
-
-    const char* languageCode = NULL;
-    const char* countryCode = NULL;
-    std::string newLocale;
-
-    label = 0;
-    json = json_tokener_parse(payload);
-    if (!json || is_error(json)) {
+    pbnjson::JValue prefs, carrier;
+    if (!lsMessageToJValue(prefs, message))
         return false;
-    }
 
-    value = json_object_object_get(json, "x_palm_carrier" );
-    if( ValidJsonObject(value) )
-    {
-        char* carrierCode = json_object_get_string(value);
-        if (gWebKitInit) {
-        }
-        if (m_instance != NULL) {
-            m_instance->m_carrierCode = carrierCode;
-        }
-    }
+    carrier = prefs["x_palm_carrier"];
+    if (carrier.isString() && m_instance)
+        m_instance->m_carrierCode = carrier.asString();
     else
         g_message(" NO PALM CARRIER in PREFS DB" );
 
-    value = json_object_object_get(json, "x_palm_textinput");
-    if (ValidJsonObject(value)) {
-
-        std::string strProp;
-
-        json_object* prop = json_object_object_get(value, "spellChecking");
-        if (ValidJsonObject(prop)) {
-
-            strProp = json_object_get_string(prop);
+    if (prefs["x_palm_textinput"].isObject()) {
+        pbnjson::JValue textInputPrefs = prefs["x_palm_textinput"];
+        if (textInputPrefs["spellChecking"].isString()) {
+            std::string strProp = textInputPrefs["spellChecking"].asString();
 #ifdef FIXME_QT
             if (strProp == "disabled")
                 PalmBrowserSettings()->checkSpelling = WebKitPalmSettings::DISABLED;
@@ -1226,19 +1191,15 @@ bool BrowserServer::getPreferencesCallback(LSHandle *sh, LSMessage *message, voi
 #endif
         }
 
-        prop = json_object_object_get(value, "grammarChecking");
-        if (ValidJsonObject(prop)) {
-
-            strProp = json_object_get_string(prop);
+        if (textInputPrefs["grammarChecking"].isString()) {
+            std::string strProp = textInputPrefs["grammarChecking"].asString();
 #ifdef FIXME_QT
             PalmBrowserSettings()->checkGrammar = strProp == "autoCorrect";
 #endif
         }
 
-        prop = json_object_object_get(value, "shortcutChecking");
-        if (ValidJsonObject(prop)) {
-
-            strProp = json_object_get_string(prop);
+        if (textInputPrefs["shortcutChecking"].isString()) {
+            std::string strProp = textInputPrefs["shortcutChecking"].asString();
 #ifdef FIXME_QT
             PalmBrowserSettings()->shortcutChecking = strProp == "autoCorrect";
 #endif
@@ -1248,18 +1209,13 @@ bool BrowserServer::getPreferencesCallback(LSHandle *sh, LSMessage *message, voi
         g_warning("Oops, no x_palm_textinput preference");
     }
 
-    value = json_object_object_get(json, "locale");
-    if ((value) && (!is_error(value))) {
-
-        label = json_object_object_get(value, "languageCode");
-        if ((label) || (!is_error(label))) {
-            languageCode = json_object_get_string(label);
-        }
-
-        label = json_object_object_get(value, "countryCode");
-        if ((label) || (!is_error(label))) {
-            countryCode = json_object_get_string(label);
-        }
+    if (prefs["locale"].isObject()) {
+        pbnjson::JValue localePrefs = prefs["locale"];
+        std::string languageCode, countryCode, newLocale;
+        if (localePrefs["languageCode"].isString())
+            languageCode = localePrefs["languageCode"].asString();
+        if (localePrefs["countryCode"].isString())
+            countryCode = localePrefs["countryCode"].asString();
 
         newLocale = languageCode;
         newLocale += "_";
@@ -1292,8 +1248,6 @@ bool BrowserServer::getPreferencesCallback(LSHandle *sh, LSMessage *message, voi
             }
         }
     }
-
-    json_object_put(json);
 
     return true;
 }
@@ -1546,13 +1500,10 @@ BrowserServer::stopService()
 }
 
 bool
-BrowserServer::serviceCmdDeleteImage(LSHandle *lsHandle, LSMessage *message, void *ctx) 
+BrowserServer::serviceCmdDeleteImage(LSHandle *lsHandle, LSMessage *message, void *ctx)
 {
     LSError lserror;
     LSErrorInit(&lserror);
-
-    struct json_object* root;
-    struct json_object* label;
 
     std::string fileName; // filename argument
     size_t suffixPos; // for filename validation
@@ -1560,27 +1511,19 @@ BrowserServer::serviceCmdDeleteImage(LSHandle *lsHandle, LSMessage *message, voi
     std::string errText; // for response
     bool success = false;
 
-    const char* msgPayload = LSMessageGetPayload(message);
-    if (msgPayload == NULL) {
+    pbnjson::JValue args;
+    if (!lsMessageToJValue(args, message))
         return false;
-    }
 
-    root = json_tokener_parse(msgPayload);
-    if (is_error(root)) {
-        root = NULL;
-        goto Exit;
-    }
-
-    label = json_object_object_get(root, "file");
-    if (label == NULL || is_error(label)) {
+    if (!args["file"].isString()) {
         g_message("%s: BrowserServer failed to find parameter 'file' in message", __FUNCTION__);
         errText = "file parameter not given";
         goto Exit;
     }
 
-    fileName = json_object_get_string(label);
+    fileName = args["file"].asString();
 
-    // checking if it ends in .png 
+    // checking if it ends in .png
     suffixPos = fileName.rfind(".png");
     if (suffixPos == std::string::npos || (fileName.length()-4 != suffixPos)) {
         g_message("%s: invalid filename '%s'", __FUNCTION__, fileName.c_str());
@@ -1597,32 +1540,21 @@ BrowserServer::serviceCmdDeleteImage(LSHandle *lsHandle, LSMessage *message, voi
     }
 
 Exit:
-    if (root != NULL && !is_error(root)) {
-        json_object_put(root);
-    }
-
-    // construct response json string
-    json_object* replyJson = json_object_new_object();
-    json_object_object_add(replyJson, 
-            (char*) "returnValue",
-            json_object_new_boolean(success));
-
+    pbnjson::JValue reply = pbnjson::Object();
+    reply.put("returnValue", success);
     if (!success) {
-        json_object_object_add(replyJson, 
-                (char*) "errorCode",
-                json_object_new_int(-1));
-
-        json_object_object_add(replyJson, 
-                (char*) "errorText",
-                json_object_new_string(errText.c_str()));
+        reply.put("errorCode", -1);
+        reply.put("errorText", errText);
     }
 
-    // send response
-    if (!LSMessageReply(lsHandle, message, json_object_to_json_string(replyJson), &lserror)) {
-        LSErrorFree(&lserror);
+    std::string replyStr;
+    if (jValueToJsonString(replyStr, reply)) {
+        // send response
+        if (!LSMessageReply(lsHandle, message, replyStr.c_str(), &lserror))
+            LSErrorFree(&lserror);
+    } else {
+        g_message("%s: Unable to serialize JSON reply", __FUNCTION__);
     }
-
-    json_object_put(replyJson);
 
     return true;
 }
@@ -1705,27 +1637,20 @@ void BrowserServer::registerForConnectionManager()
 
 bool BrowserServer::connectionManagerConnectCallback(LSHandle *sh, LSMessage *message, void *ctx)
 {
-    if (!message)
-        return true;
+    pbnjson::JValue args;
+    if (!lsMessageToJValue(args, message))
+        return false;
 
-    const char* payload = LSMessageGetPayload(message);
-    json_object* label = 0;
-    json_object* json = 0;
     bool connected = false;
 
-    label = 0;
-    json = json_tokener_parse(payload);
-    if (!json || is_error(json))
-        goto Done;
+    if (!args["connected"].isBoolean())
+        return true;
 
-    label = json_object_object_get(json, "connected");
-    if (!label || is_error(label))
-        goto Done;
-    connected = json_object_get_boolean(label);
+    connected = args["connected"].asBool();
 
     if (connected) {
 
-        // We are connected to the systemservice. call and get the connection manager status        
+        // We are connected to the systemservice. call and get the connection manager status
         BrowserServer* bs = BrowserServer::instance();
 
         bool ret = false;
@@ -1742,57 +1667,29 @@ bool BrowserServer::connectionManagerConnectCallback(LSHandle *sh, LSMessage *me
         }
     }
 
-Done:
-
-    if (json && !is_error(json))
-        json_object_put(json);
-
     return true;
 }
 
 bool BrowserServer::connectionManagerGetStatusCallback(LSHandle* sh, LSMessage* message, void* ctxt)
 {
-    if (!message)
-        return true;
+    pbnjson::JValue args;
+    if (!lsMessageToJValue(args, message))
+        return false;
 
-    const char* payload = LSMessageGetPayload(message); 
-    json_object* label = 0;
-    json_object* json = 0;
     std::string wifiIpAddress;
     std::string wanIpAddress;
     std::string selectedIpAddress;
 
     BrowserServer* bs = BrowserServer::instance();
 
-    json = json_tokener_parse(payload);
-    if (!json || is_error(json)) {
-        return false;
-    }
+    if (args["isInternetConnectionAvailable"].isBoolean())
+        isInternetConnectionAvailable = args["isInternetConnectionAvailable"].asBool();
 
-    label = json_object_object_get(json, "isInternetConnectionAvailable");
-    if (label && !is_error(label)) {
-        isInternetConnectionAvailable = json_object_get_boolean(label);
-    }
+    if (args["wifi"].isObject() && args["wifi"]["ipAddress"].isString())
+        wifiIpAddress = args["wifi"]["ipAddress"].asString();
 
-    label = json_object_object_get(json, (char*) "wifi");
-    if (label && !is_error(label)) {
-
-        json_object* l = json_object_object_get(label, (char*) "ipAddress");
-        if (l && !is_error(l)) {
-            wifiIpAddress = json_object_get_string(l);
-        }
-    }
-
-    label = json_object_object_get(json, (char*) "wan");
-    if (label && !is_error(label)) {
-
-        json_object* l = json_object_object_get(label, (char*) "ipAddress");
-        if (l && !is_error(l)) {
-            wanIpAddress = json_object_get_string(l);
-        }
-    }
-
-    json_object_put(json);
+    if (args["wan"].isObject() && args["wan"]["ipAddress"].isString())
+        wanIpAddress = args["wan"]["ipAddress"].asString();
 
     // Prefer WIFI over WAN
     if (!wanIpAddress.empty())
@@ -1803,14 +1700,8 @@ bool BrowserServer::connectionManagerGetStatusCallback(LSHandle* sh, LSMessage* 
 
 
     if (!selectedIpAddress.empty() && selectedIpAddress != bs->m_ipAddress) {
-
         g_message("IP address changed: %s. Restarting network", selectedIpAddress.c_str());
-
         bs->m_ipAddress = selectedIpAddress;
-
-        // Restart networking only if webkit has been initialized
-        if (gWebKitInit) {
-        }
     }
 
     return true;
@@ -1880,10 +1771,8 @@ void BrowserServer::asyncCmdHitTest(YapProxy *proxy, int32_t queryNum, int32_t c
         }
     }
 
-    pbnjson::JGenerator serializer(NULL);
     std::string json;
-    pbnjson::JSchemaFile schema("/etc/palm/browser/HitTest.schema");
-    if (!serializer.toString(obj, schema, json)) {
+    if (!jValueToJsonStringUsingSchemaFile(json, obj, "/etc/palm/browser/HitTest.schema")) {
         BERR("Error generating JSON");
     } else {
         BDBG("Generated JSON:\n %s\n", json.c_str());
