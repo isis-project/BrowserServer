@@ -288,8 +288,10 @@ public:
     virtual void pluginFullscreenSpotlightRemove();
     virtual void addInteractiveWidgetRect(uintptr_t id, int x, int y, int width, int height, InteractiveRectType);
     virtual void removeInteractiveWidgetRect(uintptr_t id, InteractiveRectType);
+#ifdef USE_LUNA_SERVICE
     virtual bool smartKeySearch(int requestId, const char* query);
     virtual bool smartKeyLearn(const char* word);
+#endif
 
     void getInteractiveNodeRects(int32_t mouseX, int32_t mouseY);
 
