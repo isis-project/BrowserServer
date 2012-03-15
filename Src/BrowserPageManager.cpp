@@ -16,7 +16,11 @@
 *
 LICENSE@@@ */
 
+#ifdef USE_LUNA_SERVICE
 #include <time.h>
+#else
+#include <sys/time.h>
+#endif
 #include <syslog.h>
 
 #include "BrowserPageManager.h"

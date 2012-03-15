@@ -36,8 +36,9 @@ LICENSE@@@ */
 #include "BrowserOffscreenQt.h"
 #include "BrowserOffscreenCalculations.h"
 
+#ifdef USE_LUNA_SERVICE
 #include <lunaservice.h>
-#include <cjson/json.h>
+#endif //USE_LUNA_SERVICE
 #include <pbnjson.hpp>
 
 #include <qbsinterface.h>
@@ -73,7 +74,12 @@ public:
 
     static void setInspectorPort(int port) { inspectorPort = port > 0 ? port : 0; }
 
+#ifdef USE_LUNA_SERVICE
     BrowserPage(BrowserServer* server, YapProxy* proxy, LSHandle* lsHandle);
+#else
+    BrowserPage(BrowserServer* server, YapProxy* proxy);
+#endif //USE_LUNA_SERVICE
+
     ~BrowserPage();
 
     // Inherited from QGraphicsView
@@ -189,12 +195,14 @@ public:
 
     bool dialogUserPassword(const char* inMsg, std::string& userName, std::string& password);
 
+#ifdef USE_CERT_MGR
     /*
      * dialogSSLConfirm
      * 
      * return true if things went ok and user presented a response, false otherwise
      */
     bool dialogSSLConfirm(SSLValidationInfo& sslInfo);
+#endif //USE_CERT_MGR
 
     void takeActionOnData( const char* dataType, const char* data );
     bool takeActionOnData(const char * urlString);
@@ -342,7 +350,9 @@ private:
     BrowserSyncReplyPipe* m_syncReplyPipe;
     GMainLoop*            m_nestedLoop;
     BrowserPage*          m_newlyCreatedPage;
+#ifdef USE_LUNA_SERVICE
     LSHandle*             m_lsHandle;
+#endif //USE_LUNA_SERVICE
 
     BrowserOffscreenQt*   m_offscreen0;
     BrowserOffscreenQt*   m_offscreen1;
@@ -435,7 +445,9 @@ private:
 
     void resetMetaViewport();
     void flush(int key);
+#ifdef USE_LUNA_SERVICE
     static bool smartKeySearchCallback(LSHandle *sh, LSMessage *message, void *ctx);
+#endif //USE_LUNA_SERVICE
 
     static void initKeyMap();
     static void flush(void *context, int key);
@@ -446,7 +458,11 @@ private:
 
     static unsigned int idGen;
     static bool keyMapInit;
+#ifdef USE_LUNA_SERVICE
     static std::map<unsigned short, int> keyMap;
+#else
+    static std::map<int, int> keyMap;
+#endif //USE_LUNA_SERVICE
     static int inspectorPort;
 
     bool m_ignoreMetaViewport;

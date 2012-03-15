@@ -36,7 +36,6 @@ LICENSE@@@ */
 
 #include <qpersistentcookiejar.h>
 #include <qwebevent.h>
-#include <cjson/json.h>
 #include <pbnjson.hpp>
 #include <syslog.h>
 
@@ -55,8 +54,15 @@ LICENSE@@@ */
 #include "webosmisc.h"
 #include <BufferLock.h>
 
+#ifdef USE_LUNA_SERVICE
+//FIXME: We are not using luna-keymaps anymore
 #include "webosDeviceKeydefs.h"
+#else
+#include <qnamespace.h>
+using namespace Qt;
+#endif //USE_LUNA_SERVICE
 
+#ifdef USE_CERT_MGR
 #include <cert_mgr.h>
 #include <cert_mgr_prv.h>
 #ifdef __cplusplus
@@ -66,6 +72,7 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
+#endif //USE_CERT_MGR
 
 using namespace webOS;
 static char* sUserAgent = 0;
@@ -119,7 +126,11 @@ struct PaintRequest {
 
 unsigned int BrowserPage::idGen = 0;
 bool BrowserPage::keyMapInit = false;
+#ifdef USE_LUNA_SERVICE
 std::map<unsigned short, int> BrowserPage::keyMap;
+#else
+std::map<int, int> BrowserPage::keyMap;
+#endif //USE_LUNA_SERVICE
 
 int BrowserPage::inspectorPort = 0;
 
@@ -145,6 +156,7 @@ static inline QRect PrvScaledRect(int x, int y, int w, int h, double zoom)
     return QRect(x, y, w, h);
 }
 
+#ifdef USE_CERT_MGR
 /**
  * Given a candidate certificate "cert", find a match in the local certificate store
  * alternately, find a local match for a certificate in the file "certFileAndPath".
@@ -207,6 +219,7 @@ X509* findSSLCertInLocalStore(const char* certFileAndPath, int& retCertSerialNb)
     X509_free(cert);
     return inStoreCert;
 }
+#endif //USE_CERT_MGR
 
 static QString makeUniqueFileName(const QString& inFileName)
 {
@@ -228,7 +241,11 @@ static QString makeUniqueFileName(const QString& inFileName)
     return fileName;
 }
 
+#ifdef USE_LUNA_SERVICE
 BrowserPage::BrowserPage(BrowserServer* server, YapProxy* proxy, LSHandle* lsHandle)
+#else
+BrowserPage::BrowserPage(BrowserServer* server, YapProxy* proxy)
+#endif //USE_LUNA_SERVICE
     : m_lastUrlOption(None)
     , m_server(server)
     , m_proxy(proxy)
@@ -245,7 +262,9 @@ BrowserPage::BrowserPage(BrowserServer* server, YapProxy* proxy, LSHandle* lsHan
     , m_syncReplyPipe(0)
     , m_nestedLoop(0)
     , m_newlyCreatedPage(0)
+#ifdef USE_LUNA_SERVICE
     , m_lsHandle(lsHandle)
+#endif //USE_LUNA_SERVICE
     , m_offscreen0(0)
     , m_offscreen1(0)
     , m_ownOffscreen0(false)
@@ -313,6 +332,7 @@ BrowserPage::~BrowserPage()
 
     free(m_identifier);
 
+#ifdef USE_CERT_MGR
     int result=0;
     //get rid of temporary serials
     for (std::list<int32_t>::iterator it = temporaryCertSerials.begin(); it != temporaryCertSerials.end(); ++it) {
@@ -324,6 +344,7 @@ BrowserPage::~BrowserPage()
             g_warning("BrowserServer [bpage = %u]: (dtor) FAILED to remove certificate %d",bpageId,*it);
         }
     }
+#endif //USE_CERT_MGR
     delete m_topMarker;
     delete m_bottomMarker;
 }
@@ -1071,10 +1092,10 @@ BrowserPage::keyDown(uint16_t key, uint16_t modifiers)
     // form of a key up/down pair.
     if( modifiers & 0x20 ) {
         switch( key ) {
-        case Key_c:
-        case Key_x:
-        case Key_v:
-        case Key_a:
+        case Key_C:
+        case Key_X:
+        case Key_V:
+        case Key_A:
             return;
         }
     }
@@ -1090,10 +1111,10 @@ BrowserPage::keyUp(uint16_t key, uint16_t modifiers)
 
     if( modifiers & 0x20 ) {
         switch( key ) {
-        case Key_c:
-        case Key_x:
-        case Key_v:
-        case Key_a:
+        case Key_C:
+        case Key_X:
+        case Key_V:
+        case Key_A:
             return;
         }
     }
@@ -1199,7 +1220,11 @@ void BrowserPage::clientPointToServer(uint32_t& x, uint32_t& y)
 int
 BrowserPage::mapKey(uint16_t key) {
 
+#ifdef USE_LUNA_SERVICE
     const std::map<unsigned short, int>::const_iterator it = keyMap.find (key);
+#else
+    const std::map<int, int>::const_iterator it = keyMap.find (key);
+#endif //USE_LUNA_SERVICE
 
     if (it != keyMap.end())
         return (*it).second;
@@ -1223,8 +1248,10 @@ BrowserPage::mapKeyEvent(bool pressed, uint16_t key, uint16_t modifiers) {
     if (modifiers & ShiftModifier) {
         mappedModifiers |= Qt::ShiftModifier;
     }
+#ifdef USE_LUNA_SERVICE
     else if ((key >= Key_a) && (key <= Key_z))
         mappedKey -= Key_a - Key_A;
+#endif //USE_LUNA_SERVICE
 
     if (modifiers & ControlModifier)
         mappedModifiers |= Qt::ControlModifier;
@@ -1882,6 +1909,7 @@ BrowserPage::dialogUserPassword(const char* inMsg, std::string& userName, std::s
     return ok;
 }
 
+#ifdef USE_CERT_MGR
 /*
  * POTENTIAL ISSUES:
  * 
@@ -2005,6 +2033,7 @@ BrowserPage::dialogSSLConfirm(SSLValidationInfo& sslInfo)
 
     return true;
 }
+#endif //USE_CERT_MGR
 
 void
 BrowserPage::mimeHandoffUrl( const char* mimeType, const char* url )
@@ -2315,7 +2344,11 @@ BrowserPage::downloadCancel( const char* url )
 WebOSWebPage*
 BrowserPage::createWebOSWebPage(QWebPage::WebWindowType type)
 {
+#ifdef USE_LUNA_SERVICE
     BrowserPage* newPage = new BrowserPage(m_server, m_server->createRecordProxy(), m_server->getServiceHandle()); 
+#else
+    BrowserPage* newPage = new BrowserPage(m_server, m_server->createRecordProxy());
+#endif //USE_LUNA_SERVICE
     if (!newPage) {
         BERR("%s: Unable to allocate BrowserPage instance", __FUNCTION__);
         return 0;
@@ -2774,6 +2807,7 @@ void BrowserPage::removeInteractiveWidgetRect(uintptr_t id, InteractiveRectType 
     m_server->msgRemoveFlashRects(m_proxy, result.c_str());
 }
 
+#ifdef USE_LUNA_SERVICE
 /**
  * Called by luna service when a response to a smart key search is received.
  */
@@ -2865,7 +2899,9 @@ bool BrowserPage::smartKeySearch(int requestId, const char* query)
         LSErrorFree(&error);
         return false;
     }
+    return false;
 }
+#endif //USE_LUNA_SERVICE
 
 // event of spotlight from js to plugin
 void BrowserPage::pluginSpotlightStart(int rectx, int recty, int rectw, int recth)
@@ -2911,6 +2947,7 @@ void BrowserPage::hideClipboardWidget(bool resetSelection)
 
 void BrowserPage::openSearchUrl(const char* url)
 {
+#ifdef USE_LUNA_SERVICE
     if (m_lsHandle)
     {
         LSError error;
@@ -2930,6 +2967,7 @@ void BrowserPage::openSearchUrl(const char* url)
         }
 
     }
+#endif //USE_LUNA_SERVICE
 }
 
 void BrowserPage::spellingWidgetVisibleRectUpdate(int x, int y, int width, int height)
@@ -3195,7 +3233,11 @@ void BrowserPage::initKeyMap() {
     keyMap[Key_PageUp]     = Qt::Key_PageUp;
     keyMap[Key_PageDown]   = Qt::Key_PageDown;
     keyMap[Key_Shift]      = Qt::Key_Shift;
+#ifdef USE_LUNA_SERVICE
     keyMap[Key_Ctrl]       = Qt::Key_Control;
+#else
+    keyMap[Key_Control]       = Qt::Key_Control;
+#endif
     keyMap[Key_Option]     = Qt::Key_Meta;
     keyMap[Key_Alt]        = Qt::Key_Alt;
 
@@ -3216,7 +3258,11 @@ void BrowserPage::initKeyMap() {
     keyMap[Key_CoreNavi_Menu]        = Qt::Key_CoreNavi_Menu;
     keyMap[Key_CoreNavi_QuickLaunch] = Qt::Key_CoreNavi_QuickLaunch;
     keyMap[Key_CoreNavi_Launcher]    = Qt::Key_CoreNavi_Launcher;
-    keyMap[Key_CoreNavi_Down]        = Qt::Key_CoreNavi_SwipeDown;
+#ifdef USE_LUNA_SERVICE
+    keyMap[Key_CoreNavi_Down]   = Qt::Key_CoreNavi_SwipeDown;
+#else
+    keyMap[Key_CoreNavi_SwipeDown]   = Qt::Key_CoreNavi_SwipeDown;
+#endif
     keyMap[Key_CoreNavi_Next]        = Qt::Key_CoreNavi_Next;
     keyMap[Key_CoreNavi_Previous]    = Qt::Key_CoreNavi_Previous;
     keyMap[Key_CoreNavi_Home]        = Qt::Key_CoreNavi_Home;
@@ -3226,7 +3272,12 @@ void BrowserPage::initKeyMap() {
     keyMap[Key_Slider]               = Qt::Key_Slider;
     keyMap[Key_Optical]              = Qt::Key_Optical;
     keyMap[Key_Ringer]               = Qt::Key_Ringer;
+#ifdef USE_LUNA_SERVICE
     keyMap[Key_HardPower]            = Qt::Key_Power;
+#else
+    keyMap[Key_Power]            = Qt::Key_Power;
+#endif
+
     keyMap[Key_HeadsetButton]        = Qt::Key_HeadsetButton;
     keyMap[Key_Headset]              = Qt::Key_Headset;
     keyMap[Key_HeadsetMic]           = Qt::Key_HeadsetMic;

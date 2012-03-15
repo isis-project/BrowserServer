@@ -22,6 +22,7 @@ LICENSE@@@ */
 #include <sys/inotify.h>
 #include "PluginDirWatcher.h"
 #include "BrowserServer.h"
+#include<stdio.h>
 
 
 

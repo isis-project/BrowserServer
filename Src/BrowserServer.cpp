@@ -38,11 +38,11 @@ LICENSE@@@ */
 #include "YapProxy.h"
 #include "YapPacket.h"
 
-#include <cjson/json.h>
+#ifdef USE_LUNA_SERVICE
 #include "lunaservice.h"
-
 #include <WebKitEventListener.h>
 #include <BackupManager.h>
+#endif //USE_LUNA_SERVICE
 #include "PluginDirWatcher.h"
 #include "Settings.h"
 #include <QtNetwork>
@@ -50,7 +50,9 @@ LICENSE@@@ */
 #include "qwebkitplatformplugin.h"
 #include "WebOSPlatformPlugin.h"
 
+#ifdef USE_CERT_MGR
 #include <cert_mgr.h>
+#endif
 
 #ifdef USE_HEAP_PROFILER
 #include <google/heap-profiler.h>
@@ -61,6 +63,7 @@ static bool  __attribute__((unused)) gHeapProfilerOn = false;
 
 static const int kTimerSecs = 15;
 
+#ifdef USE_LUNA_SERVICE
 // Luna Service 
 
 static LSMethod s_serviceMethods[] = {
@@ -73,6 +76,7 @@ static LSMethod s_serviceMethods[] = {
     { "gc", BrowserServer::privateDoGc },
     { 0, 0},
 };
+#endif //USE_LUNA_SERVICE
 
 static const char* const k_pszSimpleJsonSuccessResponse = "{\"returnValue\":true}";
 static const char* const k_pszSimpleJsonFailureResponse = "{\"returnValue\":false}";
@@ -101,9 +105,11 @@ BrowserServer::BrowserServer()
     , m_pageCount(0)
     , m_networkAccessManager(0)
     , m_cookieJar(0)
+#ifdef USE_LUNA_SERVICE
     , m_service(0)
     , m_connectionManagerStatusToken(0)
     , m_wkEventListener(0)
+#endif // USE_LUNA_SERVICE
     , m_pluginDirWatcher(0)
     , m_defaultDownloadDir()
 #if defined(__arm__)
@@ -149,10 +155,12 @@ bool BrowserServer::init(int argc,char ** argv) {
 
     QSettings settings;
 
+#ifdef USE_CERT_MGR
     int rValue;
     if (0 != (rValue = (CertInitCertMgr("/etc/ssl/openssl.cnf")))) {
         g_critical("Unable to initialize certificate mgr: %d", rValue);
     }
+#endif
 
     InitWebSettings();
 
@@ -287,7 +295,11 @@ BrowserServer::asyncCmdConnect(YapProxy* proxy, int32_t pageWidth, int32_t pageH
 
     } else {  // making a new BP
 
+#ifdef USE_LUNA_SERVICE
         pPage = new BrowserPage(this, proxy, m_service);
+#else
+        pPage = new BrowserPage(this, proxy);
+#endif //USE_LUNA_SERVICE
 
         if (pPage == NULL) {
             g_error("Failed to allocate Browser Page");
@@ -1100,6 +1112,7 @@ BrowserServer::asyncCmdGetElementInfoAtPoint(YapProxy* proxy, int32_t queryNum, 
 #endif // FIXME_QT
 }
 
+#ifdef USE_LUNA_SERVICE
 bool
 BrowserServer::connectToMSMService()
 {
@@ -1276,10 +1289,12 @@ bool BrowserServer::getPreferencesCallback(LSHandle *sh, LSMessage *message, voi
 
     return true;
 }
+#endif //USE_LUNA_SERVICE
 
 bool
 BrowserServer::startService()
 {
+#ifdef USE_LUNA_SERVICE
     LSError lsError;
     LSErrorInit(&lsError);
 
@@ -1313,6 +1328,7 @@ Exit:
         return false;
     }
 
+#endif //USE_LUNA_SERVICE
     g_message("%s: BrowserServer started on service bus", __FUNCTION__);
 
 #ifdef USE_HEAP_PROFILER
@@ -1514,6 +1530,7 @@ BrowserServer::handleMemchuteNotification(MemchuteThreshold threshold)
 void
 BrowserServer::stopService() 
 {
+#ifdef USE_LUNA_SERVICE
     LSError lsError;
     LSErrorInit(&lsError);
 
@@ -1522,8 +1539,10 @@ BrowserServer::stopService()
         LSErrorFree(&lsError);
 
     m_service = NULL;
+#endif //USE_LUNA_SERVICE
 }
 
+#ifdef USE_LUNA_SERVICE
 bool
 BrowserServer::serviceCmdDeleteImage(LSHandle *lsHandle, LSMessage *message, void *ctx)
 {
@@ -1772,6 +1791,7 @@ bool BrowserServer::connectionManagerGetStatusCallback(LSHandle* sh, LSMessage* 
 
     return true;
 }
+#endif //USE_LUNA_SERVICE
 
 void
 BrowserServer::asyncCmdSetMouseMode(YapProxy* proxy, int32_t mode)

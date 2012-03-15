@@ -409,8 +409,10 @@ main(int argc, char *argv[])
     g_useSysLog = isDaemonized();
     g_log_set_default_handler(logFilter, NULL);
 
+#ifdef USE_LUNA_SERVICE
     // Tie BrowserServer to Processor 1. (DFISH-7961)
     setCpuAffinity(getpid(), 1);
+#endif //USE_LUNA_SERVICE
 
     ::signal(SIGPIPE, SIG_IGN);
     ::signal(SIGTERM, PrvSigTermHandler);

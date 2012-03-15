@@ -23,7 +23,9 @@ LICENSE@@@ */
 
 #include "CmdResourceHandlers.h"
 #include <BrowserServerBase.h>
+#ifdef USE_LUNA_SERVICE
 #include <lunaservice.h>
+#endif //USE_LUNA_SERVICE
 #include <QtCore/QString>
 #include "BrowserComboBox.h"
 
@@ -60,6 +62,7 @@ public:
 
     QNetworkAccessManager *networkAccessManager() { return m_networkAccessManager; }
 
+#ifdef USE_LUNA_SERVICE
     // Luna Service Commands
     static bool serviceCmdDeleteImage(LSHandle *lsHandle, LSMessage *message, void *ctx);
     static bool serviceCmdClearCache(LSHandle *lsHandle, LSMessage *message, void *ctx);
@@ -68,6 +71,7 @@ public:
     static bool serviceCmdDumpHeapProfiler(LSHandle* lsHandle, LSMessage *message, void *ctx);
 #endif
     static bool privateDoGc(LSHandle* handle, LSMessage* message, void* ctxt);
+#endif //USE_LUNA_SERVICE
 
     bool        startService();
     void        stopService();
@@ -80,7 +84,9 @@ public:
 #endif
 
     unsigned char* getOffscreenBackupBuffer(int bufferSize);
+#ifdef USE_LUNA_SERVICE
     LSHandle* getServiceHandle() const { return m_service; }
+#endif //USE_LUNA_SERVICE
     void shutdownBrowserServer();
 
 private:
@@ -96,17 +102,21 @@ private:
     QNetworkAccessManager* m_networkAccessManager;
     QPersistentCookieJar *m_cookieJar;
 
+#ifdef USE_LUNA_SERVICE
     LSHandle* m_service;
     LSMessageToken m_connectionManagerStatusToken;
+#endif //USE_LUNA_SERVICE
     std::string m_ipAddress;
     WebKitEventListener* m_wkEventListener;
     std::string m_carrierCode;
 
+#ifdef USE_LUNA_SERVICE
     bool connectToMSMService();
     static bool msmStatusCallback(LSHandle *sh, LSMessage *message, void *ctx);
 
     bool connectToPrefsService();
     static bool getPreferencesCallback(LSHandle *sh, LSMessage *message, void *ctx);
+#endif //USE_LUNA_SERVICE
 
     int getMemInfo(int& memTotal, int& memFree, int& swapTotal, int& swapFree,
                    int& cached, int& swapCached);
@@ -124,8 +134,10 @@ private:
 
     void registerForConnectionManager();
 
+#ifdef USE_LUNA_SERVICE
     static bool connectionManagerConnectCallback(LSHandle *sh, LSMessage *message, void *ctx); 
     static bool connectionManagerGetStatusCallback(LSHandle* sh, LSMessage* message, void* ctxt);
+#endif //USE_LUNA_SERVICE
 
     // Async Commands
     virtual void asyncCmdConnect(YapProxy* proxy, int32_t pageWidth, int32_t pageHeight, int32_t sharedBufferKey1, int32_t sharedBufferKey2, int32_t sharedBufferSize, int32_t identifier);
