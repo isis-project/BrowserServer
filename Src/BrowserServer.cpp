@@ -51,7 +51,7 @@ LICENSE@@@ */
 #include "WebOSPlatformPlugin.h"
 
 #include <cert_mgr.h>
-
+#include "JsonUtils.h"
 #ifdef USE_HEAP_PROFILER
 #include <google/heap-profiler.h>
 #endif
@@ -1119,24 +1119,12 @@ BrowserServer::connectToMSMService()
 
 bool BrowserServer::msmStatusCallback(LSHandle *sh, LSMessage *message, void *ctx)
 {
-    const char* payload = LSMessageGetPayload(message);
-    if (!message)
-        return true;
-
-    BDBG("payload = %s", payload);
+    pbnjson::JValue msmStatus;
+    if (!lsMessageToJValue(msmStatus, message))
+        return false;
 
     BrowserServer *bs = reinterpret_cast<BrowserServer*>(ctx);
 
-    pbnjson::JValue msmStatus;
-    pbnjson::JDomParser parser(NULL);
-    pbnjson::JSchemaFragment schema("{}");
-
-    if (!parser.parse(payload, schema, NULL)) {
-        BERR("Couldn't parse the payload");
-        return false;
-    }
-
-    msmStatus = parser.getDom();
     if (msmStatus["inMSM"].isBoolean()) {
         bool enteringMSMMode = msmStatus["inMSM"].asBool();
 
@@ -1176,22 +1164,9 @@ BrowserServer::connectToPrefsService()
 
 bool BrowserServer::getPreferencesCallback(LSHandle *sh, LSMessage *message, void *ctx)
 {
-    const char* payload = LSMessageGetPayload(message);
-    if (!message)
-        return true;
-
-    BDBG("payload = %s", payload);
-
     pbnjson::JValue prefs, carrier;
-    pbnjson::JDomParser parser(NULL);
-    pbnjson::JSchemaFragment schema("{}");
-
-    if (!parser.parse(payload, schema, NULL)) {
-        BERR("Failed to parse %s", payload);
+    if (!lsMessageToJValue(prefs, message))
         return false;
-    }
-
-    prefs = parser.getDom();
 
     carrier = prefs["x_palm_carrier"];
     if (carrier.isString() && m_instance)
@@ -1536,22 +1511,10 @@ BrowserServer::serviceCmdDeleteImage(LSHandle *lsHandle, LSMessage *message, voi
     std::string errText; // for response
     bool success = false;
 
-    const char* msgPayload = LSMessageGetPayload(message);
-    if (msgPayload == NULL) {
-        return false;
-    }
-
-    BDBG("msgPayload = %s", msgPayload);
-
     pbnjson::JValue args;
-    pbnjson::JDomParser parser(NULL);
-    pbnjson::JSchemaFragment schema("{}");
+    if (!lsMessageToJValue(args, message))
+        return false;
 
-    if (!parser.parse(msgPayload, schema, NULL)) {
-        goto Exit;
-    }
-
-    args = parser.getDom();
     if (!args["file"].isString()) {
         g_message("%s: BrowserServer failed to find parameter 'file' in message", __FUNCTION__);
         errText = "file parameter not given";
@@ -1584,9 +1547,8 @@ Exit:
         reply.put("errorText", errText);
     }
 
-    pbnjson::JGenerator serializer;
     std::string replyStr;
-    if (serializer.toString(reply, pbnjson::JSchemaFragment("{}"), replyStr)) {
+    if (jValueToJsonString(replyStr, reply)) {
         // send response
         if (!LSMessageReply(lsHandle, message, replyStr.c_str(), &lserror))
             LSErrorFree(&lserror);
@@ -1675,27 +1637,14 @@ void BrowserServer::registerForConnectionManager()
 
 bool BrowserServer::connectionManagerConnectCallback(LSHandle *sh, LSMessage *message, void *ctx)
 {
-    if (!message)
-        return true;
-
-    const char* payload = LSMessageGetPayload(message);
-    if (!payload)
-        return true;
-
-    BDBG("payload = %s", payload);
-
     pbnjson::JValue args;
-    pbnjson::JDomParser parser(NULL);
-    pbnjson::JSchemaFragment schema("{}");
+    if (!lsMessageToJValue(args, message))
+        return false;
 
     bool connected = false;
 
-    if (!parser.parse(payload, schema, NULL))
-        goto Done;
-
-    args = parser.getDom();
     if (!args["connected"].isBoolean())
-        goto Done;
+        return true;
 
     connected = args["connected"].asBool();
 
@@ -1718,29 +1667,14 @@ bool BrowserServer::connectionManagerConnectCallback(LSHandle *sh, LSMessage *me
         }
     }
 
-Done:
     return true;
 }
 
 bool BrowserServer::connectionManagerGetStatusCallback(LSHandle* sh, LSMessage* message, void* ctxt)
 {
-    if (!message)
-        return true;
-
-    const char* payload = LSMessageGetPayload(message);
-    if (!payload)
-        return true;
-
-    BDBG("payload = %s", payload);
-
     pbnjson::JValue args;
-    pbnjson::JDomParser parser(NULL);
-    pbnjson::JSchemaFragment schema("{}");
-
-    if (!parser.parse(payload, schema, NULL))
+    if (!lsMessageToJValue(args, message))
         return false;
-
-    args = parser.getDom();
 
     std::string wifiIpAddress;
     std::string wanIpAddress;
@@ -1837,10 +1771,8 @@ void BrowserServer::asyncCmdHitTest(YapProxy *proxy, int32_t queryNum, int32_t c
         }
     }
 
-    pbnjson::JGenerator serializer(NULL);
     std::string json;
-    pbnjson::JSchemaFile schema("/etc/palm/browser/HitTest.schema");
-    if (!serializer.toString(obj, schema, json)) {
+    if (!jValueToJsonStringUsingSchemaFile(json, obj, "/etc/palm/browser/HitTest.schema")) {
         BERR("Error generating JSON");
     } else {
         BDBG("Generated JSON:\n %s\n", json.c_str());
