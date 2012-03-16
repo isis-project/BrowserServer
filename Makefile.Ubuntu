@@ -1,3 +1,6 @@
+INCLUDE_DIR :=${STAGING_DIR}/include
+STAGING_BINDIR_NATIVE :=${STAGING_DIR}/bin
+
 BUILD_TYPE := release
 PLATFORM   ?= arm
 
