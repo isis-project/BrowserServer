@@ -21,7 +21,6 @@ LIBS := \
 	-lmemchute \
 	-lglib-2.0 \
 	-llunaservice \
-	-lcjson \
 	-lpbnjson_cpp \
 	-lPmCertificateMgr \
 	-lQtGui \
