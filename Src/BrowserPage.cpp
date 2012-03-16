@@ -2811,34 +2811,14 @@ void BrowserPage::removeInteractiveWidgetRect(uintptr_t id, InteractiveRectType 
  */
 bool BrowserPage::smartKeySearchCallback(LSHandle *sh, LSMessage *message, void *ctx)
 {
-    if (!message) {
-        return true;
-    }
-#ifdef FIXME_QT
-    int requestId = (int)ctx;
-#endif
-
-    const char* payload = LSMessageGetPayload(message);
-    if (!payload)
+    pbnjson::JValue args, returnValue, match;
+    if (!lsMessageToJValue(args, message))
         return true;
 
     bool succeeded(false);
 
-    json_object* json = json_tokener_parse(payload);
-
-    if (ValidJsonObject(json)) {
-        json_object* value = json_object_object_get(json, "returnValue" );
-        if( ValidJsonObject(value) && json_object_get_boolean(value) ) {
-            value = json_object_object_get(json, "match" );
-            if( ValidJsonObject(value) ) {
-                succeeded = true;
-            }
-        }
-        json_object_put(json);
-    }
-
-    if (!succeeded) {
-    }
+    if (args["returnValue"].isBoolean() && args["returnValue"].asBool() && args["match"].isString())
+        succeeded = true;
 
     return true;
 }
@@ -2849,24 +2829,23 @@ bool BrowserPage::smartKeyLearn(const char* word)
         return false;
     }
 
-    json_object* payload = json_object_new_object();
-    if (!ValidJsonObject(payload)) {
-        return false;
-    }
-
-    json_object_object_add(payload, "word", json_object_new_string(word));
+    pbnjson::JValue args = pbnjson::Object();
+    args.put("word", word);
 
     LSError error;
     LSErrorInit(&error);
 
-    bool succeeded = LSCall(m_lsHandle, "palm://com.palm.smartKey/learn", json_object_get_string(payload), NULL, NULL, NULL, &error);
+    std::string argsStr;
+    if (!jValueToJsonString(argsStr, args)) {
+        BERR("Error generating JSON");
+    } else {
+        bool succeeded = LSCall(m_lsHandle, "palm://com.palm.smartKey/learn", argsStr.c_str(), NULL, NULL, NULL, &error);
 
-    json_object_put(payload);
-
-    if (!succeeded) {
-        g_warning("Failed querying smartKey service: %s", error.message);
-        LSErrorFree(&error);
-        return false;
+        if (!succeeded) {
+            g_warning("Failed querying smartKey service: %s", error.message);
+            LSErrorFree(&error);
+            return false;
+        }
     }
 
     return true;
@@ -2877,25 +2856,25 @@ bool BrowserPage::smartKeyLearn(const char* word)
  */
 bool BrowserPage::smartKeySearch(int requestId, const char* query)
 {
-    json_object* payload = json_object_new_object();
-    if (!ValidJsonObject(payload)) {
-    }
-
-    json_object_object_add(payload, "query", json_object_new_string(query));
+    pbnjson::JValue args = pbnjson::Object();
+    args.put("query", query);
 
     LSError error;
     LSErrorInit(&error);
 
-    bool succeeded = LSCall(m_lsHandle, "palm://com.palm.smartKey/search", json_object_get_string(payload),
-                 smartKeySearchCallback, (void*)requestId, NULL, &error);
-    json_object_put(payload);
-    if (succeeded) {
-        return true;
-    }
-    else {
-        g_warning("Failed querying smartKey service: %s", error.message);
-        LSErrorFree(&error);
-        return false;
+    std::string argsStr;
+    if (!jValueToJsonString(argsStr, args)) {
+        BERR("Error generating JSON");
+    } else {
+        bool succeeded = LSCall(m_lsHandle, "palm://com.palm.smartKey/search", argsStr.c_str(),
+                                smartKeySearchCallback, (void*)requestId, NULL, &error);
+        if (succeeded) {
+            return true;
+        } else {
+            g_warning("Failed querying smartKey service: %s", error.message);
+            LSErrorFree(&error);
+            return false;
+        }
     }
     return false;
 }
