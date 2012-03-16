@@ -24,6 +24,7 @@ LICENSE@@@ */
 #include <map>
 #include "lunaservice.h"
 #include "DbBackupStatus.h"
+#include "JsonUtils.h"
 
 struct LSHandle;
 struct LSMessage;
@@ -105,16 +106,12 @@ private:
     static bool backupRegistrationCallback(LSHandle *sh, LSMessage *message, void *ctx);
     static bool backupCallback( LSHandle* lshandle, LSMessage *message, void *user_data);
     static bool queryBackupServiceCallback(LSHandle *sh, LSMessage *message, void *ctx);
-    static bool parseBackupServiceItem(struct json_object* jsonItem, BackupItem& item);
-    static int  parseBackupServiceItemList(struct array_list* jsonItems, std::map<std::string, BackupItem>& items);
+    static bool parseBackupServiceItem(pbnjson::JValue& jsonItem, BackupItem& item);
+    static int  parseBackupServiceItemList(pbnjson::JValue& jsonItems, std::map<std::string, BackupItem>& items);
     static std::string getHtml5BackupFile(const std::string& appid,const std::string& path);
     static std::string getHtml5Url(const std::string& appid);
-    static bool getJsonPropVal(json_object* obj, const char* propName, std::string& val);
-    static bool getJsonPropVal(json_object* obj, const char* propName, double& val);
-    static bool getJsonPropVal(json_object* obj, const char* propName, int& val);
-    static bool getJsonPropVal(json_object* obj, const char* propName, bool& val);
     static bool simpleMessageReply(LSHandle* lshandle, LSMessage *message, const std::string& errorText);
-    static void addItemDataToJsonObj(json_object* obj, const BackupItem& item);
+    static void addItemDataToJsonObj(pbnjson::JValue& obj, const BackupItem& item);
     static bool backupServiceConnectCallback(LSHandle *sh, LSMessage *message, void *ctx);
 
     GMainLoop* m_mainLoop;

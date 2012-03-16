@@ -22,7 +22,7 @@ LICENSE@@@ */
 #include <string>
 #include <map>
 #include "BackupManager.h"
-#include <cjson/json.h>
+#include "JsonUtils.h"
 
 /*
  * This file is almost identical to one in luna-sysmgr. If you change this please
@@ -53,15 +53,8 @@ static const std::string strPhonyCookieAppId = "com.palm.browserServer.cookies";
  */
 static const std::string strCookieDbAppId = "com.palm.app.browser";
 
-template <class T>
-bool ValidJsonObject(T jsonObj)
-{
-    return NULL != jsonObj && !is_error(jsonObj);
-}
-
-
 /**
- * These are the methods that the backup service can call when it's doing a 
+ * These are the methods that the backup service can call when it's doing a
  * backup or restore.
  */
 LSMethod BackupManager::s_BackupServerMethods[]  = {
@@ -114,18 +107,14 @@ BackupManager::BackupItem& BackupManager::BackupItem::operator=(const BackupItem
 
 void BackupManager::BackupItem::setMetadata()
 {
-    json_object* metadata = json_object_new_object();
-    if (ValidJsonObject(metadata)) {
-        json_object_object_add(metadata, "appId", json_object_new_string(m_appid.c_str()));
-        json_object_object_add(metadata, "myType", json_object_new_int(m_eType));
-        if (!m_dbname.empty())
-            json_object_object_add(metadata, "dbName", json_object_new_string(m_dbname.c_str()));
-        json_object_object_add(metadata, "dbModTime", json_object_new_int(m_dbModTime));
+    pbnjson::JValue metadata = pbnjson::Object();
+    metadata.put("appId", m_appid);
+    metadata.put("myType", (int) m_eType);
+    if (!m_dbname.empty())
+        metadata.put("dbName", m_dbname);
+    metadata.put("dbModTime", (int) m_dbModTime);
 
-        m_metaData = json_object_get_string(metadata);
-
-        json_object_put(metadata);
-    }
+    (void) jValueToJsonString(m_metaData, metadata);
 }
 
 BackupManager::BackupManager()
@@ -240,12 +229,13 @@ void BackupManager::dbRestoreStopped( const DbBackupStatus& status, void* userDa
 
 bool BackupManager::preBackup( LSHandle* lshandle, LSMessage *message, void *user_data )
 {
-    g_warning("In prebackup");
+    g_warning("In preBackup");
 
     std::string msg;
 
     const char* str = LSMessageGetPayload( message );
-    json_object* json = json_tokener_parse(str);
+    pbnjson::JValue args;
+    (void) jsonStringToJValue(args, str);
     if (!str) {
         msg = "No payload";
     }
@@ -260,8 +250,7 @@ bool BackupManager::preBackup( LSHandle* lshandle, LSMessage *message, void *use
 
     //s_instance->m_currentBackupModTimes.erase(item.m_path);
     std::string url = getHtml5Url(strPhonyCookieAppId);
-    std::string backupPath;
-    getJsonPropVal(json, "tempDir", backupPath);
+    std::string backupPath = args["tempDir"].asString();
     item.m_path=getHtml5BackupFile(item.m_appid,backupPath);
     s_instance->m_backupItem.m_path =item.m_path;
 
@@ -303,24 +292,22 @@ bool BackupManager::postBackup( LSHandle* lshandle, LSMessage *message, void *us
 
 bool BackupManager::preRestore(  LSHandle* lshandle, LSMessage *message, void *user_data)
 {
-    // Need to respond to continue with the restore 
+    // Need to respond to continue with the restore
     g_warning("In preRestore");
-    struct json_object* response = json_object_new_object();
-    if (ValidJsonObject(response)) {
+    pbnjson::JValue response = pbnjson::Object();
 
-        LSError lserror;
-        LSErrorInit(&lserror);
+    LSError lserror;
+    LSErrorInit(&lserror);
 
-        json_object_object_add(response, "proceed", json_object_new_boolean(true));
+    response.put("proceed", true);
 
+    std::string responseStr;
+    if (jValueToJsonString(responseStr, response)) {
         g_debug("Sending reply: for preRestore");
-        if (!LSMessageReply( s_instance->m_clientService, message, json_object_to_json_string(response), &lserror )) {
+        if (!LSMessageReply( s_instance->m_clientService, message, responseStr.c_str(), &lserror )) {
             g_warning("Can't send error reply %s", lserror.message);
-            LSErrorFree (&lserror); 
+            LSErrorFree (&lserror);
         }
-
-        json_object_put( response );
-
     }
     else {
         g_warning("Proper preRestore response not sent");
@@ -341,10 +328,9 @@ bool BackupManager::postRestore(  LSHandle* lshandle, LSMessage *message, void *
     }
     else {
         g_debug("postRestore '%s'", str);
-        json_object* json = json_tokener_parse(str);
-        json_object* files = json_object_object_get(json, "files");
-        array_list* fileList = json_object_get_array(files);
-        std::string file= json_object_get_string((json_object*)array_list_get_idx(fileList, 0));
+        pbnjson::JValue args;
+        (void) lsMessageToJValue(args, message);
+        std::string file = args["files"][0].asString();
         //first check if the file has the absolute path, if yes no need to check for tempDir
         std::string path;
         if(!file.empty())
@@ -357,8 +343,7 @@ bool BackupManager::postRestore(  LSHandle* lshandle, LSMessage *message, void *
             else
             {
                 //just the file name so construct path using the tempDir sent
-                json_object* pathObj = json_object_object_get(json,"tempDir");
-                path= json_object_get_string(pathObj)+file;
+                path = args["tempDir"].asString() + file;
             }
 
 
@@ -403,20 +388,17 @@ bool BackupManager::postRestore(  LSHandle* lshandle, LSMessage *message, void *
 
 bool BackupManager::sendEmptyResponse(LSMessage *message)
 {
-    struct json_object* response = json_object_new_object();
-    if (ValidJsonObject(response)) {
-
+    pbnjson::JValue response = pbnjson::Object();
+    std::string responseStr;
+    if (jValueToJsonString(responseStr, response)) {
         LSError lserror;
         LSErrorInit(&lserror);
 
         g_debug("Sending empty reply: ");
-        if (!LSMessageReply( s_instance->m_clientService, message, json_object_to_json_string(response), &lserror )) {
+        if (!LSMessageReply( s_instance->m_clientService, message, responseStr.c_str(), &lserror )) {
             g_warning("Can't send error reply %s", lserror.message);
-            LSErrorFree (&lserror); 
+            LSErrorFree (&lserror);
         }
-
-        json_object_put( response );
-
     }
     else {
         g_warning("Proper response not sent");
@@ -428,33 +410,29 @@ bool BackupManager::sendEmptyResponse(LSMessage *message)
 bool BackupManager::sendPreBackupReply(LSMessage *message,const char* url,const std::string& errorText)
 {
     g_warning("sendPreBackupReply");
-    struct json_object* response = json_object_new_object();
-    if (ValidJsonObject(response)) {
+    pbnjson::JValue response = pbnjson::Object();
 
-        LSError lserror;
-        LSErrorInit(&lserror);
-        json_object* urlList = json_object_new_array();
-        json_object_array_add(urlList, json_object_new_string(url) );
+    LSError lserror;
+    LSErrorInit(&lserror);
 
-        //urlList.push(url);
-        json_object_object_add(response, "description", json_object_new_string("Backing up Cookies DB"));
-        json_object_object_add(response, "files", urlList);
-        json_object_object_add(response, "full", json_object_new_boolean(true));
-        json_object_object_add(response, "version", json_object_new_string("1.0"));
-        if (!errorText.empty()) {
-            json_object_object_add(response, "errorText", json_object_new_string(errorText.c_str()));
-        }
+    pbnjson::JValue urlList = pbnjson::Array();
+    urlList.append(url);
+    response.put("description", "Backing up Cookies DB");
+    response.put("files", urlList);
+    response.put("full", true);
+    response.put("version", "1.0");
+    if (!errorText.empty())
+        response.put("errorText", errorText);
 
+    std::string responseStr;
+    if (jValueToJsonString(responseStr, response)) {
         g_debug("Sending reply: for PreBackup");
-        if (!LSMessageReply( m_clientService, message, json_object_to_json_string(response), &lserror )) {
+        if (!LSMessageReply( m_clientService, message, responseStr.c_str(), &lserror )) {
             g_warning("Can't send error reply %s", lserror.message);
             LSErrorFree (&lserror);
         }
-
-        json_object_put( response );
         return true;
-    }
-    else {
+    } else {
         return false;
     }
 }
@@ -501,8 +479,8 @@ bool BackupManager::backupRegistrationCallback(LSHandle *sh, LSMessage *message,
     if (!payload)
         return true;
 
-    json_object* json = json_tokener_parse(payload);
-    if (!ValidJsonObject(json)) {
+    pbnjson::JValue args;
+    if (!jsonStringToJValue(args, payload)) {
         g_warning("Failed registering for backup service.");
         return false;
     }
@@ -515,26 +493,27 @@ bool BackupManager::backupRegistrationCallback(LSHandle *sh, LSMessage *message,
 bool BackupManager::registerForBackup()
 {
     g_warning("Requesting registration for backup");
-    json_object* payload = json_object_new_object();
-    if (NULL == payload)
-        return false;
+    pbnjson::JValue payload = pbnjson::Object();
 
-    json_object_object_add(payload, "service", json_object_new_string(strBackupServiceName.c_str()));
-    json_object_object_add(payload, "preBackup", json_object_new_string(strPreBackupFunc.c_str()));
-    json_object_object_add(payload, "postBackup", json_object_new_string(strPostBackupFunc.c_str()));
-    json_object_object_add(payload, "preRestore", json_object_new_string(strPreRestoreFunc.c_str()));
-    json_object_object_add(payload, "postRestore", json_object_new_string(strPostRestoreFunc.c_str()));
+    payload.put("service", strBackupServiceName);
+    payload.put("preBackup", strPreBackupFunc);
+    payload.put("postBackup", strPostBackupFunc);
+    payload.put("preRestore", strPreRestoreFunc);
+    payload.put("postRestore", strPostRestoreFunc);
 
     LSError error;
     LSErrorInit(&error);
 
-    bool succeeded = LSCall(m_clientService, "palm://com.palm.service.backup/register", json_object_get_string(payload), backupRegistrationCallback, NULL, NULL, &error);
-    if (!succeeded) {
-        g_warning("Failed registering for backup: %s", error.message);
-        LSErrorFree(&error);
+    bool succeeded = false;
+    std::string payloadStr;
+    if (jValueToJsonString(payloadStr, payload)) {
+        succeeded = LSCall(m_clientService, "palm://com.palm.service.backup/register", payloadStr.c_str(),
+                           backupRegistrationCallback, NULL, NULL, &error);
+        if (!succeeded) {
+            g_warning("Failed registering for backup: %s", error.message);
+            LSErrorFree(&error);
+        }
     }
-
-    json_object_put(payload);
 
     return succeeded;
 }
@@ -544,17 +523,16 @@ bool BackupManager::registerForBackup()
  *
  * @return The number of items that had errors.
  */
-int BackupManager::parseBackupServiceItemList(struct array_list* jsonItems, std::map<std::string, BackupItem>& items)
+int BackupManager::parseBackupServiceItemList(pbnjson::JValue& jsonItems, std::map<std::string, BackupItem>& items)
 {
     int nNumErrors = 0;
 
-    if (ValidJsonObject(jsonItems)) {
-        int numItems = array_list_length(jsonItems);
+    if (jsonItems.isArray()) {
+        int numItems = jsonItems.arraySize();
         for (int i = 0; i < numItems; ++i) {
-            json_object* backupItem = static_cast<json_object*>(array_list_get_idx(jsonItems, i));
-            if (ValidJsonObject(backupItem)) {
-                std::string serviceName;
-                getJsonPropVal(backupItem, "service", serviceName);
+            pbnjson::JValue backupItem = jsonItems[i];
+            if (backupItem.isObject()) {
+                std::string serviceName = backupItem["service"].asString();
                 if (serviceName.empty() || serviceName == strBackupServiceName) {
                     BackupItem item;
                     if (parseBackupServiceItem(backupItem, item)) {
@@ -578,14 +556,12 @@ int BackupManager::parseBackupServiceItemList(struct array_list* jsonItems, std:
     return nNumErrors;
 }
 
-bool BackupManager::parseBackupServiceItem(json_object* jsonItem, BackupItem& item)
+bool BackupManager::parseBackupServiceItem(pbnjson::JValue& jsonItem, BackupItem& item)
 {
-    assert(ValidJsonObject(jsonItem));
-
-    getJsonPropVal(jsonItem, "path", item.m_path);
-    getJsonPropVal(jsonItem, "version", item.m_version);
+    item.m_path = jsonItem["path"].asString();
+    item.m_version = jsonItem["version"].asNumber<double>();
     int nType(0);
-    getJsonPropVal(jsonItem, "type", nType);
+    nType = jsonItem["type"].asNumber<int>();
     if (nType == 0) {
         item.m_eType = BackupFile;
     }
@@ -597,23 +573,24 @@ bool BackupManager::parseBackupServiceItem(json_object* jsonItem, BackupItem& it
         return false;
     }
 
-    getJsonPropVal(jsonItem, "recursive", item.m_recursive);
-    getJsonPropVal(jsonItem, "metadata", item.m_metaData);
+    item.m_recursive = jsonItem["recursive"].asNumber<int>();
+    item.m_metaData = jsonItem["metadata"].asString();
     if (!item.m_metaData.empty()) {
-        json_object* metadata = json_tokener_parse(item.m_metaData.c_str());
-        if (ValidJsonObject(metadata)) {
-            getJsonPropVal(metadata, "appId", item.m_appid);
-            getJsonPropVal(metadata, "dbName", item.m_dbname);
+        pbnjson::JValue metadata;
+        if (jsonStringToJValue(metadata, item.m_metaData)) {
+            item.m_appid = metadata["appId"].asString();
+            item.m_dbname = metadata["dbName"].asString();
             int myType;
-            if (getJsonPropVal(metadata, "myType", myType)) {
+            if (metadata["myType"].isNumber()) {
+                myType = metadata["myType"].asNumber<int>();
                 item.m_eType = static_cast<BackupType>(myType);
             }
             double modTime;
-            if (getJsonPropVal(metadata, "dbModTime", modTime)) {
+            if (metadata["dbModTime"].isNumber()) {
+                modTime = metadata["dbModTime"].asNumber<double>();
                 item.m_dbModTime = static_cast<time_t>(modTime);
             }
 
-            json_object_put(metadata);
             if (item.m_eType == BackupHtml5Db && item.m_dbname.empty()) {
                 g_warning("HTML5 db's need a database name.");
                 return false;
@@ -631,59 +608,6 @@ bool BackupManager::parseBackupServiceItem(json_object* jsonItem, BackupItem& it
 
     return true;
 }
-
-bool BackupManager::getJsonPropVal(json_object* obj, const char* propName, bool& val)
-{
-    json_object* value = json_object_object_get(obj, propName );
-    if( ValidJsonObject(value) ) {
-        val = json_object_get_boolean(value);
-        return true;
-    }
-    else {
-        val = false;
-        return false;
-    }
-}
-
-bool BackupManager::getJsonPropVal(json_object* obj, const char* propName, double& val)
-{
-    json_object* value = json_object_object_get(obj, propName );
-    if( ValidJsonObject(value) ) {
-        val = json_object_get_double(value);
-        return true;
-    }
-    else {
-        val = 0.0;
-        return false;
-    }
-}
-
-bool BackupManager::getJsonPropVal(json_object* obj, const char* propName, int& val)
-{
-    json_object* value = json_object_object_get(obj, propName );
-    if( ValidJsonObject(value) ) {
-        val = json_object_get_int(value);
-        return true;
-    }
-    else {
-        val = 0.0;
-        return false;
-    }
-}
-
-bool BackupManager::getJsonPropVal(json_object* obj, const char* propName, std::string& val)
-{
-    json_object* value = json_object_object_get(obj, propName );
-    if( ValidJsonObject(value) ) {
-        val = json_object_get_string(value);
-        return true;
-    }
-    else {
-        val.erase();
-        return false;
-    }
-}
-
 
 /**
  * Register the calls that the backup service will call when it does a backup or
