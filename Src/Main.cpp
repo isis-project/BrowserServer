@@ -441,7 +441,9 @@ main(int argc, char *argv[])
         return -1;
     }
 
+#ifdef USE_CERT_MGR
     SSLSupport::init();
+#endif
 
     server->InitMemWatcher();
 
@@ -480,7 +482,9 @@ main(int argc, char *argv[])
 
     server->stopService();
 
+#ifdef USE_CERT_MGR
     SSLSupport::deinit();
+#endif
     return 0;
 }
 

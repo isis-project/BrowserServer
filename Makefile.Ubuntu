@@ -1,9 +1,11 @@
 INCLUDE_DIR :=${STAGING_DIR}/include
+STAGING_INCDIR := ${INCLUDE_DIR}
 LIB_DIR :=${STAGING_DIR}/lib
+STAGING_LIBDIR := ${LIB_DIR}
 STAGING_BINDIR_NATIVE :=${STAGING_DIR}/bin
 
 BUILD_TYPE := release
-PLATFORM   ?= arm
+PLATFORM   ?= x86
 
 MOC := ${STAGING_BINDIR_NATIVE}/moc
 
@@ -23,13 +25,15 @@ INCLUDES := \
 	`pkg-config --cflags glib-2.0`
 
 LIBS := \
+	-L$(LIB_DIR) -lQtGui \
+	-L$(LIB_DIR) -lQtNetwork \
+	-L$(LIB_DIR) -lpbnjson_cpp \
+	-L$(LIB_DIR) -lpbnjson_c \
+	-L$(LIB_DIR) -lyajl \
+	-L$(LIB_DIR) -lQtWebKit \
+	-L$(LIB_DIR) -lWebKitMisc \
 	-lpthread \
 	-lglib-2.0 \
-	-lQtGui \
-	-lQtNetwork \
-	-L$(LIB_DIR) -lpbnjson_cpp \
-	-L$(LIB_DIR) -lQtWebKit \
-	-L$(LIB_DIR) -lWebKitMisc
 
 FLAGS_OPT := -fno-exceptions -fno-rtti -fvisibility=hidden -DDEBUG -fPIC -DTARGET_DEVICE
 
@@ -68,11 +72,11 @@ APP_SOURCES := \
 	BrowserOffscreenQt.cpp \
 	BrowserPageManager.cpp \
 	Settings.cpp \
-	SSLSupport.cpp \
 	BrowserPage.moc.cpp \
 	BrowserComboBox.cpp \
 	BrowserComboBox.moc.cpp \
 	qwebkitplatformplugin.moc.cpp \
+	JsonUtils.cpp \
 	WebOSPlatformPlugin.moc.cpp
 
 LIB_OBJS := $(LIB_SOURCES:%.cpp=$(OBJDIR)/%.o)
