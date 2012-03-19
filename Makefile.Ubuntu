@@ -7,7 +7,8 @@ STAGING_BINDIR_NATIVE :=${STAGING_DIR}/bin
 BUILD_TYPE := release
 PLATFORM   ?= x86
 
-MOC := ${STAGING_BINDIR_NATIVE}/moc
+#MOC := ${STAGING_BINDIR_NATIVE}/moc
+QT_INSTALL_PREFIX = `qmake -query QT_INSTALL_PREFIX`
 
 INCLUDES := \
 	-isystem $(INCLUDE_DIR) \
@@ -22,9 +23,15 @@ INCLUDES := \
 	-I$(INCLUDE_DIR)/QtNetwork \
 	-I$(INCLUDE_DIR)/QtWebKit \
 	-I$(INCLUDE_DIR)/WebKitSupplemental \
+	-I$(QT_INSTALL_PREFIX)/include/ \
+	-I$(QT_INSTALL_PREFIX)/include/Qt \
+	-I$(QT_INSTALL_PREFIX)/include/QtCore \
+	-I$(QT_INSTALL_PREFIX)/include/QtGui \
+	-I$(QT_INSTALL_PREFIX)/include/QtNetwork \
 	`pkg-config --cflags glib-2.0`
 
 LIBS := \
+   -L$(QT_INSTALL_PREFIX)/lib \
 	-L$(LIB_DIR) -lQtGui \
 	-L$(LIB_DIR) -lQtNetwork \
 	-L$(LIB_DIR) -lpbnjson_cpp \

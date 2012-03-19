@@ -59,7 +59,7 @@ IpcBuffer* IpcBuffer::create(int size)
     }
 
     void* buffer = ::shmat(key, NULL, SHM_CACHE_WRITETHROUGH);
-    if (-1 == (int) buffer) {
+    if ((void *)-1 == buffer) {
         g_critical("Failed to attach to shared memory key (1) %d: %s", key, strerror(errno));
         ::shmctl(key, IPC_RMID, NULL);
         return 0;
@@ -78,7 +78,7 @@ IpcBuffer* IpcBuffer::create(int size)
 IpcBuffer* IpcBuffer::attach(int key, int size)
 {
     void* buffer = ::shmat(key, NULL, 0);
-    if (-1 == (int) buffer) {
+    if ((void *)-1 == buffer) {
         g_critical("Failed to attach to shared memory key (2) %d: %s", key, strerror(errno));
         return false;
     }
