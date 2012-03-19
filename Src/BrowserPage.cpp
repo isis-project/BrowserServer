@@ -3233,33 +3233,27 @@ void BrowserPage::initKeyMap() {
     keyMap[Key_F11]        = Qt::Key_F11;
     keyMap[Key_F12]        = Qt::Key_F12;
 
+#ifdef USE_LUNA_SERVICE
     keyMap[Key_CoreNavi_Back]        = Qt::Key_CoreNavi_Back;
     keyMap[Key_CoreNavi_Menu]        = Qt::Key_CoreNavi_Menu;
     keyMap[Key_CoreNavi_QuickLaunch] = Qt::Key_CoreNavi_QuickLaunch;
     keyMap[Key_CoreNavi_Launcher]    = Qt::Key_CoreNavi_Launcher;
-#ifdef USE_LUNA_SERVICE
     keyMap[Key_CoreNavi_Down]   = Qt::Key_CoreNavi_SwipeDown;
-#else
     keyMap[Key_CoreNavi_SwipeDown]   = Qt::Key_CoreNavi_SwipeDown;
-#endif
     keyMap[Key_CoreNavi_Next]        = Qt::Key_CoreNavi_Next;
     keyMap[Key_CoreNavi_Previous]    = Qt::Key_CoreNavi_Previous;
     keyMap[Key_CoreNavi_Home]        = Qt::Key_CoreNavi_Home;
     keyMap[Key_CoreNavi_Meta]        = Qt::Key_CoreNavi_Meta;
     keyMap[Key_Flick]                = Qt::Key_Flick;
-
     keyMap[Key_Slider]               = Qt::Key_Slider;
     keyMap[Key_Optical]              = Qt::Key_Optical;
     keyMap[Key_Ringer]               = Qt::Key_Ringer;
-#ifdef USE_LUNA_SERVICE
     keyMap[Key_HardPower]            = Qt::Key_Power;
-#else
     keyMap[Key_Power]            = Qt::Key_Power;
-#endif
-
     keyMap[Key_HeadsetButton]        = Qt::Key_HeadsetButton;
     keyMap[Key_Headset]              = Qt::Key_Headset;
     keyMap[Key_HeadsetMic]           = Qt::Key_HeadsetMic;
+#endif
 
     keyMapInit = true;
 }
