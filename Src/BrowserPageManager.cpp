@@ -231,7 +231,7 @@ BrowserPageManager::purgeLowPriorityPages()
         numPurged++;
     }
 
-    g_warning("Purged %d low priority pages out of %u.", numPurged, m_pageList.size());
+    g_warning("Purged %d low priority pages out of %u.", numPurged, (unsigned int)m_pageList.size());
 
     return numPurged;
 }

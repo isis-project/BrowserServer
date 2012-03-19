@@ -18,6 +18,7 @@ LICENSE@@@ */
 
 #include <sys/types.h>
 #include <sys/shm.h>
+#include <sys/time.h>
 #include <stdlib.h>
 #include <math.h>
 #include <assert.h>
