@@ -3239,8 +3239,7 @@ void BrowserPage::initKeyMap() {
     keyMap[Key_CoreNavi_Menu]        = Qt::Key_CoreNavi_Menu;
     keyMap[Key_CoreNavi_QuickLaunch] = Qt::Key_CoreNavi_QuickLaunch;
     keyMap[Key_CoreNavi_Launcher]    = Qt::Key_CoreNavi_Launcher;
-    keyMap[Key_CoreNavi_Down]   = Qt::Key_CoreNavi_SwipeDown;
-    keyMap[Key_CoreNavi_SwipeDown]   = Qt::Key_CoreNavi_SwipeDown;
+    keyMap[Key_CoreNavi_Down]        = Qt::Key_CoreNavi_SwipeDown;
     keyMap[Key_CoreNavi_Next]        = Qt::Key_CoreNavi_Next;
     keyMap[Key_CoreNavi_Previous]    = Qt::Key_CoreNavi_Previous;
     keyMap[Key_CoreNavi_Home]        = Qt::Key_CoreNavi_Home;
@@ -3250,7 +3249,6 @@ void BrowserPage::initKeyMap() {
     keyMap[Key_Optical]              = Qt::Key_Optical;
     keyMap[Key_Ringer]               = Qt::Key_Ringer;
     keyMap[Key_HardPower]            = Qt::Key_Power;
-    keyMap[Key_Power]            = Qt::Key_Power;
     keyMap[Key_HeadsetButton]        = Qt::Key_HeadsetButton;
     keyMap[Key_Headset]              = Qt::Key_Headset;
     keyMap[Key_HeadsetMic]           = Qt::Key_HeadsetMic;
