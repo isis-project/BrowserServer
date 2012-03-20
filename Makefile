@@ -17,6 +17,7 @@ INCLUDES := \
 	`pkg-config --cflags glib-2.0`
 
 LIBS := \
+	-laffinity \
 	-lpthread \
 	-lmemchute \
 	-lglib-2.0 \
