@@ -112,6 +112,8 @@ stage: $(TARGET_APP) $(OBJDIR)/libYap.a
 	install -m 444 Src/BrowserOffscreenCalculations.h $(STAGING_INCDIR)
 	install -d $(STAGING_LIBDIR)
 	install -m 444 $(OBJDIR)/libYap.a $(STAGING_LIBDIR)/libYap.a
+	mkdir -p $(LUNA_STAGING)/bin
+	install -m 0775 $(BUILD_TYPE)-$(PLATFORM)/BrowserServer $(STAGING_DIR)/bin/BrowserServer
 
 $(TARGET_LIB): $(LIB_OBJS)
 	$(AR) rcs $(TARGET_LIB) $(LIB_OBJS)
