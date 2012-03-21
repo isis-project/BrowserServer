@@ -38,6 +38,7 @@ LIBS := \
 	-L$(LIB_DIR) -lyajl \
 	-L$(LIB_DIR) -lQtWebKit \
 	-L$(LIB_DIR) -lWebKitMisc \
+	-lQtCore \
 	-lpthread \
 	-lglib-2.0 \
 
