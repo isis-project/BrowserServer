@@ -32,13 +32,13 @@ INCLUDES := \
 LIBS := \
    -L$(QT_INSTALL_PREFIX)/lib \
 	-L$(LIB_DIR) \
+	-lQtWebKit \
 	-lQtGui \
 	-lQtNetwork \
 	-lQtCore \
 	-lpbnjson_cpp \
 	-lpbnjson_c \
 	-lyajl \
-	-lQtWebKit \
 	-lWebKitMisc \
 	-lpthread \
 	-lglib-2.0 \
