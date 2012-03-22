@@ -1,6 +1,7 @@
 *.moc.cpp
 BrowserServer.conf
 release-*
+debug-*
 CodeGen/BrowserClientBase.*
 CodeGen/BrowserServerBase.*
 CodeGen/CodeGen
