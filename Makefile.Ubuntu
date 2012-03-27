@@ -3,9 +3,11 @@ STAGING_INCDIR := ${INCLUDE_DIR}
 LIB_DIR :=${STAGING_DIR}/lib
 STAGING_LIBDIR := ${LIB_DIR}
 STAGING_BINDIR_NATIVE ?=${STAGING_DIR}/bin
+ISIS_ROOT_DIR := ${HOME}/.isis
 
 BUILD_TYPE := debug
 PLATFORM   ?= x86
+MACHINE := desktop
 
 MOC := ${STAGING_BINDIR_NATIVE}/moc
 
@@ -115,6 +117,8 @@ stage: $(TARGET_APP) $(OBJDIR)/libYap.a
 	install -m 444 $(OBJDIR)/libYap.a $(STAGING_LIBDIR)/libYap.a
 	mkdir -p $(LUNA_STAGING)/bin
 	install -m 0775 $(BUILD_TYPE)-$(PLATFORM)/BrowserServer $(STAGING_DIR)/bin/BrowserServer
+	mkdir -p $(ISIS_ROOT_DIR)/etc/palm
+	install -m 0755 BrowserServer.conf $(ISIS_ROOT_DIR)/etc/palm/BrowserServer.conf
 
 $(TARGET_LIB): $(LIB_OBJS)
 	$(AR) rcs $(TARGET_LIB) $(LIB_OBJS)
@@ -137,6 +141,7 @@ BrowserPage.moc.cpp: BrowserPage.h
 .PHONY: BrowserServer.conf
 BrowserServer.conf:
 	./conf/mergeconf.pl conf/BrowserServer_base.conf conf/BrowserServer_${MACHINE}.conf > $@
+	perl -p -i -e "s{ISIS_ROOT_DIR}{$(ISIS_ROOT_DIR)}g" $@
 
 vpath %.cpp Yap Src
 vpath %.h Src
