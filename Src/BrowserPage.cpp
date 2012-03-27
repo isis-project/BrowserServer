@@ -709,12 +709,31 @@ BrowserPage::init(uint32_t virtualPageWidth, uint32_t virtualPageHeight, int sha
 
     if (!qpa_qbs_register_client) {
 
-       void *handle = dlopen("/usr/plugins/platforms/libqbsplugin.so", RTLD_LAZY);
+        void *handle = 0;
 
-       if (handle)
-           qpa_qbs_register_client = (qpa_qbs_register_client_function)dlsym(handle, "qpa_qbs_register_client");
-       else
-          qDebug() << "### /usr/plugins/platforms/libqbsplugin.so NOT FOUND!!!";
+        char* path = getenv("QT_PLUGIN_PATH");
+
+        qDebug() << " *** QT_PLUGIN_PATH=" << (path ? path : "NONE");
+
+        if (path) {
+
+           QString lib(QString(path) + QString("/platforms/libqbsplugin.so"));
+           handle = dlopen(qPrintable(lib), RTLD_LAZY);
+        }
+
+        if (!handle)
+            dlopen("/usr/plugins/platforms/libqbsplugin.so", RTLD_LAZY);
+
+        if (!handle) {
+            handle = dlopen("libqbsplugin.so", RTLD_LAZY);
+        }
+
+        if (handle)
+            qpa_qbs_register_client = (qpa_qbs_register_client_function)dlsym(handle, "qpa_qbs_register_client");
+        else {
+           qDebug() << "libqbsplugin.so not found!";
+           exit(-1);
+        }
     }
 
     if (qpa_qbs_register_client)
@@ -726,8 +745,10 @@ BrowserPage::init(uint32_t virtualPageWidth, uint32_t virtualPageHeight, int sha
         m_driver->setBufferState(0, true);
         m_driver->setBufferState(1, true);
     }
-    else
+    else {
         qDebug() << "### m_driver not set!!!";
+        exit(-1);
+    }
 
     return true;
 }
