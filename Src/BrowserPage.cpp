@@ -1107,10 +1107,11 @@ BrowserPage::holdAt(uint32_t contentsPosX, uint32_t contentsPosY)
     return false;
 }
 void
-BrowserPage::keyDown(uint16_t key, uint16_t modifiers)
+BrowserPage::keyDown(int32_t key, int32_t modifiers)
 {
     BDBG("Key Down: %d (0x%02x, %c)", key, key, key);
 
+#if 0
     // Check for a clipboard operation request. This comes from palmwebview.cpp in the
     // form of a key up/down pair.
     if( modifiers & 0x20 ) {
@@ -1122,16 +1123,18 @@ BrowserPage::keyDown(uint16_t key, uint16_t modifiers)
             return;
         }
     }
+#endif
 
     QKeyEvent event = mapKeyEvent(true, key, modifiers);
     QCoreApplication::sendEvent(m_graphicsView->viewport(), &event);
 }
 
 void
-BrowserPage::keyUp(uint16_t key, uint16_t modifiers)
+BrowserPage::keyUp(int32_t key, int32_t modifiers)
 {
     BDBG("Key Up: %d (0x%02x, %c)", key, key, key);
 
+#if 0
     if( modifiers & 0x20 ) {
         switch( key ) {
         case Key_C:
@@ -1141,6 +1144,7 @@ BrowserPage::keyUp(uint16_t key, uint16_t modifiers)
             return;
         }
     }
+#endif // 0
 
     QKeyEvent event = mapKeyEvent(false, key, modifiers);
     QCoreApplication::sendEvent(m_graphicsView->viewport(), &event);
@@ -1261,6 +1265,7 @@ BrowserPage::mapKey(uint16_t key) {
 QKeyEvent
 BrowserPage::mapKeyEvent(bool pressed, uint16_t key, uint16_t modifiers) {
 
+#if 0
     static const uint16_t ShiftModifier = 0x80;
     static const uint16_t ControlModifier = 0x40;
     static const uint16_t MetaModifier = 0x20;
@@ -1281,12 +1286,13 @@ BrowserPage::mapKeyEvent(bool pressed, uint16_t key, uint16_t modifiers) {
     if (modifiers & MetaModifier)
         mappedModifiers |= Qt::MetaModifier;
 
+#endif // 0
     QString text;
 
     if (key < 0xE000)
         text += QChar(key);
 
-    QKeyEvent event(pressed ? QEvent::KeyPress : QEvent::KeyRelease, mappedKey, mappedModifiers, text);
+    QKeyEvent event(pressed ? QEvent::KeyPress : QEvent::KeyRelease, key, (Qt::KeyboardModifier)modifiers, text);
 
     return event;
 }

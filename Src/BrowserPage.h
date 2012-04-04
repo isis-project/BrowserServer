@@ -122,9 +122,9 @@ public:
     bool clickAt(uint32_t contentsPosX, uint32_t contentsPosY, uint32_t numClicks);
     bool holdAt(uint32_t contentsPosX, uint32_t contentsPosY);
 
-    void keyDown(uint16_t key, uint16_t modifiers);
+    void keyDown(int32_t key, int32_t modifiers);
 
-    void keyUp(uint16_t key, uint16_t modifiers);
+    void keyUp(int32_t key, int32_t modifiers);
 
     bool freeze();
 

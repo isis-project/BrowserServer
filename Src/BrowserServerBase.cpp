@@ -157,8 +157,8 @@ void BrowserServerBase::handleAsyncCommand(YapProxy* proxy, YapPacket* cmd)
 	}
 	case 0x1008: { // KeyDown
 		
-		uint16_t key = 0;
-		uint16_t modifiers = 0;
+		int32_t key = 0;
+		int32_t modifiers = 0;
 		
 		(*cmd) >> key;
 		(*cmd) >> modifiers;
@@ -170,8 +170,8 @@ void BrowserServerBase::handleAsyncCommand(YapProxy* proxy, YapPacket* cmd)
 	}
 	case 0x1009: { // KeyUp
 		
-		uint16_t key = 0;
-		uint16_t modifiers = 0;
+		int32_t key = 0;
+		int32_t modifiers = 0;
 		
 		(*cmd) >> key;
 		(*cmd) >> modifiers;

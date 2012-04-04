@@ -471,7 +471,7 @@ BrowserServer::asyncCmdDisableSelection(YapProxy* proxy)
 }
 
 void
-BrowserServer::asyncCmdKeyDown(YapProxy* proxy, uint16_t key, uint16_t modifiers)
+BrowserServer::asyncCmdKeyDown(YapProxy* proxy, int32_t key, int32_t modifiers)
 {
     BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
     if (!pPage) {
@@ -485,7 +485,7 @@ BrowserServer::asyncCmdKeyDown(YapProxy* proxy, uint16_t key, uint16_t modifiers
 }
 
 void
-BrowserServer::asyncCmdKeyUp(YapProxy* proxy, uint16_t key, uint16_t modifiers)
+BrowserServer::asyncCmdKeyUp(YapProxy* proxy, int32_t key, int32_t modifiers)
 {
     BrowserPage* pPage = static_cast<BrowserPage*>(proxy->privateData());
     if (!pPage) {
