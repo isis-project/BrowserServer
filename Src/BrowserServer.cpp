@@ -112,7 +112,7 @@ BrowserServer::BrowserServer()
 #endif // USE_LUNA_SERVICE
     , m_pluginDirWatcher(0)
     , m_defaultDownloadDir()
-#if defined(__arm__)
+#if defined(USE_MEMCHUTE)
     , m_memchute(MEMCHUTE_NORMAL)
 #endif
     , m_offscreenBackupBuffer(0)
@@ -254,7 +254,7 @@ BrowserServer::clientDisconnected(YapProxy* proxy)
         proxy->setPrivateData(0);
     }
 
-#if defined(__arm__)
+#if defined(EXIT_AFTER_LAST_CLIENT)
     // Exit -- we'll get relaunched, but this will cause us to free any
     // memory we leaked.
     if( !m_pageCount ) {
@@ -1324,7 +1324,7 @@ void BrowserServer::InitMemWatcher()
 #ifdef FIXME_QT
     if (PalmBrowserSettings()->enableMemoryTracking) {
         g_warning("BrowserServer::InitMemWatcher - Configuring memory tracking.");
-#if defined(__arm__)
+#if defined(USE_MEMCHUTE)
         m_memchute = MEMCHUTE_NORMAL;
 #endif
         GMainLoop* pLoop = BrowserServer::instance()->mainLoop();
@@ -1345,7 +1345,7 @@ void BrowserServer::doMemWatch()
     if (!gWebKitInit)
         return;
 
-#if defined(__arm__)
+#if defined(USE_MEMCHUTE)
     MemchuteThreshold threshold = m_memchute;
     static int counter = 0;
     static const int kCounterIntervalForCleanup = 4;
@@ -1405,7 +1405,7 @@ void BrowserServer::doMemWatch()
     default:
         break;
     }
-#endif  // __arm__
+#endif  // USE_MEMCHUTE
 }
 
 int BrowserServer::getMemInfo(int& memTotal, int& memFree, int& swapTotal,
@@ -1472,7 +1472,7 @@ int BrowserServer::getMemInfo(int& memTotal, int& memFree, int& swapTotal,
  *
  * @author Anthony D'Auria
  */
-#if defined(__arm__)
+#if defined(USE_MEMCHUTE)
 
 static const char* MemchuteThresholdName(MemchuteThreshold threshold)
 {
@@ -1500,7 +1500,7 @@ BrowserServer::handleMemchuteNotification(MemchuteThreshold threshold)
 }
 
 
-#endif // __arm__ 
+#endif // USE_MEMCHUTE 
 
 void
 BrowserServer::stopService() 

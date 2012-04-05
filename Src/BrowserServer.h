@@ -31,11 +31,11 @@ LICENSE@@@ */
 
 #include <glib.h>  // memchute doesn't include it currently
 
-#if defined(__arm__)
+#if defined(USE_MEMCHUTE)
 extern "C" {
 #include <memchute.h>
 }
-#endif // __arm__
+#endif // USE_MEMCHUTE
 
 class WebKitEventListener;
 class PluginDirWatcher;
@@ -79,7 +79,7 @@ public:
     void InitMemWatcher();
     void doMemWatch();
 
-#if defined(__arm__)
+#if defined(USE_MEMCHUTE)
     static void handleMemchuteNotification(MemchuteThreshold threshold);
 #endif
 
@@ -124,9 +124,9 @@ private:
 
     QString m_defaultDownloadDir;
 
-#if defined(__arm__)
+#if defined(USE_MEMCHUTE)
     MemchuteThreshold m_memchute;
-#endif  // __arm__
+#endif  // USE_MEMCHUTE
     unsigned char* m_offscreenBackupBuffer;
     int m_offscreenBackupBufferLength;
 
