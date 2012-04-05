@@ -195,7 +195,7 @@ Chown(char *path, int owner, int group, bool recurse)
 static void InitPrivileges() {
 #define NOTROOT
 #ifdef NOTROOT
-#if defined(__arm__)
+#if defined(SETUP_WEBOS_DEVICE_DIRECTORIES)
     const int kProcessId = 1000; // user "luna"
     const int kGroupId = 1000;  // group "luna"
     const int kGroup2Id = 44;  // group "video"
@@ -312,7 +312,7 @@ static void InitPrivileges() {
     setgid( kGroupId );
     setuid( kProcessId );
 #endif
-#endif // defined(__arm__)
+#endif // defined(SETUP_WEBOS_DEVICE_DIRECTORIES)
 #endif // NOTROOT
 }
 
@@ -449,7 +449,7 @@ main(int argc, char *argv[])
 
     server->InitMemWatcher();
 
-#if defined(__arm__)
+#if defined(USE_MEMCHUTE)
     MemchuteWatcher* memWatch =
         MemchuteWatcherNew(BrowserServer::handleMemchuteNotification);
     if (memWatch != NULL) {
@@ -476,7 +476,7 @@ main(int argc, char *argv[])
 
     server->run(deadlockTimeoutMs);
 
-#if defined(__arm__)
+#if defined(USE_MEMCHUTE)
     if (memWatch != NULL) {
         MemchuteWatcherDestroy(memWatch);
     }
