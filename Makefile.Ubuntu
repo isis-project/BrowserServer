@@ -44,6 +44,7 @@ LIBS := \
 	-lWebKitMisc \
 	-lpthread \
 	-lglib-2.0 \
+	`pkg-config --libs gthread-2.0`
 
 FLAGS_OPT := -fno-exceptions -fno-rtti -fvisibility=hidden -DDEBUG -fPIC -DTARGET_DEVICE
 
