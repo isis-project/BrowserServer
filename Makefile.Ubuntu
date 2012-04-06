@@ -1,29 +1,22 @@
-INCLUDE_DIR :=${STAGING_DIR}/include
-STAGING_INCDIR := ${INCLUDE_DIR}
-LIB_DIR :=${STAGING_DIR}/lib
-STAGING_LIBDIR := ${LIB_DIR}
-STAGING_BINDIR_NATIVE ?=${STAGING_DIR}/bin
+STAGING_INCDIR := ${STAGING_DIR}/include
+STAGING_LIBDIR := ${STAGING_DIR}/lib
 ISIS_ROOT_DIR := ${HOME}/.isis
 
 BUILD_TYPE := debug
 PLATFORM   ?= x86
 MACHINE := desktop
 
-MOC := ${STAGING_BINDIR_NATIVE}/moc
+MOC := ${QT_INSTALL_PREFIX}/bin/moc
 
 INCLUDES := \
-	-isystem $(INCLUDE_DIR) \
-	-isystem $(INCLUDE_DIR)/webkit \
+	-isystem $(STAGING_INCDIR) \
+	-isystem $(STAGING_INCDIR)/webkit \
 	-I./Src \
 	-I./Yap \
-	-I$(INCLUDE_DIR) \
-	-I$(INCLUDE_DIR)/ime \
-	-I$(INCLUDE_DIR)/Qt \
-	-I$(INCLUDE_DIR)/QtCore \
-	-I$(INCLUDE_DIR)/QtGui \
-	-I$(INCLUDE_DIR)/QtNetwork \
-	-I$(INCLUDE_DIR)/QtWebKit \
-	-I$(INCLUDE_DIR)/WebKitSupplemental \
+	-I$(STAGING_INCDIR) \
+	-I$(STAGING_INCDIR)/ime \
+	-I$(STAGING_INCDIR)/QtWebKit \
+	-I$(STAGING_INCDIR)/WebKitSupplemental \
 	-I$(QT_INSTALL_PREFIX)/include/ \
 	-I$(QT_INSTALL_PREFIX)/include/Qt \
 	-I$(QT_INSTALL_PREFIX)/include/QtCore \
@@ -33,7 +26,7 @@ INCLUDES := \
 
 LIBS := \
    -L$(QT_INSTALL_PREFIX)/lib \
-	-L$(LIB_DIR) \
+	-L$(STAGING_LIBDIR) \
 	-lQtWebKit \
 	-lQtGui \
 	-lQtNetwork \
@@ -53,7 +46,7 @@ else
 FLAGS_OPT := -O2 $(FLAGS_OPT)
 endif
 
-LOCAL_CFLAGS := $(CXXFLAGS) -Wall -Werror $(FLAGS_OPT) -DQT_WEBOS
+LOCAL_CFLAGS := $(CXXFLAGS) -Wall -Werror $(FLAGS_OPT) -DQT_WEBOS -DISIS_DESKTOP
 
 LOCAL_LFLAGS := $(LDFLAGS) $(FLAGS_OPT) $(LIBS)
 
@@ -115,10 +108,12 @@ stage: $(TARGET_APP) $(OBJDIR)/libYap.a
 	install -m 444 Src/BrowserOffscreenCalculations.h $(STAGING_INCDIR)
 	install -d $(STAGING_LIBDIR)
 	install -m 444 $(OBJDIR)/libYap.a $(STAGING_LIBDIR)/libYap.a
-	mkdir -p $(LUNA_STAGING)/bin
-	install -m 0775 $(BUILD_TYPE)-$(PLATFORM)/BrowserServer $(STAGING_DIR)/bin/BrowserServer
-	mkdir -p $(ISIS_ROOT_DIR)/etc/palm
-	install -m 0755 BrowserServer.conf $(ISIS_ROOT_DIR)/etc/palm/BrowserServer.conf
+	mkdir -p $(STAGING_DIR)/bin
+	install -m 0775 $(TARGET_APP) $(STAGING_DIR)/bin/BrowserServer
+	mkdir -p $(ISIS_ROOT_DIR)/conf
+	install -m 644 BrowserServer.conf $(ISIS_ROOT_DIR)/conf
+	install -m 644 schema/HitTest.schema $(ISIS_ROOT_DIR)/conf
+	install -m 644 schema/InteractiveWidgetRect.schema $(ISIS_ROOT_DIR)/conf
 
 $(TARGET_LIB): $(LIB_OBJS)
 	$(AR) rcs $(TARGET_LIB) $(LIB_OBJS)
@@ -126,10 +121,10 @@ $(TARGET_LIB): $(LIB_OBJS)
 $(TARGET_APP): $(APP_OBJS) $(TARGET_LIB)
 	$(CXX) -o $(TARGET_APP) $(APP_OBJS) $(LIB_OBJS) $(LOCAL_LFLAGS)
 
-qwebkitplatformplugin.moc.cpp: $(INCLUDE_DIR)/WebKitSupplemental/qwebkitplatformplugin.h
+qwebkitplatformplugin.moc.cpp: $(STAGING_INCDIR)/WebKitSupplemental/qwebkitplatformplugin.h
 	$(MOC) -o $@ $<
 
-WebOSPlatformPlugin.moc.cpp: $(INCLUDE_DIR)/WebKitSupplemental/WebOSPlatformPlugin.h
+WebOSPlatformPlugin.moc.cpp: $(STAGING_INCDIR)/WebKitSupplemental/WebOSPlatformPlugin.h
 	$(MOC) -o $@ $<
 
 BrowserComboBox.moc.cpp: BrowserComboBox.h
@@ -154,8 +149,9 @@ $(OBJDIR)/%.o: %.cpp
 .PHONY: clean
 clean:
 	rm -rf $(OBJDIR)
-	rm -rf $(STAGING_INCDIR)/Yap
 	rm -f $(OBJDIR)/libYap.a
+	rm -rf $(STAGING_INCDIR)/Yap
+	rm -rf $(STAGING_INCDIR)/Yap
 	rm -f $(STAGING_LIBDIR)/libYap.a
 	rm -f $(TARGET_APP)
 	rm -f BrowserPage.moc.cpp
@@ -164,10 +160,6 @@ clean:
 	rm -f qwebkitplatformplugin.moc.cpp
 	rm -f WebOSPlatformPlugin.moc.cpp
 
-.PHONY: install
-install:
-	mkdir -p $(INSTALL_DIR)/usr/bin
-	install -m 0775 $(BUILD_TYPE)-$(PLATFORM)/BrowserServer $(INSTALL_DIR)/usr/bin/BrowserServer
 
 CodeGen/CodeGen: CodeGen/YapCodeGen.cpp CodeGen/BrowserYapCommandMessages.defs
 	bash -c "pushd CodeGen && qmake && popd"
