@@ -34,6 +34,7 @@ LICENSE@@@ */
 
 #include <QtGui>
 #include <QtNetwork>
+#include <QtCore/QSettings>
 
 #include <qpersistentcookiejar.h>
 #include <qwebevent.h>
@@ -2765,9 +2766,12 @@ void BrowserPage::addInteractiveWidgetRect(uintptr_t id, int x, int y, int width
 
     rectArrayJson.append(rectJson);
 
+    QSettings settings;
+    QString schemaFile = settings.value("InteractiveWidgetRectSchema").toString();
+
     std::string result;
-    if (!jValueToJsonStringUsingSchemaFile(result, rectArrayJson, "/etc/palm/browser/InteractiveWidgetRect.schema")) {
-        BERR("Error generating JSON");
+    if (!jValueToJsonStringUsingSchemaFile(result, rectArrayJson, qPrintable(schemaFile))) {
+        BERR("Error generating JSON.\nSchema file: %s", qPrintable(schemaFile));
     } else {
         BDBG("Generated JSON:\n %s\n", result.c_str());
         // send json string to BrowserAdapter

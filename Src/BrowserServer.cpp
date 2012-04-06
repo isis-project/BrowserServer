@@ -49,6 +49,7 @@ LICENSE@@@ */
 
 #include "qwebkitplatformplugin.h"
 #include "WebOSPlatformPlugin.h"
+#include <QtCore/QSettings>
 
 #ifdef USE_CERT_MGR
 #include <cert_mgr.h>
@@ -1791,9 +1792,12 @@ void BrowserServer::asyncCmdHitTest(YapProxy *proxy, int32_t queryNum, int32_t c
         }
     }
 
+    QSettings settings;
+    QString schemaFile = settings.value("HitTestSchema").toString();
+
     std::string json;
-    if (!jValueToJsonStringUsingSchemaFile(json, obj, "/etc/palm/browser/HitTest.schema")) {
-        BERR("Error generating JSON");
+    if (!jValueToJsonStringUsingSchemaFile(json, obj, qPrintable(schemaFile))) {
+        BERR("Error generating JSON.\nSchema file: %s", qPrintable(schemaFile));
     } else {
         BDBG("Generated JSON:\n %s\n", json.c_str());
         msgHitTestResponse(proxy, queryNum, json.c_str());
