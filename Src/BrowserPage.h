@@ -122,9 +122,9 @@ public:
     bool clickAt(uint32_t contentsPosX, uint32_t contentsPosY, uint32_t numClicks);
     bool holdAt(uint32_t contentsPosX, uint32_t contentsPosY);
 
-    void keyDown(int32_t key, int32_t modifiers);
+    void keyDown(int32_t key, int32_t modifiers, int32_t chr);
 
-    void keyUp(int32_t key, int32_t modifiers);
+    void keyUp(int32_t key, int32_t modifiers, int32_t chr);
 
     bool freeze();
 
@@ -427,8 +427,7 @@ private:
     int32_t createIdentifier();
 
     void clientPointToServer(uint32_t& x, uint32_t& y);
-    int mapKey(uint16_t key);
-    QKeyEvent mapKeyEvent(bool pressed, uint16_t key, uint16_t modifiers);
+    QKeyEvent mapKeyEvent(bool pressed, int32_t key, int32_t modifiers, int32_t chr);
 
     void handleFingerEvent();
     void initWebViewWidgetState();
@@ -451,7 +450,6 @@ private:
     static bool smartKeySearchCallback(LSHandle *sh, LSMessage *message, void *ctx);
 #endif //USE_LUNA_SERVICE
 
-    static void initKeyMap();
     static void flush(void *context, int key);
     void loadSelectionMarkers();
     void hideSelectionMarkers();
@@ -459,12 +457,6 @@ private:
 private:
 
     static unsigned int idGen;
-    static bool keyMapInit;
-#ifdef USE_LUNA_SERVICE
-    static std::map<unsigned short, int> keyMap;
-#else
-    static std::map<int, int> keyMap;
-#endif //USE_LUNA_SERVICE
     static int inspectorPort;
 
     bool m_ignoreMetaViewport;
