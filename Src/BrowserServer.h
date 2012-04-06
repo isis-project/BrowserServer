@@ -148,8 +148,8 @@ private:
     virtual void asyncCmdSetHtml(YapProxy* proxy, const char* url, const char* body);
     virtual void asyncCmdClickAt(YapProxy* proxy, int32_t contentX, int32_t contentY, int32_t numClicks, int32_t counter);
     virtual void asyncCmdHoldAt(YapProxy* proxy, int32_t contentX, int32_t contentY);
-    virtual void asyncCmdKeyDown(YapProxy* proxy, int32_t key, int32_t modifiers);
-    virtual void asyncCmdKeyUp(YapProxy* proxy, int32_t key, int32_t modifiers);
+    virtual void asyncCmdKeyDown(YapProxy* proxy, int32_t key, int32_t modifiers, int32_t chr);
+    virtual void asyncCmdKeyUp(YapProxy* proxy, int32_t key, int32_t modifiers, int32_t chr);
     virtual void asyncCmdForward(YapProxy* proxy);
     virtual void asyncCmdBack(YapProxy* proxy);
     virtual void asyncCmdReload(YapProxy* proxy);

@@ -107,8 +107,8 @@ protected:
     virtual void asyncCmdOpenUrl(YapProxy* proxy, const char* url) = 0;
     virtual void asyncCmdSetHtml(YapProxy* proxy, const char* url, const char* body) = 0;
     virtual void asyncCmdClickAt(YapProxy* proxy, int32_t contentX, int32_t contentY, int32_t numClicks, int32_t counter) = 0;
-    virtual void asyncCmdKeyDown(YapProxy* proxy, int32_t key, int32_t modifiers) = 0;
-    virtual void asyncCmdKeyUp(YapProxy* proxy, int32_t key, int32_t modifiers) = 0;
+    virtual void asyncCmdKeyDown(YapProxy* proxy, int32_t key, int32_t modifiers, int32_t chr) = 0;
+    virtual void asyncCmdKeyUp(YapProxy* proxy, int32_t key, int32_t modifiers, int32_t chr) = 0;
     virtual void asyncCmdForward(YapProxy* proxy) = 0;
     virtual void asyncCmdBack(YapProxy* proxy) = 0;
     virtual void asyncCmdReload(YapProxy* proxy) = 0;

@@ -128,12 +128,6 @@ struct PaintRequest {
 };
 
 unsigned int BrowserPage::idGen = 0;
-bool BrowserPage::keyMapInit = false;
-#ifdef USE_LUNA_SERVICE
-std::map<unsigned short, int> BrowserPage::keyMap;
-#else
-std::map<int, int> BrowserPage::keyMap;
-#endif //USE_LUNA_SERVICE
 
 int BrowserPage::inspectorPort = 0;
 
@@ -296,7 +290,6 @@ BrowserPage::BrowserPage(BrowserServer* server, YapProxy* proxy)
     BDBG("%p", this);
     assert(proxy != NULL);
     bpageId = ++idGen;
-    initKeyMap();
     resetMetaViewport();
 
     m_bufferLockName = createBufferLockName(proxy->postfix());
@@ -1108,7 +1101,7 @@ BrowserPage::holdAt(uint32_t contentsPosX, uint32_t contentsPosY)
     return false;
 }
 void
-BrowserPage::keyDown(int32_t key, int32_t modifiers)
+BrowserPage::keyDown(int32_t key, int32_t modifiers, int32_t chr)
 {
     BDBG("Key Down: %d (0x%02x, %c)", key, key, key);
 
@@ -1126,12 +1119,12 @@ BrowserPage::keyDown(int32_t key, int32_t modifiers)
     }
 #endif
 
-    QKeyEvent event = mapKeyEvent(true, key, modifiers);
+    QKeyEvent event = mapKeyEvent(true, key, modifiers, chr);
     QCoreApplication::sendEvent(m_graphicsView->viewport(), &event);
 }
 
 void
-BrowserPage::keyUp(int32_t key, int32_t modifiers)
+BrowserPage::keyUp(int32_t key, int32_t modifiers, int32_t chr)
 {
     BDBG("Key Up: %d (0x%02x, %c)", key, key, key);
 
@@ -1147,7 +1140,7 @@ BrowserPage::keyUp(int32_t key, int32_t modifiers)
     }
 #endif // 0
 
-    QKeyEvent event = mapKeyEvent(false, key, modifiers);
+    QKeyEvent event = mapKeyEvent(false, key, modifiers, chr);
     QCoreApplication::sendEvent(m_graphicsView->viewport(), &event);
 }
 
@@ -1245,53 +1238,18 @@ void BrowserPage::clientPointToServer(uint32_t& x, uint32_t& y)
     y = (y * m_zoomLevel) - m_offscreenCalculations.renderY;
 }
 
-int
-BrowserPage::mapKey(uint16_t key) {
-
-#ifdef USE_LUNA_SERVICE
-    const std::map<unsigned short, int>::const_iterator it = keyMap.find (key);
-#else
-    const std::map<int, int>::const_iterator it = keyMap.find (key);
-#endif //USE_LUNA_SERVICE
-
-    if (it != keyMap.end())
-        return (*it).second;
-
-    if (key >= Key_Space && key < 0xE000)
-        return (int)key;
-
-    return 0;
-}
-
 QKeyEvent
-BrowserPage::mapKeyEvent(bool pressed, uint16_t key, uint16_t modifiers) {
+BrowserPage::mapKeyEvent(bool pressed, int32_t key, int32_t modifiers, int32_t chr) {
 
-#if 0
-    static const uint16_t ShiftModifier = 0x80;
-    static const uint16_t ControlModifier = 0x40;
-    static const uint16_t MetaModifier = 0x20;
 
-    int mappedKey = mapKey(key);
+    uint16_t utf16Buffer[3] = {0, 0, 0};
+    char* dest = (char*)utf16Buffer;
+    char* source = (char*)&chr;
+    for (int ix = 0; ix < 4; ix++)
+       dest[ix] = source[ix];
 
-    Qt::KeyboardModifiers mappedModifiers = Qt::NoModifier;
-    if (modifiers & ShiftModifier) {
-        mappedModifiers |= Qt::ShiftModifier;
-    }
-#ifdef USE_LUNA_SERVICE
-    else if ((key >= Key_a) && (key <= Key_z))
-        mappedKey -= Key_a - Key_A;
-#endif //USE_LUNA_SERVICE
-
-    if (modifiers & ControlModifier)
-        mappedModifiers |= Qt::ControlModifier;
-    if (modifiers & MetaModifier)
-        mappedModifiers |= Qt::MetaModifier;
-
-#endif // 0
     QString text;
-
-    if (key < 0xE000)
-        text += QChar(key);
+    text.setUtf16(utf16Buffer, 2);
 
     QKeyEvent event(pressed ? QEvent::KeyPress : QEvent::KeyRelease, key, (Qt::KeyboardModifier)modifiers, text);
 
@@ -3219,73 +3177,6 @@ void BrowserPage::calculateScrollParamsForOffscreen(int contentX, int contentY)
             invalidate();
         }
     }
-}
-
-void BrowserPage::initKeyMap() {
-
-    if (keyMapInit)
-        return;
-
-    keyMap[Key_Escape]     = Qt::Key_Escape;
-    keyMap[Key_Tab]        = Qt::Key_Tab;
-    keyMap[Key_Delete]     = Qt::Key_Delete;
-    keyMap[Key_Backspace]  = Qt::Key_Backspace;
-    keyMap[Key_Return]     = Qt::Key_Return;
-    keyMap[Key_Return]     = Qt::Key_Enter;
-    keyMap[Key_Insert]     = Qt::Key_Insert;
-    keyMap[Key_Delete]     = Qt::Key_Delete;
-    keyMap[Key_MediaPause] = Qt::Key_Pause;
-    keyMap[Key_Home]       = Qt::Key_Home;
-    keyMap[Key_End]        = Qt::Key_End;
-    keyMap[Key_Left]       = Qt::Key_Left;
-    keyMap[Key_Up]         = Qt::Key_Up;
-    keyMap[Key_Right]      = Qt::Key_Right;
-    keyMap[Key_Down]       = Qt::Key_Down;
-    keyMap[Key_PageUp]     = Qt::Key_PageUp;
-    keyMap[Key_PageDown]   = Qt::Key_PageDown;
-    keyMap[Key_Shift]      = Qt::Key_Shift;
-#ifdef USE_LUNA_SERVICE
-    keyMap[Key_Ctrl]       = Qt::Key_Control;
-#else
-    keyMap[Key_Control]       = Qt::Key_Control;
-#endif
-    keyMap[Key_Option]     = Qt::Key_Meta;
-    keyMap[Key_Alt]        = Qt::Key_Alt;
-
-    keyMap[Key_F1]         = Qt::Key_F1;
-    keyMap[Key_F2]         = Qt::Key_F2;
-    keyMap[Key_F3]         = Qt::Key_F3;
-    keyMap[Key_F4]         = Qt::Key_F4;
-    keyMap[Key_F5]         = Qt::Key_F5;
-    keyMap[Key_F6]         = Qt::Key_F6;
-    keyMap[Key_F7]         = Qt::Key_F7;
-    keyMap[Key_F8]         = Qt::Key_F8;
-    keyMap[Key_F9]         = Qt::Key_F9;
-    keyMap[Key_F10]        = Qt::Key_F10;
-    keyMap[Key_F11]        = Qt::Key_F11;
-    keyMap[Key_F12]        = Qt::Key_F12;
-
-#ifdef USE_LUNA_SERVICE
-    keyMap[Key_CoreNavi_Back]        = Qt::Key_CoreNavi_Back;
-    keyMap[Key_CoreNavi_Menu]        = Qt::Key_CoreNavi_Menu;
-    keyMap[Key_CoreNavi_QuickLaunch] = Qt::Key_CoreNavi_QuickLaunch;
-    keyMap[Key_CoreNavi_Launcher]    = Qt::Key_CoreNavi_Launcher;
-    keyMap[Key_CoreNavi_Down]        = Qt::Key_CoreNavi_SwipeDown;
-    keyMap[Key_CoreNavi_Next]        = Qt::Key_CoreNavi_Next;
-    keyMap[Key_CoreNavi_Previous]    = Qt::Key_CoreNavi_Previous;
-    keyMap[Key_CoreNavi_Home]        = Qt::Key_CoreNavi_Home;
-    keyMap[Key_CoreNavi_Meta]        = Qt::Key_CoreNavi_Meta;
-    keyMap[Key_Flick]                = Qt::Key_Flick;
-    keyMap[Key_Slider]               = Qt::Key_Slider;
-    keyMap[Key_Optical]              = Qt::Key_Optical;
-    keyMap[Key_Ringer]               = Qt::Key_Ringer;
-    keyMap[Key_HardPower]            = Qt::Key_Power;
-    keyMap[Key_HeadsetButton]        = Qt::Key_HeadsetButton;
-    keyMap[Key_Headset]              = Qt::Key_Headset;
-    keyMap[Key_HeadsetMic]           = Qt::Key_HeadsetMic;
-#endif
-
-    keyMapInit = true;
 }
 
 void BrowserPage::setCanBlitOnScroll(bool val)

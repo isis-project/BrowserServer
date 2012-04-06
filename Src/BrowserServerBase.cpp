@@ -159,11 +159,13 @@ void BrowserServerBase::handleAsyncCommand(YapProxy* proxy, YapPacket* cmd)
 		
 		int32_t key = 0;
 		int32_t modifiers = 0;
+      int32_t chr = 0;
 		
 		(*cmd) >> key;
 		(*cmd) >> modifiers;
+		(*cmd) >> chr;
 		
-		asyncCmdKeyDown(proxy, key, modifiers);
+		asyncCmdKeyDown(proxy, key, modifiers, chr);
 		
 		
 		break;
@@ -172,11 +174,13 @@ void BrowserServerBase::handleAsyncCommand(YapProxy* proxy, YapPacket* cmd)
 		
 		int32_t key = 0;
 		int32_t modifiers = 0;
+      int32_t chr = 0;
 		
 		(*cmd) >> key;
 		(*cmd) >> modifiers;
+		(*cmd) >> chr;
 		
-		asyncCmdKeyUp(proxy, key, modifiers);
+		asyncCmdKeyUp(proxy, key, modifiers, chr);
 		
 		
 		break;
