@@ -147,6 +147,9 @@ $(OBJDIR)/%.o: %.cpp
 
 -include $(SOURCES:%.cpp=$(OBJDIR)/%.d)
 
+deb: 
+	dpkg-buildpackage -rfakeroot
+
 .PHONY: clean
 clean:
 	rm -rf $(OBJDIR)
@@ -172,3 +175,4 @@ CodeGen/CodeGen: CodeGen/YapCodeGen.cpp CodeGen/BrowserYapCommandMessages.defs
 code: CodeGen/CodeGen
 	bash -c "pushd CodeGen && ./CodeGen client Browser BrowserYapCommandMessages.defs && popd"
 	bash -c "pushd CodeGen && ./CodeGen server Browser BrowserYapCommandMessages.defs && popd"
+

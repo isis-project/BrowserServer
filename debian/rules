@@ -7,7 +7,56 @@
 # This special exception was added by Craig Small in version 0.37 of dh-make.
 
 # Uncomment this to turn on verbose mode.
-#export DH_VERBOSE=1
+export DH_VERBOSE=1
+export DEB_STAGING_INCDIR =debian/browserserver/usr/include
+export DEB_STAGING_LIBDIR =debian/browserserver/usr/lib
+export DEB_STAGING_BINDIR =debian/browserserver/usr/bin
+export DEB_STAGING_CONFDIR=debian/browserserver/usr/conf
 
 %:
 	dh $@ 
+
+.PHONY: override_dh_auto_build override_dh_auto_test override_dh_install
+
+override_dh_auto_build:
+
+override_dh_auto_test:
+
+override_dh_auto_clean:
+
+override_dh_install:
+
+override_dh_auto_install:
+
+# this is temporary until we resolve dependencies..
+override_dh_shlibdeps:
+
+override_dh_installdirs:
+	install -d debian/browserserver
+	install -d $(DEB_STAGING_INCDIR)/Yap
+	install -m 444 Yap/YapDefs.h   $(DEB_STAGING_INCDIR)/Yap
+	install -m 444 Yap/YapClient.h $(DEB_STAGING_INCDIR)/Yap
+	install -m 444 Yap/YapPacket.h $(DEB_STAGING_INCDIR)/Yap
+	install -m 444 Yap/YapProxy.h  $(DEB_STAGING_INCDIR)/Yap
+	install -m 444 Yap/YapServer.h $(DEB_STAGING_INCDIR)/Yap
+	install -m 444 Yap/BufferLock.h $(DEB_STAGING_INCDIR)/Yap
+	install -m 444 Yap/OffscreenBuffer.h $(DEB_STAGING_INCDIR)/Yap
+	install -m 444 Src/IpcBuffer.h $(DEB_STAGING_INCDIR)
+	install -m 444 Src/BrowserRect.h $(DEB_STAGING_INCDIR)
+	install -m 444 Src/BrowserOffscreenInfo.h $(DEB_STAGING_INCDIR)
+	install -m 444 Src/BrowserOffscreenCalculations.h $(DEB_STAGING_INCDIR)
+
+	install -d $(DEB_STAGING_LIBDIR)
+	install -m 444 debug-x86/libYap.a $(DEB_STAGING_LIBDIR)/libYap.a
+
+	mkdir -p $(DEB_STAGING_BINDIR)
+	install -m 0775 debug-x86/BrowserServer $(DEB_STAGING_BINDIR)/BrowserServer
+
+	mkdir -p $(DEB_STAGING_CONFDIR)
+	install -m 644 BrowserServer.conf $(DEB_STAGING_CONFDIR)
+	install -m 644 schema/HitTest.schema $(DEB_STAGING_CONFDIR)
+	install -m 644 schema/InteractiveWidgetRect.schema $(DEB_STAGING_CONFDIR)
+
+       
+#override_dh_clean:
+

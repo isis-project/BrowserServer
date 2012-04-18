@@ -1,0 +1,3 @@
+./browserserver/usr/bin/* /usr/bin/
+./browserserver/usr/lib/* /usr/lib/
+./browserserver/usr/include/* /usr/include/
