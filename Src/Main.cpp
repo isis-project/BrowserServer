@@ -375,9 +375,11 @@ main(int argc, char *argv[])
 
     qDebug("BrowserServer compiled against Qt %s, running on %s", QT_VERSION_STR, qVersion());
 
+#if !GLIB_CHECK_VERSION(2, 32, 0)
     if (!g_thread_supported()) {
         g_thread_init(NULL);
     }
+#endif
 
     int remoteInspectorPort = qMax(0, QString(::getenv("BROWSERSERVER_INSPECTOR_PORT")).toInt());
     if (!remoteInspectorPort)
