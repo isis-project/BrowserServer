@@ -3,6 +3,38 @@ PLATFORM   ?= arm
 
 MOC := ${STAGING_BINDIR_NATIVE}/moc-palm
 
+ifneq (,$(findstring BUILD_BACKUP_MANAGER,$(CXXFLAGS)))
+	BACKUP_MANAGER_SOURCE=BackupManager.cpp WebKitEventListener.cpp
+else
+	BACKUP_MANAGER_SOURCE=
+endif
+
+ifneq (,$(findstring BUILD_CPU_AFFINITY,$(CXXFLAGS)))
+	CPU_AFFINITY_SOURCE=CpuAffinity.cpp
+	LIBAFFINITY=-laffinity
+else
+	CPU_AFFINITY_SOURCE=
+	LIBAFFINITY=
+endif
+
+ifneq (,$(findstring USE_CERT_MGR,$(CXXFLAGS)))
+	LIBCERTMGR=-lPmCertificateMgr
+else
+	LIBCERTMGR=
+endif
+
+ifneq (,$(findstring USE_MEMCHUTE,$(CXXFLAGS)))
+	LIBMEMCHUTE=-lmemchute
+else
+	LIBMEMCHUTE=
+endif
+
+ifneq (,$(findstring BUILD_SSL_SUPPORT,$(CXXFLAGS)))
+	SSL_SUPPORT_SOURCE=SSLSupport.cpp
+else
+	SSL_SUPPORT_SOURCE=
+endif
+
 INCLUDES := \
 	-isystem $(INCLUDE_DIR)/PmCertificateMgr/IncsPublic \
 	-isystem $(INCLUDE_DIR)/webkit \
@@ -16,14 +48,16 @@ INCLUDES := \
 	-I$(INCLUDE_DIR)/WebKitSupplemental \
 	`pkg-config --cflags glib-2.0`
 
+LIBLUNASERVICE ?= lunaservice
+
 LIBS := \
-	-laffinity \
+    $(LIBAFFINITY) \
 	-lpthread \
-	-lmemchute \
+	$(LIBMEMCHUTE) \
 	-lglib-2.0 \
-	-llunaservice \
+	-l$(LIBLUNASERVICE) \
 	-lpbnjson_cpp \
-	-lPmCertificateMgr \
+	$(LIBCERTMGR) \
 	-lQtGui \
 	-lQtWebKit \
 	-lQtNetwork \
@@ -65,11 +99,10 @@ APP_SOURCES := \
 	BrowserServerBase.cpp \
 	BrowserOffscreenQt.cpp \
 	BrowserPageManager.cpp \
-	BackupManager.cpp \
-	CpuAffinity.cpp \
-	WebKitEventListener.cpp \
+	$(BACKUP_MANAGER_SOURCE) \
+	$(CPU_AFFINITY_SOURCE) \
 	Settings.cpp \
-	SSLSupport.cpp \
+	$(SSL_SUPPORT_SOURCE) \
 	JsonUtils.cpp \
 	BrowserPage.moc.cpp \
 	BrowserComboBox.cpp \
