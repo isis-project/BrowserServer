@@ -45,6 +45,7 @@ bool InitSettings()
     map.insert("WebSettings/PluginsEnabled", true);
     map.insert("WebSettings/TiledBackingStoreEnabled", false);
     map.insert("WebSettings/WebGLEnabled", true);
+    map.insert("WebSettings/FullScreenEnabled", true);
 
 #ifdef ISIS_DESKTOP
     QString root = QString("%1/.isis").arg(QDir::homePath());
