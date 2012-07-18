@@ -80,7 +80,7 @@ IpcBuffer* IpcBuffer::attach(int key, int size)
     void* buffer = ::shmat(key, NULL, 0);
     if ((void *)-1 == buffer) {
         g_critical("Failed to attach to shared memory key (2) %d: %s", key, strerror(errno));
-        return false;
+        return NULL;
     }
 
     IpcBuffer* b = new IpcBuffer(key, size);

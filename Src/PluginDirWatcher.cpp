@@ -22,9 +22,8 @@ LICENSE@@@ */
 #include <sys/inotify.h>
 #include "PluginDirWatcher.h"
 #include "BrowserServer.h"
-#include<stdio.h>
-
-
+#include <stdio.h>
+#include <unistd.h>
 
 struct SourceWatchData {
     int notifyfd;
