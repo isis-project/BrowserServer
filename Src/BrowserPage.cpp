@@ -58,7 +58,7 @@ LICENSE@@@ */
 
 #ifdef USE_LUNA_SERVICE
 //FIXME: We are not using luna-keymaps anymore
-#include "webosDeviceKeydefs.h"
+#include "SysMgrDeviceKeydefs.h"
 #else
 #include <qnamespace.h>
 using namespace Qt;
@@ -2804,11 +2804,11 @@ bool BrowserPage::smartKeySearchCallback(LSHandle *sh, LSMessage *message, void 
     pbnjson::JValue args, returnValue, match;
     if (!lsMessageToJValue(args, message))
         return true;
+    //Following variable is un-used so comment out.
+    //bool succeeded(false);
 
-    bool succeeded(false);
-
-    if (args["returnValue"].isBoolean() && args["returnValue"].asBool() && args["match"].isString())
-        succeeded = true;
+    //if (args["returnValue"].isBoolean() && args["returnValue"].asBool() && args["match"].isString())
+    //    succeeded = true;
 
     return true;
 }

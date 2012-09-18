@@ -413,7 +413,10 @@ main(int argc, char *argv[])
 
 #ifdef USE_LUNA_SERVICE
     // Tie BrowserServer to Processor 1. (DFISH-7961)
-    setCpuAffinity(getpid(), 1);
+    // Following code needs to be replaced by API of a 
+    // open source module that handles processor-core-affinity, 
+    // which sets BrowserServer to Processor 1
+    // setCpuAffinity(getpid(), 1);
 #endif //USE_LUNA_SERVICE
 
     ::signal(SIGPIPE, SIG_IGN);
