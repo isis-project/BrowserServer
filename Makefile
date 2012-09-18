@@ -1,5 +1,5 @@
 BUILD_TYPE := release
-PLATFORM   ?= arm
+PLATFORM   := $(TARGET_ARCH)
 
 MOC := ${STAGING_BINDIR_NATIVE}/moc-palm
 
@@ -36,16 +36,20 @@ else
 endif
 
 INCLUDES := \
-	-isystem $(INCLUDE_DIR)/PmCertificateMgr/IncsPublic \
-	-isystem $(INCLUDE_DIR)/webkit \
+	-isystem $(STAGING_INCDIR)/PmCertificateMgr/IncsPublic \
+	-isystem $(STAGING_INCDIR)/webkit \
 	-I./Src \
 	-I./Yap \
-	-I$(INCLUDE_DIR)/ime \
+        -I$(STAGING_INCDIR) \
+	-I$(STAGING_INCDIR)/ime \
+	-I$(STAGING_INCDIR)/QtWebKit \
+        -I$(STAGING_INCDIR)/sysmgr-ipc \
+	-I$(STAGING_INCDIR)/WebKitSupplemental \
+        -I$(INCLUDE_DIR) \
+        -I$(INCLUDE_DIR)/Qt \
 	-I$(INCLUDE_DIR)/QtCore \
 	-I$(INCLUDE_DIR)/QtGui \
 	-I$(INCLUDE_DIR)/QtNetwork \
-	-I$(INCLUDE_DIR)/QtWebKit \
-	-I$(INCLUDE_DIR)/WebKitSupplemental \
 	`pkg-config --cflags glib-2.0`
 
 LIBLUNASERVICE ?= lunaservice
@@ -58,10 +62,16 @@ LIBS := \
 	-l$(LIBLUNASERVICE) \
 	-lpbnjson_cpp \
 	$(LIBCERTMGR) \
+        -lrt \
+        -lcrypto \
+        -lQtCore \
+        -ldl \
+        -lssl \
 	-lQtGui \
 	-lQtWebKit \
 	-lQtNetwork \
-	-lWebKitMisc
+	-lWebKitMisc \
+        `pkg-config --libs gthread-2.0`
 
 FLAGS_OPT := -fno-exceptions -fno-rtti -fvisibility=hidden -DDEBUG -fPIC -DTARGET_DEVICE
 
@@ -143,10 +153,10 @@ $(TARGET_LIB): $(LIB_OBJS)
 $(TARGET_APP): $(APP_OBJS) $(TARGET_LIB)
 	$(CXX) -o $(TARGET_APP) $(APP_OBJS) $(LIB_OBJS) $(LOCAL_LFLAGS)
 
-qwebkitplatformplugin.moc.cpp: $(INCLUDE_DIR)/WebKitSupplemental/qwebkitplatformplugin.h
+qwebkitplatformplugin.moc.cpp: $(STAGING_INCDIR)/WebKitSupplemental/qwebkitplatformplugin.h
 	$(MOC) -o $@ $<
 
-WebOSPlatformPlugin.moc.cpp: $(INCLUDE_DIR)/WebKitSupplemental/WebOSPlatformPlugin.h
+WebOSPlatformPlugin.moc.cpp: $(STAGING_INCDIR)/WebKitSupplemental/WebOSPlatformPlugin.h
 	$(MOC) -o $@ $<
 
 BrowserComboBox.moc.cpp: BrowserComboBox.h
