@@ -50,16 +50,14 @@ INCLUDES := \
 	-I$(INCLUDE_DIR)/QtCore \
 	-I$(INCLUDE_DIR)/QtGui \
 	-I$(INCLUDE_DIR)/QtNetwork \
-	`pkg-config --cflags glib-2.0`
-
-LIBLUNASERVICE ?= lunaservice
+	`pkg-config --cflags glib-2.0` \
+	`pkg-config --cflags luna-service2`
 
 LIBS := \
     $(LIBAFFINITY) \
 	-lpthread \
 	$(LIBMEMCHUTE) \
 	-lglib-2.0 \
-	-l$(LIBLUNASERVICE) \
 	-lpbnjson_cpp \
 	$(LIBCERTMGR) \
         -lrt \
@@ -71,7 +69,8 @@ LIBS := \
 	-lQtWebKit \
 	-lQtNetwork \
 	-lWebKitMisc \
-        `pkg-config --libs gthread-2.0`
+        `pkg-config --libs gthread-2.0` \
+        `pkg-config --libs luna-service2`
 
 FLAGS_OPT := -fno-exceptions -fno-rtti -fvisibility=hidden -DDEBUG -fPIC -DTARGET_DEVICE
 
