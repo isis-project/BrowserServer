@@ -2857,7 +2857,7 @@ bool BrowserPage::smartKeySearch(int requestId, const char* query)
         BERR("Error generating JSON");
     } else {
         bool succeeded = LSCall(m_lsHandle, "palm://com.palm.smartKey/search", argsStr.c_str(),
-                                smartKeySearchCallback, (void*)requestId, NULL, &error);
+                                smartKeySearchCallback, NULL, NULL, &error);
         if (succeeded) {
             return true;
         } else {
