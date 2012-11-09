@@ -106,7 +106,7 @@ public:
 
     const char* getIdentifier() { return m_identifier; }
 
-    bool isBusPriviledged() { return false; } //everything running through browser server is not priviledged
+    bool isBusPrivileged() { return false; } //everything running through browser server is not privileged
 
     void openUrl(const char* pUrl);
 
