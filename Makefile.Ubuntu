@@ -22,7 +22,9 @@ INCLUDES := \
 	-I$(QT_INSTALL_PREFIX)/include/QtCore \
 	-I$(QT_INSTALL_PREFIX)/include/QtGui \
 	-I$(QT_INSTALL_PREFIX)/include/QtNetwork \
-	`pkg-config --cflags glib-2.0`
+	$(shell pkg-config --cflags glib-2.0) \
+	$(shell pkg-config --cflags luna-service2) \
+	$(shell pkg-config --cflags pbnjson_cpp)
 
 LIBS := \
    -L$(QT_INSTALL_PREFIX)/lib \
@@ -38,7 +40,9 @@ LIBS := \
 	-lpthread \
 	-lglib-2.0 \
 	-ldl \
-	`pkg-config --libs gthread-2.0`
+	$(shell pkg-config --libs gthread-2.0) \
+	$(shell pkg-config --libs luna-service2) \
+	$(shell pkg-config --libs pbnjson_cpp)
 
 FLAGS_OPT := -fno-exceptions -fno-rtti -fvisibility=hidden -DDEBUG -fPIC -DTARGET_DEVICE
 
