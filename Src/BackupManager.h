@@ -22,6 +22,8 @@ LICENSE@@@ */
 #include <string>
 #include <list>
 #include <map>
+#include <glib.h>
+
 #include "lunaservice.h"
 #include "DbBackupStatus.h"
 #include "JsonUtils.h"
